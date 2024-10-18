@@ -1,0 +1,51 @@
+# Node.js dependencies
+node_modules/
+# Yarn lock file
+yarn.lock
+
+# Expo-specific files
+packages/mobile/.expo/
+packages/mobile/.expo-shared/
+packages/mobile/ios/
+packages/mobile/android/
+
+# Vite build output
+packages/web/dist/
+
+# Shared TypeScript build files
+packages/shared/build/
+
+# Logs and debugging
+*.log
+*.log.*
+yarn-error.log
+npm-debug.log*
+
+# MacOS files
+.DS_Store
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# React Native
+*.keystore
+*.p8
+*.pem
+*.cer
+*.mobileprovision
+*.jks
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# Temp files
+tmp/
+temp/
+
+# Ignore package-lock.json to avoid conflicts with Yarn
+package-lock.json
