@@ -6,8 +6,10 @@ import type {
   FetchBaseQueryMeta,
 } from "@reduxjs/toolkit/query";
 
+const baseUrl = import.meta.env.VITE_API_URL;
+
 export const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.BASE_URL,
+  baseUrl: baseUrl,
   prepareHeaders: (headers: Headers): Headers => {
     const token = localStorage.getItem("token");
 

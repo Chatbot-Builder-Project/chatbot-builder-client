@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "cross-env VITE_PLATFORM=web vite",
-    "build": "cross-env VITE_PLATFORM=web tsc -b && vite build",
+    "dev": "cross-env VITEPLATFORM=web vite",
+    "build": "cross-env VITEPLATFORM=web tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
