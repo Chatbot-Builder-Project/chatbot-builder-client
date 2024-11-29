@@ -14,16 +14,6 @@ const GlobalStyle = createGlobalStyle`
     line-height: 1.6;
     min-height: 100vh; 
   }
-
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-
-  button {
-    cursor: pointer;
-    font-family: inherit;
-  }
 `;
 
 export default GlobalStyle;
