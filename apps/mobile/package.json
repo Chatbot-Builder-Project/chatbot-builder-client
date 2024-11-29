@@ -1,8 +1,8 @@
 {
-  "name": "mobile",
+  "name": "@chatbot-builder/mobile",
   "version": "1.0.0",
-  "main": "expo/AppEntry.js",
-  "entryPoint": "./index.ts",
+  "main": "./index.tsx",
+  "entryPoint": "./index.tsx",
   "platforms": [
     "ios",
     "android",
@@ -18,7 +18,8 @@
     "expo": "~51.0.28",
     "expo-status-bar": "~1.12.1",
     "react": "18.2.0",
-    "react-native": "0.74.5"
+    "react-native": "0.74.5",
+    "@chatbot-builder/client": "1.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
