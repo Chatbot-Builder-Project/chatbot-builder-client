@@ -1,6 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { AuthCredentials, AuthResponse } from "./types";
 import { baseQuery } from "../baseQuery";
+import { login, logout } from "../../slices/Auth/slice";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -12,6 +13,14 @@ export const authApi = createApi({
         method: "POST",
         body: credentials,
       }),
+      onQueryStarted: async (_credentials, { dispatch, queryFulfilled }) => {
+        try {
+          const { data } = await queryFulfilled;
+          dispatch(login({ token: data.accessToken }));
+        } catch {
+          dispatch(logout());
+        }
+      },
     }),
     register: builder.mutation<AuthResponse, AuthCredentials>({
       query: (userDetails) => ({
