@@ -1,12 +1,7 @@
 import { LeftSidebar } from "../LeftSidebar";
-import { BuilderLayoutContainer } from "./Layout.styles";
 
 const Layout: React.FC = () => {
-  return (
-    <BuilderLayoutContainer>
-      <LeftSidebar />
-    </BuilderLayoutContainer>
-  );
+  return <LeftSidebar />;
 };
 
 export default Layout;

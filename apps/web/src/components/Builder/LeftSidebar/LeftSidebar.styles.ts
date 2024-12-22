@@ -5,6 +5,8 @@ export const LeftSidebarContainer = styled.div`
   height: 100%;
   background-color: blue;
   border-right: 1px solid #ccc;
-  position: relative;
+  position: absolute;
+  left: 0;
+  top: 0;
   z-index: 2;
 `;

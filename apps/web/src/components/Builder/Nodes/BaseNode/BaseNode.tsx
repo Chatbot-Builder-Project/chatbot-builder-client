@@ -19,7 +19,7 @@ export const BaseNode: React.FC<BaseNodeProps> = ({
   }));
 
   return (
-    <NodeContainer ref={drag} x={x} y={y} isDragging={isDragging}>
+    <NodeContainer ref={drag} $x={x} $y={y} $isDragging={isDragging}>
       <strong>{label}</strong>
       <div>{children}</div>
     </NodeContainer>
