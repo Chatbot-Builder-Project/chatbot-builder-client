@@ -4,7 +4,18 @@ import { LeftSidebarContainer } from "./LeftSidebar.styles";
 const LeftSidebar: React.FC = () => {
   return (
     <LeftSidebarContainer>
-      <BaseNode id={""} x={0} y={0} label={""} children={undefined} />
+      <BaseNode
+        data={{
+          extraPropertyA: "Extra",
+          x: 0,
+          y: 0,
+          id: "123a123",
+          label: "test",
+          type: "typeA",
+        }}
+        isLeftSidebar
+        children={undefined}
+      />
     </LeftSidebarContainer>
   );
 };

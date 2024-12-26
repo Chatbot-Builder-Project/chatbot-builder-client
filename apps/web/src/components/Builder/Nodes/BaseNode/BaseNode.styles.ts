@@ -4,14 +4,24 @@ export const NodeContainer = styled.div<{
   $x: number;
   $y: number;
   $isDragging: boolean;
+  $isLeftSidebar?: boolean;
 }>`
-  position: absolute;
-  left: ${(props) => props.$x}px;
-  top: ${(props) => props.$y}px;
-  opacity: ${(props) => (props.$isDragging ? 0.5 : 1)};
-  cursor: grab;
+  ${(props) =>
+    props.$isLeftSidebar
+      ? `
+        cursor: pointer;
+        display: flex;
+        position: static;
+      `
+      : `
+        cursor: grab;
+        position: absolute;
+        left: ${props.$x}px;
+        top: ${props.$y}px;
+      `}
+  opacity: ${(props) => (props.$isDragging && !props.$isLeftSidebar ? 0 : 1)};
   padding: 10px;
-  background-color: ${(props) => (props.$isDragging ? "red" : "white")};
+  background-color: white;
   border-radius: 5px;
   width: 200px;
   height: 100px;

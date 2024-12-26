@@ -6,14 +6,3 @@ export interface BaseNode {
   label: string;
 }
 
-export interface CustomNodeTypeA extends BaseNode {
-  type: "typeA";
-  extraPropertyA: string;
-}
-
-export interface CustomNodeTypeB extends BaseNode {
-  type: "typeB";
-  extraPropertyB: number;
-}
-
-export type BuilderNode = CustomNodeTypeA | CustomNodeTypeB;

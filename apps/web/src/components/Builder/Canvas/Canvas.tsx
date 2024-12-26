@@ -1,96 +1,106 @@
-import { selectAllNodes } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import {
+  selectAllNodes,
+  updateNodePosition,
+} from "@chatbot-builder/store/slices/Builder/Nodes/slice";
+import React, { useRef, useCallback, useMemo } from "react";
 import { useDrop } from "react-dnd";
 import { useSelector, shallowEqual } from "react-redux";
-import { NodeTypeA } from "../Nodes/NodeA";
-import { BaseNode } from "@chatbot-builder/client";
+import useCanvasKeyboard from "../../../hooks/builder/useCanvasKeyboard";
+import { useDispatch } from "react-redux";
+import { BaseNodeData } from "../../../types/nodes";
+import useCanvasDrag from "../../../hooks/builder/useCanvasDrag";
+import { CANVAS_DIMENSIONS } from "./utils";
+import { BaseNode } from "../Nodes/BaseNode/BaseNode";
 
-const NodeComponent = React.memo(({ node }: { node: BaseNode }) => {
-  switch (node.type) {
-    case "typeA":
-      return <NodeTypeA extraPropertyA={""} {...node} />;
-    default:
-      return null;
-  }
-});
+const WRAPPER_STYLES = {
+  width: "100vw",
+  height: "100vh",
+  position: "relative" as const,
+  overflow: "hidden",
+};
 
 const Canvas: React.FC = () => {
-  const [position, setPosition] = useState({ x: 2800, y: 2500 });
-  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
-    null
-  );
-
+  const dispatch = useDispatch();
+  const dropCanvas = useRef<HTMLDivElement | null>(null);
+  const isCtrlPressed = useCanvasKeyboard();
+  const { position, handleMouseDown, handleMouseMove, handleMouseUp } =
+    useCanvasDrag(isCtrlPressed);
   const nodes = useSelector(selectAllNodes, shallowEqual);
 
-  const dropCanvas = useRef<HTMLDivElement | null>(null);
+  const calculateDropPosition = useCallback(
+    (
+      clientOffset: { x: number; y: number },
+      item: BaseNodeData & {
+        nodeWidth: number;
+        nodeHeight: number;
+        mouseOffset: { x: number; y: number };
+      }
+    ) => {
+      if (!dropCanvas.current) return { x: 0, y: 0 };
 
-  const [{ isOver }, drop] = useDrop(() => ({
-    accept: "NODE",
-    drop: (item, monitor) => {
-      const offset = monitor.getClientOffset();
-      const dropElementBoundary = dropCanvas.current?.getBoundingClientRect();
+      const canvasBounds = dropCanvas.current.getBoundingClientRect();
+      const scale = 1;
 
-      console.log("Dropped:", item, offset, dropElementBoundary);
+      const adjustedX = clientOffset.x - item.mouseOffset.x;
+      const adjustedY = clientOffset.y - item.mouseOffset.y;
+
+      const x = (adjustedX - canvasBounds.left) / scale;
+      const y = (adjustedY - canvasBounds.top) / scale;
+
+      return {
+        x: x - position.x + CANVAS_DIMENSIONS.initialX - item.nodeWidth / 2,
+        y: y - position.y + CANVAS_DIMENSIONS.initialY - item.nodeHeight / 2,
+      };
     },
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
+    [position]
+  );
+
+  const handleNodePositionChange = useCallback(
+    (id: string, x: number, y: number) => {
+      dispatch(updateNodePosition({ id, x, y }));
+    },
+    [dispatch]
+  );
+
+  const [, drop] = useDrop(
+    () => ({
+      accept: "NODE",
+      drop: (
+        item: BaseNodeData & {
+          nodeWidth: number;
+          nodeHeight: number;
+          mouseOffset: { x: number; y: number };
+        },
+        monitor
+      ) => {
+        const clientOffset = monitor.getClientOffset();
+        if (!clientOffset) return;
+
+        const dropPosition = calculateDropPosition(clientOffset, item);
+        return dropPosition;
+      },
     }),
-  }));
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Control") setIsCtrlPressed(true);
-    };
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "Control") setIsCtrlPressed(false);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, []);
-
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (isCtrlPressed) {
-        setDragStart({ x: e.clientX, y: e.clientY });
-        setIsDragging(true);
-      }
-    },
-    [isCtrlPressed]
+    [calculateDropPosition, handleNodePositionChange]
   );
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (isDragging && dragStart) {
-        const deltaX = e.clientX - dragStart.x;
-        const deltaY = e.clientY - dragStart.y;
-        setPosition((prev) => ({ x: prev.x + deltaX, y: prev.y + deltaY }));
-        setDragStart({ x: e.clientX, y: e.clientY });
-      }
-    },
-    [isDragging, dragStart]
+  const canvasStyle = useMemo(
+    () => ({
+      backgroundColor: "white",
+      width: CANVAS_DIMENSIONS.width,
+      height: CANVAS_DIMENSIONS.height,
+      border: "1px dashed gray",
+      position: "absolute" as const,
+      left: `${position.x}px`,
+      top: `${position.y}px`,
+      cursor: isCtrlPressed ? "grab" : "default",
+      transform: "translate(-50%, -50%)",
+    }),
+    [position.x, position.y, isCtrlPressed]
   );
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    setDragStart(null);
-  }, []);
 
   return (
     <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        position: "relative",
-        overflow: "hidden",
-      }}
+      style={WRAPPER_STYLES}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
@@ -101,19 +111,23 @@ const Canvas: React.FC = () => {
         }}
         onMouseDown={handleMouseDown}
         style={{
-          backgroundColor: isOver ? "green" : "white",
-          width: "5000px",
-          height: "5000px",
-          border: "1px dashed gray",
-          position: "absolute",
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-          cursor: isCtrlPressed ? "grab" : "default",
-          transform: "translate(-50%, -50%)",
+          ...canvasStyle,
+          backgroundImage: `
+        linear-gradient(to right, #f0f0f0 1px, transparent 1px),
+        linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)
+        `,
+          backgroundSize: "20px 20px",
+          position: "relative",
         }}
       >
         {nodes.map((node) => (
-          <NodeComponent key={node.id} node={node} />
+          <BaseNode
+            key={node.id}
+            data={node}
+            onPositionChange={handleNodePositionChange}
+          >
+            <>test</>
+          </BaseNode>
         ))}
       </div>
     </div>
