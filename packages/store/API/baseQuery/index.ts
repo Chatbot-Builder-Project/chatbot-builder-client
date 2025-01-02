@@ -1,1 +1,1 @@
-export { baseQueryWithAuthHandling, baseQuery } from "./baseQuery";
+export { fetchBaseQueryWithAuthHandling } from "./baseQuery";

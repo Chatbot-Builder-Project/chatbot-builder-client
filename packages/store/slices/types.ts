@@ -1,7 +1,8 @@
 interface User {
-  email: string | null;
-  name: string | null;
-  id: string | null;
+  readonly email: string | null;
+  readonly name: string | null;
+  readonly id: string | null;
+  readonly isEmailConfirmed: boolean | null;
 }
 
 export type { User };

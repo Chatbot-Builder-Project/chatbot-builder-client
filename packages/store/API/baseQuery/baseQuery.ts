@@ -5,37 +5,58 @@ import type {
   FetchBaseQueryError,
   FetchBaseQueryMeta,
 } from "@reduxjs/toolkit/query";
+import { QueryError } from "./types";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
-export const baseQuery = fetchBaseQuery({
-  baseUrl: baseUrl,
-  prepareHeaders: (headers: Headers): Headers => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      headers.set("authorization", `Bearer ${token}`);
-    }
-
-    return headers;
-  },
-});
-
-export const baseQueryWithAuthHandling: BaseQueryFn<
+export const fetchBaseQueryWithAuthHandling: BaseQueryFn<
   string | FetchArgs,
   unknown,
-  FetchBaseQueryError,
+  QueryError | FetchBaseQueryError,
   Record<string, unknown>,
   FetchBaseQueryMeta
 > = async (args, api, extraOptions) => {
-  const result = await baseQuery(args, api, extraOptions);
+  const baseQuery = fetchBaseQuery({
+    baseUrl,
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        headers.set("authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
+  });
 
-  if (result.error && "status" in result.error) {
-    if (result.error.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-  }
+  return Promise.resolve(baseQuery(args, api, extraOptions))
+    .then((result) => {
+      if (!result.error) return result;
 
-  return result;
+      const error = result.error as FetchBaseQueryError;
+
+      if (error.data && typeof error.data === "object") {
+        const errorData = error.data as QueryError;
+        return {
+          ...result,
+          error: {
+            ...error,
+            detail: errorData.detail ?? "An error occurred",
+            title: errorData.title ?? "Error",
+            type: errorData.type ?? "Unknown Error",
+            status: error.status ?? 500,
+          } as QueryError,
+        };
+      }
+
+      return result;
+    })
+    .catch(() => ({
+      error: {
+        status: 500,
+        data: {
+          detail: "Network or server error occurred",
+          title: "Error",
+          type: "UnhandledError",
+        } as QueryError,
+      },
+    }));
 };

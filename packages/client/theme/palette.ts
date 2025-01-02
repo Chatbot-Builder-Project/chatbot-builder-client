@@ -1,10 +1,42 @@
-export const theme = {
+import { Theme } from "./types";
+
+export const theme: Theme = {
   colors: {
-    primary: "#4CAF50",
-    secondary: "#FFC107",
-    background: "#f0f0f0",
+    primary: "#632edb",
+    secondary: "#6A5F8E",
+    background: "#2d2d2e",
+    accent: "#D1B3FF",
+    text: "#f0f0f0",
+    muted: "#8A7FB1",
+    dark: "#101012",
+    brightYellow: "#FFC300",
+    brightOrange: "#FF5733",
+    brightGreen: "#DAF7A6",
+    brightAqua: "#33FFBD",
+    brightPink: "#FF33F6",
+    error: "#FF4C4C",
+    success: "#4CAF50",
   },
   fonts: {
-    body: "Arial, sans-serif",
+    body: "'Oswald', sans-serif",
+    heading: "'Oswald', serif",
+  },
+  fontSizes: {
+    small: "0.875rem",
+    medium: "1rem",
+    large: "1.5rem",
+    xl: "2rem",
+  },
+  spacing: {
+    xs: "4px",
+    sm: "8px",
+    md: "16px",
+    lg: "24px",
+    xl: "32px",
+  },
+  breakpoints: {
+    mobile: "576px",
+    tablet: "768px",
+    desktop: "1024px",
   },
 };

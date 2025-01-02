@@ -8,13 +8,14 @@ import GlobalStyle from "./globalStyle";
 import { Provider } from "react-redux";
 import { store } from "@chatbot-builder/store";
 
+console.log(router);
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ThemeProvider theme={theme}>
-      <Provider store={store}>
+    <Provider store={store}>
+      <ThemeProvider theme={theme}>
         <GlobalStyle />
         <RouterProvider router={router} />
-      </Provider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </Provider>
   </StrictMode>
 );
