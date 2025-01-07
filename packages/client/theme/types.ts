@@ -3,7 +3,9 @@ interface ThemeColors {
   secondary: string;
   background: string;
   accent: string;
+  primaryGradient: string;
   text: string;
+  lightText: string;
   muted: string;
   dark: string;
   brightYellow: string;

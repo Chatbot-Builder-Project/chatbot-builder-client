@@ -10,13 +10,9 @@ const GlobalStyle = createGlobalStyle`
 
   body {
     background-color: ${(props) => props.theme.colors.background};
-    color: ${(props) => props.theme.colors.text};
+    color: ${(props) => props.theme.colors.primary};
     line-height: 1.6;
     min-height: 100vh; 
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    color: ${(props) => props.theme.colors.accent};
   }
 
   button {
@@ -30,12 +26,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   a {
-    color: ${(props) => props.theme.colors.accent};
     text-decoration: none;
-    
-    &:hover {
-      color: ${(props) => props.theme.colors.muted};
-    }
   }
 `;
 

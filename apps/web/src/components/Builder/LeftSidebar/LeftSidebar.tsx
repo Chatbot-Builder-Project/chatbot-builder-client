@@ -4,7 +4,7 @@ import { LeftSidebarContainer } from "./LeftSidebar.styles";
 const LeftSidebar: React.FC = () => {
   return (
     <LeftSidebarContainer>
-      <BaseNode
+      {/* <BaseNode
         data={{
           extraPropertyA: "Extra",
           x: 0,
@@ -15,7 +15,7 @@ const LeftSidebar: React.FC = () => {
         }}
         isLeftSidebar
         children={undefined}
-      />
+      /> */}
     </LeftSidebarContainer>
   );
 };

@@ -1,61 +1,95 @@
-import { createSlice, createEntityAdapter, PayloadAction } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createEntityAdapter,
+  PayloadAction,
+} from "@reduxjs/toolkit";
 import { RootState } from "../../../store";
-import { BaseNodeData } from "../../../../../apps/web/src/types/nodes";
+import { NodeData, DataLink, FlowLink, BuilderState } from "./types";
 
-// Default nodes for initialization
-const defaultNodes: BaseNodeData[] = [
+const nodesAdapter = createEntityAdapter<NodeData>({
+  selectId: (node) => node.info.id,
+});
+
+const dataLinksAdapter = createEntityAdapter<DataLink>({
+  selectId: (link) => link.info.id,
+});
+
+const flowLinksAdapter = createEntityAdapter<FlowLink>({
+  selectId: (link) => link.info.id,
+});
+
+const defaultNodes: NodeData[] = [
   {
-    id: "start-node",
-    type: "staticNode",
-    x: 500,
-    y: 200,
-    label: "Start Node",
-  },
-  {
-    id: "welcome-node",
-    type: "staticNode",
-    x: 500,
-    y: 500,
-    label: "Welcome Message",
+    type: "Static",
+    info: {
+      id: 4,
+      name: "Static_4",
+    },
+    visual: {
+      x: 500,
+      y: 200,
+    },
+    data: {
+      type: "Text",
+      text: "Hello user, say something.",
+    },
+    outputPort: {
+      info: {
+        id: 5,
+        name: "OutputPort_5",
+      },
+      visual: { x: 0, y: 0 },
+      nodeId: 4,
+      dataType: "Text",
+    },
   },
 ];
 
-export interface NodesState {
-  ids: string[];
-  entities: { [key: string]: BaseNodeData };
-  selectedNodeId: string | null;
-}
+const initialState: BuilderState = {
+  nodes: nodesAdapter.setAll(nodesAdapter.getInitialState(), defaultNodes),
+  dataLinks: dataLinksAdapter.getInitialState(),
+  flowLinks: flowLinksAdapter.getInitialState(),
+  selectedNodeId: null,
+  startNodeId: 1,
+};
 
-const nodesAdapter = createEntityAdapter<BaseNodeData>({
-  selectId: (node) => node.id,
-});
-
-const initialState = nodesAdapter.getInitialState<NodesState>({
-  ids: defaultNodes.map(node => node.id),
-  entities: defaultNodes.reduce((acc, node) => {
-    acc[node.id] = node;
-    return acc;
-  }, {} as { [key: string]: BaseNodeData }),
-  selectedNodeId: "start-node",
-});
-
-const nodesSlice = createSlice({
-  name: "nodes",
+const builderSlice = createSlice({
+  name: "builder",
   initialState,
   reducers: {
-    addNode: nodesAdapter.addOne,
+    addNode: (state, action: PayloadAction<NodeData>) => {
+      nodesAdapter.addOne(state.nodes, action.payload);
+    },
     updateNodePosition: (
       state,
-      action: PayloadAction<{ id: string; x: number; y: number }>
+      action: PayloadAction<{ id: number; x: number; y: number }>
     ) => {
       const { id, x, y } = action.payload;
-      if (state.entities[id]) {
-        state.entities[id] = { ...state.entities[id], x, y };
+      const node = state.nodes.entities[id];
+      if (node) {
+        node.visual = { x, y };
       }
     },
-    removeNode: nodesAdapter.removeOne,
-    setSelectedNode: (state, action: PayloadAction<string | null>) => {
+    removeNode: (state, action: PayloadAction<number>) => {
+      nodesAdapter.removeOne(state.nodes, action.payload);
+    },
+    setSelectedNode: (state, action: PayloadAction<number | null>) => {
       state.selectedNodeId = action.payload;
+    },
+    addDataLink: (state, action: PayloadAction<DataLink>) => {
+      dataLinksAdapter.addOne(state.dataLinks, action.payload);
+    },
+    removeDataLink: (state, action: PayloadAction<number>) => {
+      dataLinksAdapter.removeOne(state.dataLinks, action.payload);
+    },
+    addFlowLink: (state, action: PayloadAction<FlowLink>) => {
+      flowLinksAdapter.addOne(state.flowLinks, action.payload);
+    },
+    removeFlowLink: (state, action: PayloadAction<number>) => {
+      flowLinksAdapter.removeOne(state.flowLinks, action.payload);
+    },
+    setStartNode: (state, action: PayloadAction<number>) => {
+      state.startNodeId = action.payload;
     },
   },
 });
@@ -66,10 +100,28 @@ export const {
   selectIds: selectNodeIds,
 } = nodesAdapter.getSelectors<RootState>((state) => state.builder.nodes);
 
+export const { selectAll: selectAllDataLinks, selectById: selectDataLinkById } =
+  dataLinksAdapter.getSelectors<RootState>((state) => state.builder.dataLinks);
+
+export const { selectAll: selectAllFlowLinks, selectById: selectFlowLinkById } =
+  flowLinksAdapter.getSelectors<RootState>((state) => state.builder.flowLinks);
+
 export const selectSelectedNodeId = (state: RootState) =>
-  state.builder.nodes.selectedNodeId;
+  state.builder.selectedNodeId;
 
-export const { addNode, updateNodePosition, removeNode, setSelectedNode } =
-  nodesSlice.actions;
+export const selectStartNodeId = (state: RootState) =>
+  state.builder.startNodeId;
 
-export default nodesSlice.reducer;
+export const {
+  addNode,
+  updateNodePosition,
+  removeNode,
+  setSelectedNode,
+  addDataLink,
+  removeDataLink,
+  addFlowLink,
+  removeFlowLink,
+  setStartNode,
+} = builderSlice.actions;
+
+export default builderSlice.reducer;

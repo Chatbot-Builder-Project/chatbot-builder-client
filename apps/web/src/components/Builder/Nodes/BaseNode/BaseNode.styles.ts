@@ -21,7 +21,7 @@ export const NodeContainer = styled.div<{
       `}
   opacity: ${(props) => (props.$isDragging && !props.$isLeftSidebar ? 0 : 1)};
   padding: 10px;
-  background-color: white;
+  background-color: #888;
   border-radius: 5px;
   width: 200px;
   height: 100px;

@@ -4,9 +4,11 @@ export const theme: Theme = {
   colors: {
     primary: "#632edb",
     secondary: "#6A5F8E",
-    background: "#2d2d2e",
+    primaryGradient: "linear-gradient(135deg, #6A00FF, #A600FF, #E100FF)",
+    background: "#f6f9ff",
     accent: "#D1B3FF",
-    text: "#f0f0f0",
+    text: "#101012",
+    lightText: "#fffdf9",
     muted: "#8A7FB1",
     dark: "#101012",
     brightYellow: "#FFC300",
@@ -18,8 +20,8 @@ export const theme: Theme = {
     success: "#4CAF50",
   },
   fonts: {
-    body: "'Oswald', sans-serif",
-    heading: "'Oswald', serif",
+    body: "'Montserrat', sans-serif",
+    heading: "'Bagel Fat One', serif",
   },
   fontSizes: {
     small: "0.875rem",

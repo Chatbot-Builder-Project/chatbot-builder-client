@@ -1,11 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { User } from "../types";
 
-const initialState: User = {
+export const initialState: User = {
   email: null,
   name: null,
   id: null,
   isEmailConfirmed: null,
+  isAuthenticated: false,
 };
 
 const userSlice = createSlice({
@@ -15,6 +16,7 @@ const userSlice = createSlice({
     setUser: (_state, { payload }: PayloadAction<Required<User>>) => ({
       // TODO: Remove this hardcoded values
       ...payload,
+      isAuthenticated: true,
       name: "amjad",
       id: "123123",
     }),

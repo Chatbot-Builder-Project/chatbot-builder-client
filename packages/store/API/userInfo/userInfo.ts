@@ -9,7 +9,7 @@ export const userInfoApi = createApi({
   endpoints: (builder) => ({
     fetchUserInfo: builder.query<User, void>({
       query: () => ({
-        url: "/users/manage/info",
+        url: "/users/identity/manage/info",
         method: "GET",
       }),
       onQueryStarted: async (_args, { dispatch, queryFulfilled }) => {

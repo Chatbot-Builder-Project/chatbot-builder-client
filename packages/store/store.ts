@@ -1,15 +1,10 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
-import { authReducer, userReducer, nodesReducer } from "./slices";
+import { userReducer, builderReducer } from "./slices";
 import { authApi } from "./API/Auth";
 import { userInfoApi } from "./API/userInfo";
 
-const builderReducer = combineReducers({
-  nodes: nodesReducer,
-});
-
 const store = configureStore({
   reducer: {
-    auth: authReducer,
     user: userReducer,
     builder: builderReducer,
     [authApi.reducerPath]: authApi.reducer,

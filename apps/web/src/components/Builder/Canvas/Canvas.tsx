@@ -5,12 +5,13 @@ import {
 import React, { useRef, useCallback, useMemo } from "react";
 import { useDrop } from "react-dnd";
 import { useSelector, shallowEqual } from "react-redux";
-import useCanvasKeyboard from "../../../hooks/builder/useCanvasKeyboard";
 import { useDispatch } from "react-redux";
 import { BaseNodeData } from "../../../types/nodes";
-import useCanvasDrag from "../../../hooks/builder/useCanvasDrag";
 import { CANVAS_DIMENSIONS } from "./utils";
 import { BaseNode } from "../Nodes/BaseNode/BaseNode";
+import { clamp } from "lodash";
+import { ArrowWrapper } from "../Nodes/ArrowWrapper";
+import { useCanvasControls } from "../../../hooks/builder/index";
 
 const WRAPPER_STYLES = {
   width: "100vw",
@@ -22,9 +23,15 @@ const WRAPPER_STYLES = {
 const Canvas: React.FC = () => {
   const dispatch = useDispatch();
   const dropCanvas = useRef<HTMLDivElement | null>(null);
-  const isCtrlPressed = useCanvasKeyboard();
-  const { position, handleMouseDown, handleMouseMove, handleMouseUp } =
-    useCanvasDrag(isCtrlPressed);
+  const {
+    position,
+    scale,
+    isCtrlPressed,
+    isWheelPressed,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+  } = useCanvasControls();
   const nodes = useSelector(selectAllNodes, shallowEqual);
 
   const calculateDropPosition = useCallback(
@@ -39,24 +46,29 @@ const Canvas: React.FC = () => {
       if (!dropCanvas.current) return { x: 0, y: 0 };
 
       const canvasBounds = dropCanvas.current.getBoundingClientRect();
-      const scale = 1;
 
-      const adjustedX = clientOffset.x - item.mouseOffset.x;
-      const adjustedY = clientOffset.y - item.mouseOffset.y;
-
+      const adjustedX = clientOffset.x;
+      const adjustedY = clientOffset.y;
       const x = (adjustedX - canvasBounds.left) / scale;
       const y = (adjustedY - canvasBounds.top) / scale;
-
       return {
-        x: x - position.x + CANVAS_DIMENSIONS.initialX - item.nodeWidth / 2,
-        y: y - position.y + CANVAS_DIMENSIONS.initialY - item.nodeHeight / 2,
+        x: clamp(
+          x - item.mouseOffset.x,
+          0,
+          CANVAS_DIMENSIONS.width - item.nodeWidth
+        ),
+        y: clamp(
+          y - item.mouseOffset.y,
+          0,
+          CANVAS_DIMENSIONS.height - item.nodeHeight
+        ),
       };
     },
     [position]
   );
 
   const handleNodePositionChange = useCallback(
-    (id: string, x: number, y: number) => {
+    (id: number, x: number, y: number) => {
       dispatch(updateNodePosition({ id, x, y }));
     },
     [dispatch]
@@ -75,8 +87,8 @@ const Canvas: React.FC = () => {
       ) => {
         const clientOffset = monitor.getClientOffset();
         if (!clientOffset) return;
-
         const dropPosition = calculateDropPosition(clientOffset, item);
+
         return dropPosition;
       },
     }),
@@ -90,12 +102,14 @@ const Canvas: React.FC = () => {
       height: CANVAS_DIMENSIONS.height,
       border: "1px dashed gray",
       position: "absolute" as const,
-      left: `${position.x}px`,
-      top: `${position.y}px`,
-      cursor: isCtrlPressed ? "grab" : "default",
-      transform: "translate(-50%, -50%)",
+      left: `50%`,
+      top: `50%`,
+      cursor: isCtrlPressed || isWheelPressed ? "grab" : "default",
+      transform: `translate(-50%, -50%) `,
+      zoom: scale,
+      transformOrigin: "center",
     }),
-    [position.x, position.y, isCtrlPressed]
+    [position.x, position.y, scale, isCtrlPressed, isWheelPressed]
   );
 
   return (
@@ -120,15 +134,24 @@ const Canvas: React.FC = () => {
           position: "relative",
         }}
       >
-        {nodes.map((node) => (
-          <BaseNode
-            key={node.id}
-            data={node}
-            onPositionChange={handleNodePositionChange}
-          >
-            <>test</>
-          </BaseNode>
-        ))}
+        <ArrowWrapper
+          connections={[
+            {
+              start: "welcome-node",
+              end: "start-node",
+            },
+          ]}
+        >
+          {nodes.map((node) => (
+            <BaseNode
+              key={node.info.id}
+              data={node}
+              onPositionChange={handleNodePositionChange}
+            >
+              <div>{node.info.name}</div>
+            </BaseNode>
+          ))}
+        </ArrowWrapper>
       </div>
     </div>
   );

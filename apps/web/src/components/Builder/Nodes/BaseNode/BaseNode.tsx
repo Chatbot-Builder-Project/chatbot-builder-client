@@ -1,25 +1,21 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useDrag } from "react-dnd";
 import { NodeContainer } from "./BaseNode.styles";
-import { BaseNodeData, DragItem } from "../../../../types/nodes";
+import { useXarrow } from "react-xarrows";
+import { NodeData } from "@chatbot-builder/store/slices/Builder/Nodes/types";
+import { BaseNodeProps } from "./types";
 
-interface BaseNodeProps<T extends BaseNodeData> {
-  data: T;
-  isLeftSidebar?: boolean;
-  onPositionChange?: (id: string, x: number, y: number) => void;
-  children: React.ReactNode;
-}
-
-export function BaseNode<T extends BaseNodeData>({
+export function BaseNode({
   data,
   children,
   isLeftSidebar,
   onPositionChange,
-}: BaseNodeProps<T>) {
+}: BaseNodeProps) {
+  const updateXArrow = useXarrow();
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
   const [{ isDragging }, drag] = useDrag<
-    DragItem & {
+    NodeData & {
       nodeWidth: number;
       nodeHeight: number;
       mouseOffset: { x: number; y: number };
@@ -32,13 +28,13 @@ export function BaseNode<T extends BaseNodeData>({
       const nodeElement = nodeRef.current;
       const initialOffset = monitor.getInitialClientOffset();
       const initialSourceClientOffset = monitor.getInitialSourceClientOffset();
-      
+
       let mouseOffset = { x: 0, y: 0 };
       if (initialOffset && initialSourceClientOffset && nodeElement) {
         const nodeBounds = nodeElement.getBoundingClientRect();
         mouseOffset = {
           x: initialOffset.x - nodeBounds.left,
-          y: initialOffset.y - nodeBounds.top
+          y: initialOffset.y - nodeBounds.top,
         };
       }
 
@@ -46,7 +42,7 @@ export function BaseNode<T extends BaseNodeData>({
         ...data,
         nodeWidth: nodeElement?.offsetWidth ?? 0,
         nodeHeight: nodeElement?.offsetHeight ?? 0,
-        mouseOffset
+        mouseOffset,
       };
     },
     collect: (monitor) => ({
@@ -55,19 +51,21 @@ export function BaseNode<T extends BaseNodeData>({
     end: (_item, monitor) => {
       const dropResult = monitor.getDropResult();
       if (dropResult && onPositionChange) {
-        onPositionChange(data.id, dropResult.x, dropResult.y);
+        onPositionChange(data.info.id, dropResult.x, dropResult.y);
       }
     },
   }));
 
   return (
     <NodeContainer
+      id={data.info.id.toString()}
       ref={(node) => {
         nodeRef.current = node;
         drag(node);
       }}
-      $x={data.x}
-      $y={data.y}
+      onDrag={updateXArrow}
+      $x={data.visual.x}
+      $y={data.visual.y}
       $isDragging={isDragging}
       $isLeftSidebar={isLeftSidebar ?? false}
     >
