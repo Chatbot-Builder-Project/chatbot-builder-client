@@ -1,45 +1,95 @@
-import { useState, useEffect, useCallback } from "react";
-import { CANVAS_DIMENSIONS } from "../../components/Builder/Canvas/utils";
+import { useRef, useEffect, useCallback, useState } from "react";
+import { CANVAS_DIMENSIONS } from "../../components/Builder/Canvas";
+import { LEFT_SIDEBAR_WIDTH } from "../../components/Builder/LeftSidebar";
 
-export const useCanvasControls = () => {
-  const [position, setPosition] = useState({
-    x: CANVAS_DIMENSIONS.initialX,
-    y: CANVAS_DIMENSIONS.initialY,
-  });
+export const useCanvasControls = (
+  ref: React.MutableRefObject<HTMLDivElement | null>
+) => {
   const [scale, setScale] = useState(1);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
-    null
+  const ctrlRef = useRef(false);
+  const draggingRef = useRef(false);
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
+  const posRef = useRef({ x: 0, y: 0 });
+
+  const MIN_SCALE = 0.5;
+  const MAX_SCALE = 2;
+
+  const updateCursor = useCallback(() => {
+    if (ref.current) {
+      ref.current.style.cursor =
+        ctrlRef.current || draggingRef.current ? "grab" : "auto";
+    }
+  }, [ref]);
+
+  const calculateMaxOffsets = (currentScale: number) => {
+    const scaledWidth = CANVAS_DIMENSIONS.width * currentScale;
+    const scaledHeight = CANVAS_DIMENSIONS.height * currentScale;
+    const maxOffsetX = (scaledWidth - window.innerWidth) / (2 * currentScale);
+    const maxOffsetY = (scaledHeight - window.innerHeight) / (2 * currentScale);
+    return {
+      maxOffsetX: maxOffsetX > 0 ? maxOffsetX : 0,
+      maxOffsetY: maxOffsetY > 0 ? maxOffsetY : 0,
+    };
+  };
+
+  const updatePosition = useCallback(
+    (newX: number, newY: number, currentScale: number) => {
+      const { maxOffsetX, maxOffsetY } = calculateMaxOffsets(currentScale);
+
+      const constrainedX = Math.max(
+        Math.min(newX, maxOffsetX + LEFT_SIDEBAR_WIDTH / scale),
+        -maxOffsetX
+      );
+      const constrainedY = Math.max(Math.min(newY, maxOffsetY), -maxOffsetY);
+
+      posRef.current.x = constrainedX;
+      posRef.current.y = constrainedY;
+
+      if (ref.current) {
+        ref.current.style.transform = `translate(calc(-50% + ${constrainedX}px), calc(-50% + ${constrainedY}px))`;
+      }
+    },
+    [ref, scale]
   );
-  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
-  const [isWheelPressed, setIsWheelPressed] = useState(false);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.style.zoom = ` ${scale}`;
+
+      updatePosition(posRef.current.x, posRef.current.y, scale);
+    }
+  }, [ref, scale, updatePosition]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Control") setIsCtrlPressed(true);
+      if (e.key === "Control") ctrlRef.current = true;
+      updateCursor();
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "Control") setIsCtrlPressed(false);
+      if (e.key === "Control") ctrlRef.current = false;
+      updateCursor();
     };
 
     const handleMouseDown = (e: MouseEvent) => {
       if (e.button === 1) {
         e.preventDefault();
-        setIsWheelPressed(true);
       }
+      updateCursor();
     };
 
     const handleMouseUp = (e: MouseEvent) => {
-      if (e.button === 1) setIsWheelPressed(false);
+      if (e.button === 1) {
+        e.preventDefault();
+      }
+      updateCursor();
     };
 
     const handleWheel = (e: WheelEvent) => {
-      if (isCtrlPressed) {
-        e.preventDefault();
-        const delta = e.deltaY * -0.001;
-        setScale((prevScale) => Math.min(Math.max(prevScale + delta, 0.1), 4));
-      }
+      e.preventDefault();
+      setScale((prevScale) =>
+        Math.min(Math.max(prevScale - e.deltaY * 0.001, MIN_SCALE), MAX_SCALE)
+      );
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -55,44 +105,47 @@ export const useCanvasControls = () => {
       window.removeEventListener("mouseup", handleMouseUp);
       window.removeEventListener("wheel", handleWheel);
     };
-  }, [isCtrlPressed]);
+  }, [ref, updateCursor]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
-      if (isCtrlPressed || isWheelPressed || e.button === 1) {
+      if (e.button === 1 || ctrlRef.current) {
         e.preventDefault();
-        setDragStart({ x: e.clientX, y: e.clientY });
-        setIsDragging(true);
+        draggingRef.current = true;
+        dragStartRef.current = { x: e.clientX, y: e.clientY };
+        updateCursor();
       }
     },
-    [isCtrlPressed, isWheelPressed]
+    [updateCursor]
   );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
-      if (isDragging && dragStart) {
-        const deltaX = e.clientX - dragStart.x;
-        const deltaY = e.clientY - dragStart.y;
-        setPosition((prev) => ({
-          x: prev.x + deltaX,
-          y: prev.y + deltaY,
-        }));
-        setDragStart({ x: e.clientX, y: e.clientY });
+      if (draggingRef.current && dragStartRef.current && ref.current) {
+        const deltaX = e.clientX - dragStartRef.current.x;
+        const deltaY = e.clientY - dragStartRef.current.y;
+
+        const newX = posRef.current.x + deltaX / scale;
+        const newY = posRef.current.y + deltaY / scale;
+
+        updatePosition(newX, newY, scale);
+
+        dragStartRef.current = { x: e.clientX, y: e.clientY };
       }
     },
-    [isDragging, dragStart]
+    [ref, scale, updatePosition]
   );
 
   const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-    setDragStart(null);
-  }, []);
+    draggingRef.current = false;
+    dragStartRef.current = null;
+    updateCursor();
+  }, [updateCursor]);
 
   return {
-    position,
     scale,
-    isCtrlPressed,
-    isWheelPressed,
+    isCtrlPressed: ctrlRef.current,
+    isWheelPressed: draggingRef.current,
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,

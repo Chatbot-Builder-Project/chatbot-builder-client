@@ -10,6 +10,7 @@ export function BaseNode({
   children,
   isLeftSidebar,
   onPositionChange,
+  scale,
 }: BaseNodeProps) {
   const updateXArrow = useXarrow();
   const nodeRef = useRef<HTMLDivElement | null>(null);
@@ -33,15 +34,15 @@ export function BaseNode({
       if (initialOffset && initialSourceClientOffset && nodeElement) {
         const nodeBounds = nodeElement.getBoundingClientRect();
         mouseOffset = {
-          x: initialOffset.x - nodeBounds.left,
-          y: initialOffset.y - nodeBounds.top,
+          x: (initialOffset.x - nodeBounds.left) / scale,
+          y: (initialOffset.y - nodeBounds.top) / scale,
         };
       }
 
       return {
         ...data,
-        nodeWidth: nodeElement?.offsetWidth ?? 0,
-        nodeHeight: nodeElement?.offsetHeight ?? 0,
+        nodeWidth: (nodeElement?.offsetWidth ?? 0) / scale,
+        nodeHeight: (nodeElement?.offsetHeight ?? 0) / scale,
         mouseOffset,
       };
     },

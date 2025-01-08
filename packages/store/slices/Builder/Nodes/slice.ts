@@ -26,8 +26,8 @@ const defaultNodes: NodeData[] = [
       name: "Static_4",
     },
     visual: {
-      x: 500,
-      y: 200,
+      x: 5000,
+      y: 5000,
     },
     data: {
       type: "Text",

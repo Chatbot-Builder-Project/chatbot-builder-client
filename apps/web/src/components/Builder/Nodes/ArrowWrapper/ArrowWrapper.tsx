@@ -1,15 +1,16 @@
-import React from "react";
+import React, { memo } from "react";
 import Xarrow, { Xwrapper } from "react-xarrows";
 
 interface ArrowWrapperProps {
   children: React.ReactNode;
-  connections?: Array<{
-    start: string;
-    end: string;
-  }>;
 }
 
-function ArrowWrapper({ children, connections = [] }: ArrowWrapperProps) {
+function ArrowWrapper({ children }: ArrowWrapperProps) {
+  const connections: Array<{
+    start: string;
+    end: string;
+  }> = [];
+  console.log("123123213");
   return (
     <Xwrapper>
       {children}
@@ -23,11 +24,11 @@ function ArrowWrapper({ children, connections = [] }: ArrowWrapperProps) {
             color: "red",
           }}
           color="#888"
-          path="smooth"
+          path="grid"
         />
       ))}
     </Xwrapper>
   );
 }
 
-export default ArrowWrapper;
+export default memo(ArrowWrapper);

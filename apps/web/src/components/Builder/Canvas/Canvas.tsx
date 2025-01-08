@@ -23,20 +23,15 @@ const WRAPPER_STYLES = {
 const Canvas: React.FC = () => {
   const dispatch = useDispatch();
   const dropCanvas = useRef<HTMLDivElement | null>(null);
-  const {
-    position,
-    scale,
-    isCtrlPressed,
-    isWheelPressed,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUp,
-  } = useCanvasControls();
+
+  const { scale, handleMouseDown, handleMouseMove, handleMouseUp } =
+    useCanvasControls(dropCanvas);
+
   const nodes = useSelector(selectAllNodes, shallowEqual);
 
   const calculateDropPosition = useCallback(
     (
-      clientOffset: { x: number; y: number },
+      dropPosition: { x: number; y: number },
       item: BaseNodeData & {
         nodeWidth: number;
         nodeHeight: number;
@@ -46,25 +41,35 @@ const Canvas: React.FC = () => {
       if (!dropCanvas.current) return { x: 0, y: 0 };
 
       const canvasBounds = dropCanvas.current.getBoundingClientRect();
+      const { left, top, width, height } = canvasBounds;
+      const centerOffset = {
+        x: left + width / 2,
+        y: top + height / 2,
+      };
 
-      const adjustedX = clientOffset.x;
-      const adjustedY = clientOffset.y;
-      const x = (adjustedX - canvasBounds.left) / scale;
-      const y = (adjustedY - canvasBounds.top) / scale;
+      const position = {
+        x:
+          (dropPosition.x - centerOffset.x) / scale +
+          CANVAS_DIMENSIONS.width / 2,
+        y:
+          (dropPosition.y - centerOffset.y) / scale +
+          CANVAS_DIMENSIONS.height / 2,
+      };
+
       return {
         x: clamp(
-          x - item.mouseOffset.x,
+          position.x - item.mouseOffset.x / scale,
           0,
           CANVAS_DIMENSIONS.width - item.nodeWidth
         ),
         y: clamp(
-          y - item.mouseOffset.y,
+          position.y - item.mouseOffset.y / scale,
           0,
           CANVAS_DIMENSIONS.height - item.nodeHeight
         ),
       };
     },
-    [position]
+    [scale]
   );
 
   const handleNodePositionChange = useCallback(
@@ -100,16 +105,15 @@ const Canvas: React.FC = () => {
       backgroundColor: "white",
       width: CANVAS_DIMENSIONS.width,
       height: CANVAS_DIMENSIONS.height,
-      border: "1px dashed gray",
+      border: "5px dashed gray",
       position: "absolute" as const,
-      left: `50%`,
-      top: `50%`,
-      cursor: isCtrlPressed || isWheelPressed ? "grab" : "default",
-      transform: `translate(-50%, -50%) `,
-      zoom: scale,
+      cursor: "default",
+      left: "50%",
+      top: "50%",
+      transform: `translate(-50%, -50%)`,
       transformOrigin: "center",
     }),
-    [position.x, position.y, scale, isCtrlPressed, isWheelPressed]
+    []
   );
 
   return (
@@ -127,24 +131,18 @@ const Canvas: React.FC = () => {
         style={{
           ...canvasStyle,
           backgroundImage: `
-        linear-gradient(to right, #f0f0f0 1px, transparent 1px),
-        linear-gradient(to bottom, #f0f0f0 1px, transparent 1px)
-        `,
-          backgroundSize: "20px 20px",
+            linear-gradient(to right, rgba(240, 240, 240, 0.5) 1px, transparent 1px),
+            linear-gradient(to bottom,rgba(240, 240, 240, 0.5) 1px, transparent 1px)
+          `,
+          backgroundSize: `${25 * scale}px ${25 * scale}px`,
           position: "relative",
         }}
       >
-        <ArrowWrapper
-          connections={[
-            {
-              start: "welcome-node",
-              end: "start-node",
-            },
-          ]}
-        >
+        <ArrowWrapper>
           {nodes.map((node) => (
             <BaseNode
               key={node.info.id}
+              scale={scale}
               data={node}
               onPositionChange={handleNodePositionChange}
             >

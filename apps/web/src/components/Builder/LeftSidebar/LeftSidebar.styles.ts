@@ -1,7 +1,9 @@
 import styled from "styled-components";
 
+export const LEFT_SIDEBAR_WIDTH = 250;
+
 export const LeftSidebarContainer = styled.div`
-  width: 250px;
+  width: ${LEFT_SIDEBAR_WIDTH}px;
   height: 100%;
   display: flex;
   flex-direction: column;
