@@ -43,6 +43,30 @@ const defaultNodes: NodeData[] = [
       dataType: "Text",
     },
   },
+  {
+    type: "Static",
+    info: {
+      id: 6,
+      name: "Static_4",
+    },
+    visual: {
+      x: 5500,
+      y: 5000,
+    },
+    data: {
+      type: "Text",
+      text: "Hello user, say something.",
+    },
+    outputPort: {
+      info: {
+        id: 5,
+        name: "OutputPort_5",
+      },
+      visual: { x: 0, y: 0 },
+      nodeId: 4,
+      dataType: "Text",
+    },
+  },
 ];
 
 const initialState: BuilderState = {

@@ -10,7 +10,6 @@ function ArrowWrapper({ children }: ArrowWrapperProps) {
     start: string;
     end: string;
   }> = [];
-  console.log("123123213");
   return (
     <Xwrapper>
       {children}

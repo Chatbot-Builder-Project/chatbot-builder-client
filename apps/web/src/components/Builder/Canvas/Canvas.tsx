@@ -1,24 +1,13 @@
-import {
-  selectAllNodes,
-  updateNodePosition,
-} from "@chatbot-builder/store/slices/Builder/Nodes/slice";
+import { updateNodePosition } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import React, { useRef, useCallback, useMemo } from "react";
 import { useDrop } from "react-dnd";
-import { useSelector, shallowEqual } from "react-redux";
 import { useDispatch } from "react-redux";
 import { BaseNodeData } from "../../../types/nodes";
-import { CANVAS_DIMENSIONS } from "./utils";
-import { BaseNode } from "../Nodes/BaseNode/BaseNode";
+import { CANVAS_DIMENSIONS, WRAPPER_STYLES } from "./utils";
 import { clamp } from "lodash";
-import { ArrowWrapper } from "../Nodes/ArrowWrapper";
 import { useCanvasControls } from "../../../hooks/builder/index";
-
-const WRAPPER_STYLES = {
-  width: "100vw",
-  height: "100vh",
-  position: "relative" as const,
-  overflow: "hidden",
-};
+import NodesLayer from "./NodesLayer";
+import { ArrowWrapper } from "../Nodes/ArrowWrapper";
 
 const Canvas: React.FC = () => {
   const dispatch = useDispatch();
@@ -26,8 +15,6 @@ const Canvas: React.FC = () => {
 
   const { scale, handleMouseDown, handleMouseMove, handleMouseUp } =
     useCanvasControls(dropCanvas);
-
-  const nodes = useSelector(selectAllNodes, shallowEqual);
 
   const calculateDropPosition = useCallback(
     (
@@ -60,12 +47,12 @@ const Canvas: React.FC = () => {
         x: clamp(
           position.x - item.mouseOffset.x / scale,
           0,
-          CANVAS_DIMENSIONS.width - item.nodeWidth
+          CANVAS_DIMENSIONS.width - item.nodeWidth / scale
         ),
         y: clamp(
           position.y - item.mouseOffset.y / scale,
           0,
-          CANVAS_DIMENSIONS.height - item.nodeHeight
+          CANVAS_DIMENSIONS.height - item.nodeHeight / scale
         ),
       };
     },
@@ -131,24 +118,15 @@ const Canvas: React.FC = () => {
         style={{
           ...canvasStyle,
           backgroundImage: `
-            linear-gradient(to right, rgba(240, 240, 240, 0.5) 1px, transparent 1px),
-            linear-gradient(to bottom,rgba(240, 240, 240, 0.5) 1px, transparent 1px)
+            linear-gradient(to right, rgba(240, 240, 240, 0.35) 1px, transparent 1px),
+            linear-gradient(to bottom,rgba(240, 240, 240, 0.35) 1px, transparent 1px)
           `,
-          backgroundSize: `${25 * scale}px ${25 * scale}px`,
+          backgroundSize: `25px 25px`,
           position: "relative",
         }}
       >
         <ArrowWrapper>
-          {nodes.map((node) => (
-            <BaseNode
-              key={node.info.id}
-              scale={scale}
-              data={node}
-              onPositionChange={handleNodePositionChange}
-            >
-              <div>{node.info.name}</div>
-            </BaseNode>
-          ))}
+          <NodesLayer onPositionChange={handleNodePositionChange} />
         </ArrowWrapper>
       </div>
     </div>

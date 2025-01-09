@@ -1,26 +1,20 @@
-import { useRef } from "react";
+import { useRef, memo } from "react";
 import { useDrag } from "react-dnd";
 import { NodeContainer } from "./BaseNode.styles";
 import { useXarrow } from "react-xarrows";
 import { NodeData } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 import { BaseNodeProps } from "./types";
+import { useSelector } from "react-redux";
+import { selectNodeById } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
+import { RootState } from "@chatbot-builder/store/store";
 
-export function BaseNode({
-  data,
-  children,
-  isLeftSidebar,
-  onPositionChange,
-  scale,
-}: BaseNodeProps) {
+function BaseNode({ id, children, onPositionChange }: BaseNodeProps) {
   const updateXArrow = useXarrow();
+  const data = useSelector((state: RootState) => selectNodeById(state, id));
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
   const [{ isDragging }, drag] = useDrag<
-    NodeData & {
-      nodeWidth: number;
-      nodeHeight: number;
-      mouseOffset: { x: number; y: number };
-    },
+    NodeData,
     { x: number; y: number },
     { isDragging: boolean }
   >(() => ({
@@ -34,24 +28,24 @@ export function BaseNode({
       if (initialOffset && initialSourceClientOffset && nodeElement) {
         const nodeBounds = nodeElement.getBoundingClientRect();
         mouseOffset = {
-          x: (initialOffset.x - nodeBounds.left) / scale,
-          y: (initialOffset.y - nodeBounds.top) / scale,
+          x: initialOffset.x - nodeBounds.left,
+          y: initialOffset.y - nodeBounds.top,
         };
       }
 
       return {
-        ...data,
-        nodeWidth: (nodeElement?.offsetWidth ?? 0) / scale,
-        nodeHeight: (nodeElement?.offsetHeight ?? 0) / scale,
+        ...data!,
+        nodeWidth: nodeElement?.offsetWidth ?? 0,
+        nodeHeight: nodeElement?.offsetHeight ?? 0,
         mouseOffset,
-      };
+      } as NodeData;
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
     end: (_item, monitor) => {
       const dropResult = monitor.getDropResult();
-      if (dropResult && onPositionChange) {
+      if (dropResult && onPositionChange && data) {
         onPositionChange(data.info.id, dropResult.x, dropResult.y);
       }
     },
@@ -59,18 +53,20 @@ export function BaseNode({
 
   return (
     <NodeContainer
-      id={data.info.id.toString()}
+      id={id?.toString()}
       ref={(node) => {
         nodeRef.current = node;
         drag(node);
       }}
-      onDrag={updateXArrow}
-      $x={data.visual.x}
-      $y={data.visual.y}
+      // onClick={}
+      onDragEnd={updateXArrow}
+      $x={data?.visual.x || 0}
+      $y={data?.visual.y || 0}
       $isDragging={isDragging}
-      $isLeftSidebar={isLeftSidebar ?? false}
     >
       {children}
     </NodeContainer>
   );
 }
+
+export default memo(BaseNode);
