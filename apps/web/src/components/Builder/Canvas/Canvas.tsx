@@ -1,20 +1,21 @@
-import { updateNodePosition } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
-import React, { useRef, useCallback, useMemo } from "react";
+import {
+  setSelectedNode,
+  updateNodePosition,
+} from "@chatbot-builder/store/slices/Builder/Nodes/slice";
+import React, { useCallback, useMemo } from "react";
 import { useDrop } from "react-dnd";
 import { useDispatch } from "react-redux";
 import { BaseNodeData } from "../../../types/nodes";
 import { CANVAS_DIMENSIONS, WRAPPER_STYLES } from "./utils";
 import { clamp } from "lodash";
-import { useCanvasControls } from "../../../hooks/builder/index";
 import NodesLayer from "./NodesLayer";
 import { ArrowWrapper } from "../Nodes/ArrowWrapper";
+import { useCanvas } from "../../../contexts/CanvasContext";
 
 const Canvas: React.FC = () => {
   const dispatch = useDispatch();
-  const dropCanvas = useRef<HTMLDivElement | null>(null);
-
-  const { scale, handleMouseDown, handleMouseMove, handleMouseUp } =
-    useCanvasControls(dropCanvas);
+  const { canvasRef, handleMouseDown, handleMouseMove, handleMouseUp, scale } =
+    useCanvas();
 
   const calculateDropPosition = useCallback(
     (
@@ -25,9 +26,9 @@ const Canvas: React.FC = () => {
         mouseOffset: { x: number; y: number };
       }
     ) => {
-      if (!dropCanvas.current) return { x: 0, y: 0 };
+      if (!canvasRef.current) return { x: 0, y: 0 };
 
-      const canvasBounds = dropCanvas.current.getBoundingClientRect();
+      const canvasBounds = canvasRef.current.getBoundingClientRect();
       const { left, top, width, height } = canvasBounds;
       const centerOffset = {
         x: left + width / 2,
@@ -56,7 +57,7 @@ const Canvas: React.FC = () => {
         ),
       };
     },
-    [scale]
+    [scale, canvasRef]
   );
 
   const handleNodePositionChange = useCallback(
@@ -89,10 +90,9 @@ const Canvas: React.FC = () => {
 
   const canvasStyle = useMemo(
     () => ({
-      backgroundColor: "white",
+      backgroundColor: "#f3f4f8",
       width: CANVAS_DIMENSIONS.width,
       height: CANVAS_DIMENSIONS.height,
-      border: "5px dashed gray",
       position: "absolute" as const,
       cursor: "default",
       left: "50%",
@@ -103,6 +103,10 @@ const Canvas: React.FC = () => {
     []
   );
 
+  const handleCanvasClick = useCallback(() => {
+    dispatch(setSelectedNode(null));
+  }, [dispatch]);
+
   return (
     <div
       style={WRAPPER_STYLES}
@@ -112,16 +116,16 @@ const Canvas: React.FC = () => {
       <div
         ref={(node) => {
           drop(node);
-          dropCanvas.current = node;
+          if (node) canvasRef.current = node;
         }}
+        onClick={handleCanvasClick}
         onMouseDown={handleMouseDown}
         style={{
           ...canvasStyle,
           backgroundImage: `
-            linear-gradient(to right, rgba(240, 240, 240, 0.35) 1px, transparent 1px),
-            linear-gradient(to bottom,rgba(240, 240, 240, 0.35) 1px, transparent 1px)
-          `,
-          backgroundSize: `25px 25px`,
+            radial-gradient(circle at center, #d7d8db 2px, transparent 1px)
+            `,
+          backgroundSize: `35px 35px`,
           position: "relative",
         }}
       >

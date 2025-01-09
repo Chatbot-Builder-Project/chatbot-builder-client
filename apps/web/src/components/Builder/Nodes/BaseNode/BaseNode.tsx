@@ -4,14 +4,23 @@ import { NodeContainer } from "./BaseNode.styles";
 import { useXarrow } from "react-xarrows";
 import { NodeData } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 import { BaseNodeProps } from "./types";
-import { useSelector } from "react-redux";
-import { selectNodeById } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectNodeById,
+  setSelectedNode,
+} from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { RootState } from "@chatbot-builder/store/store";
 
-function BaseNode({ id, children, onPositionChange }: BaseNodeProps) {
+function BaseNode({
+  id,
+  children,
+  onPositionChange,
+  isSelected,
+}: BaseNodeProps) {
   const updateXArrow = useXarrow();
   const data = useSelector((state: RootState) => selectNodeById(state, id));
   const nodeRef = useRef<HTMLDivElement | null>(null);
+  const dispatch = useDispatch();
 
   const [{ isDragging }, drag] = useDrag<
     NodeData,
@@ -51,6 +60,11 @@ function BaseNode({ id, children, onPositionChange }: BaseNodeProps) {
     },
   }));
 
+  const handleNodeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    dispatch(setSelectedNode(id));
+  };
+
   return (
     <NodeContainer
       id={id?.toString()}
@@ -58,7 +72,8 @@ function BaseNode({ id, children, onPositionChange }: BaseNodeProps) {
         nodeRef.current = node;
         drag(node);
       }}
-      // onClick={}
+      $isSelected={isSelected}
+      onClick={handleNodeClick}
       onDragEnd={updateXArrow}
       $x={data?.visual.x || 0}
       $y={data?.visual.y || 0}
@@ -69,4 +84,8 @@ function BaseNode({ id, children, onPositionChange }: BaseNodeProps) {
   );
 }
 
-export default memo(BaseNode);
+export default memo(BaseNode, (prevProps, nextProps) => {
+  return (
+    prevProps.isSelected == nextProps.isSelected && prevProps.id == nextProps.id
+  );
+});

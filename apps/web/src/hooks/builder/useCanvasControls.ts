@@ -2,14 +2,15 @@ import { useRef, useEffect, useCallback, useState } from "react";
 import { CANVAS_DIMENSIONS } from "../../components/Builder/Canvas";
 import { LEFT_SIDEBAR_WIDTH } from "../../components/Builder/LeftSidebar";
 
-export const useCanvasControls = (
-  ref: React.MutableRefObject<HTMLDivElement | null>
-) => {
+export const useCanvasControls = (ref: React.RefObject<HTMLDivElement>) => {
   const [scale, setScale] = useState(1);
   const ctrlRef = useRef(false);
   const draggingRef = useRef(false);
-  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const posRef = useRef({ x: 0, y: 0 });
+  const dragStartRef = useRef<{ x: number; y: number; time: number } | null>(
+    null
+  );
+  const velocityRef = useRef({ x: 0, y: 0 });
 
   const MIN_SCALE = 0.5;
   const MAX_SCALE = 2;
@@ -37,19 +38,18 @@ export const useCanvasControls = (
       const { maxOffsetX, maxOffsetY } = calculateMaxOffsets(currentScale);
 
       const constrainedX = Math.max(
-        Math.min(newX, maxOffsetX + LEFT_SIDEBAR_WIDTH / scale),
+        Math.min(newX, maxOffsetX + LEFT_SIDEBAR_WIDTH / currentScale),
         -maxOffsetX
       );
       const constrainedY = Math.max(Math.min(newY, maxOffsetY), -maxOffsetY);
 
-      posRef.current.x = constrainedX;
-      posRef.current.y = constrainedY;
+      posRef.current = { x: constrainedX, y: constrainedY };
 
       if (ref.current) {
         ref.current.style.transform = `translate(calc(-50% + ${constrainedX}px), calc(-50% + ${constrainedY}px))`;
       }
     },
-    [ref, scale]
+    [ref]
   );
 
   useEffect(() => {
@@ -86,6 +86,7 @@ export const useCanvasControls = (
     };
 
     const handleWheel = (e: WheelEvent) => {
+      if (draggingRef.current) return;
       e.preventDefault();
       setScale((prevScale) =>
         Math.min(Math.max(prevScale - e.deltaY * 0.001, MIN_SCALE), MAX_SCALE)
@@ -111,8 +112,11 @@ export const useCanvasControls = (
     (e: React.MouseEvent) => {
       if (e.button === 1 || ctrlRef.current) {
         e.preventDefault();
+
+        velocityRef.current = { x: 0, y: 0 };
         draggingRef.current = true;
-        dragStartRef.current = { x: e.clientX, y: e.clientY };
+        dragStartRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
+
         updateCursor();
       }
     },
@@ -124,13 +128,18 @@ export const useCanvasControls = (
       if (draggingRef.current && dragStartRef.current && ref.current) {
         const deltaX = e.clientX - dragStartRef.current.x;
         const deltaY = e.clientY - dragStartRef.current.y;
+        const deltaTime = Date.now() - dragStartRef.current.time;
 
         const newX = posRef.current.x + deltaX / scale;
         const newY = posRef.current.y + deltaY / scale;
-
         updatePosition(newX, newY, scale);
 
-        dragStartRef.current = { x: e.clientX, y: e.clientY };
+        velocityRef.current = {
+          x: deltaX / deltaTime,
+          y: deltaY / deltaTime,
+        };
+
+        dragStartRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
       }
     },
     [ref, scale, updatePosition]
@@ -139,8 +148,45 @@ export const useCanvasControls = (
   const handleMouseUp = useCallback(() => {
     draggingRef.current = false;
     dragStartRef.current = null;
+
+    const DECELERATION = 0.04;
+    const SLIDE_INTERVAL = 4;
+
+    const slide = () => {
+      const velocity = velocityRef.current;
+      if (Math.abs(velocity.x) > 0.1 || Math.abs(velocity.y) > 0.1) {
+        const newX = posRef.current.x + velocity.x * SLIDE_INTERVAL;
+        const newY = posRef.current.y + velocity.y * SLIDE_INTERVAL;
+
+        updatePosition(newX, newY, scale);
+
+        velocityRef.current = {
+          x: velocity.x * (1 - DECELERATION),
+          y: velocity.y * (1 - DECELERATION),
+        };
+
+        requestAnimationFrame(slide);
+      } else {
+        velocityRef.current = { x: 0, y: 0 };
+      }
+    };
+
+    slide();
     updateCursor();
-  }, [updateCursor]);
+  }, [updatePosition, scale, updateCursor]);
+
+  const resetPosition = useCallback(() => {
+    if (ref.current) {
+      posRef.current = { x: 0, y: 0 };
+      ref.current.style.transition = "transform 0.2s ease-out";
+      ref.current.style.transform = "translate(-50%, -50%)";
+      setTimeout(() => {
+        if (ref.current) {
+          ref.current.style.transition = "";
+        }
+      }, 500);
+    }
+  }, [ref]);
 
   return {
     scale,
@@ -149,5 +195,6 @@ export const useCanvasControls = (
     handleMouseDown,
     handleMouseMove,
     handleMouseUp,
+    resetPosition,
   };
 };

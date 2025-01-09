@@ -10,8 +10,8 @@ export const LeftSidebarContainer = styled.div`
   justify-content: flex-start;
   padding: 25px 5px;
   align-items: center;
-  background-color: rgb(208, 208, 208);
-  border-right: 1px solid #ccc;
+  background-color: ${(props) => props.theme.colors.secondaryBackground};
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
   position: absolute;
   left: 0;
   top: 0;

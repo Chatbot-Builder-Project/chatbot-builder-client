@@ -13,6 +13,7 @@ const GlobalStyle = createGlobalStyle`
     color: ${(props) => props.theme.colors.primary};
     line-height: 1.6;
     min-height: 100vh; 
+    overflow: hidden;
   }
 
   button {

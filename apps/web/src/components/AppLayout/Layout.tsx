@@ -20,7 +20,7 @@ type NavigationLink = {
 const navigationLinks: NavigationLink[] = [
   { path: "/", label: "Home" },
   { path: "/marketplace", label: "Marketplace" },
-  { path: "/Builder", label: "Builder", isLoggedIn: true },
+  { path: "/builder", label: "Builder", isLoggedIn: true },
   { path: "/auth/login", label: "Login", isLoggedIn: false },
 ];
 

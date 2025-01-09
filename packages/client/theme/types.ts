@@ -2,6 +2,8 @@ interface ThemeColors {
   primary: string;
   secondary: string;
   background: string;
+  secondaryBackground: string;
+  nodeBackground: string;
   accent: string;
   primaryGradient: string;
   text: string;

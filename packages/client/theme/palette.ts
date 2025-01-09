@@ -6,6 +6,8 @@ export const theme: Theme = {
     secondary: "#6A5F8E",
     primaryGradient: "linear-gradient(135deg, #6A00FF, #A600FF, #E100FF)",
     background: "#f6f9ff",
+    secondaryBackground: "#162137",
+    nodeBackground: "#ffffff",
     accent: "#D1B3FF",
     text: "#101012",
     lightText: "#fffdf9",

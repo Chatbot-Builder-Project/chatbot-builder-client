@@ -4,16 +4,22 @@ export const NodeContainer = styled.div<{
   $x: number;
   $y: number;
   $isDragging: boolean;
+  $isSelected: boolean;
   $isLeftSidebar?: boolean;
 }>`
-  cursor: grab;
+  cursor: ${(props) => (props.$isDragging ? "grab" : "default")};
   position: absolute;
   left: ${(props) => props.$x}px;
   top: ${(props) => props.$y}px;
   opacity: ${(props) => (props.$isDragging ? 0 : 1)};
   padding: 10px;
-  background-color: #888;
-  border-radius: 5px;
+  ${(props) =>
+    props.$isSelected
+      ? `border: 2px solid ${props.theme.colors.primary};`
+      : `border: 2px solid transparent;`}
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+  background-color: ${(props) => props.theme.colors.nodeBackground};
+  border-radius: 10px;
   width: 200px;
   height: 100px;
 `;

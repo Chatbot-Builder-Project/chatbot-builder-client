@@ -23,7 +23,7 @@ const defaultNodes: NodeData[] = [
     type: "Static",
     info: {
       id: 4,
-      name: "Static_4",
+      name: "test 1",
     },
     visual: {
       x: 5000,
@@ -47,7 +47,7 @@ const defaultNodes: NodeData[] = [
     type: "Static",
     info: {
       id: 6,
-      name: "Static_4",
+      name: "test 2",
     },
     visual: {
       x: 5500,

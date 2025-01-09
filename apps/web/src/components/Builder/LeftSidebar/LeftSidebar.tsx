@@ -1,4 +1,4 @@
-import { BaseNode } from "../Nodes/BaseNode/BaseNode";
+// import { BaseNode } from "../Nodes/BaseNode/BaseNode";
 import { LeftSidebarContainer } from "./LeftSidebar.styles";
 
 const LeftSidebar: React.FC = () => {
