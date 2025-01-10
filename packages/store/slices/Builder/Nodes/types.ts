@@ -1,50 +1,84 @@
 import { EntityState } from "@reduxjs/toolkit";
 
-export type NodeType = "Static" | "Input" | "Output";
-export type DataType = "Text" | "Number" | "Boolean";
-
-export interface VisualData {
-  x: number;
-  y: number;
+export enum NodeType {
+  Interaction = "Interaction",
+  Static = "Static",
+  Switch = "Switch",
+  Prompt = "Prompt",
 }
 
-export interface InfoData {
+interface BaseInfo {
   id: number;
   name: string;
 }
 
-export interface PortData {
-  info: InfoData;
-  visual: VisualData;
+interface Port {
+  info: BaseInfo;
   nodeId: number;
-  dataType: DataType;
+  dataType: string;
 }
 
-export interface NodeData {
+interface BaseNode {
   type: NodeType;
-  info: InfoData;
-  visual: VisualData;
-  data: {
-    type: DataType;
-    text?: string;
-    number?: number;
-    boolean?: boolean;
+  info: BaseInfo;
+  visual: {
+    x: number;
+    y: number;
   };
-  outputPort: PortData;
 }
+
+export type NodeTemplate<T extends NodeData> = Omit<T, 'info'> & {
+  info: { id: 0; name: '' };
+};
+
+export type NodeTemplates = {
+  [K in NodeType]: NodeTemplate<Extract<NodeData, { type: K }>>;
+};
+
+export interface InteractionNode extends BaseNode {
+  type: NodeType.Interaction;
+  textInputPort: Port;
+  outputEnumId: number;
+  optionOutputPort: Port;
+  outputOptionMetas: Record<string, { Description: string }>;
+}
+
+export interface StaticNode extends BaseNode {
+  type: NodeType.Static;
+  data: {
+    type: string;
+    text: string;
+  };
+  outputPort: Port;
+}
+
+export interface SwitchNode extends BaseNode {
+  type: NodeType.Switch;
+  enumId: number;
+  inputPort: Port;
+  optionFlowLinkIds: Record<string, number>;
+}
+
+export interface PromptNode extends BaseNode {
+  type: NodeType.Prompt;
+  template: string;
+  outputPort: Port;
+  inputPorts: Port[];
+}
+
+export type NodeData = InteractionNode | StaticNode | SwitchNode | PromptNode;
 
 export interface DataLink {
-  info: InfoData;
+  info: BaseInfo;
   sourcePortId: number;
   targetPortId: number;
 }
 
 export interface FlowLink {
-  info: InfoData;
+  info: BaseInfo;
   sourceNodeId: number;
   targetNodeId: number;
 }
-
 
 export interface BuilderState {
   nodes: EntityState<NodeData>;
@@ -52,4 +86,5 @@ export interface BuilderState {
   flowLinks: EntityState<FlowLink>;
   selectedNodeId: number | null;
   startNodeId: number | null;
+  nextNodeId: number;
 }

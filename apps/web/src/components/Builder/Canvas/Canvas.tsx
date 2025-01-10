@@ -9,7 +9,7 @@ import { BaseNodeData } from "../../../types/nodes";
 import { CANVAS_DIMENSIONS, WRAPPER_STYLES } from "./utils";
 import { clamp } from "lodash";
 import NodesLayer from "./NodesLayer";
-import { ArrowWrapper } from "../Nodes/ArrowWrapper";
+import { ArrowWrapper } from "../ArrowWrapper";
 import { useCanvas } from "../../../contexts/CanvasContext";
 
 const Canvas: React.FC = () => {
@@ -125,10 +125,27 @@ const Canvas: React.FC = () => {
           backgroundImage: `
             radial-gradient(circle at center, #d7d8db 2px, transparent 1px)
             `,
+          backgroundPosition: `center`,
           backgroundSize: `35px 35px`,
           position: "relative",
         }}
       >
+        <div
+          style={{
+            position: "absolute",
+            left: "50%",
+            top: "50%",
+            opacity: 0.5,
+            transform: "translate(-50%, -50%)",
+            fontSize: "48px",
+            color: "#d7d8db",
+            fontWeight: "bold",
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        >
+          +
+        </div>
         <ArrowWrapper>
           <NodesLayer onPositionChange={handleNodePositionChange} />
         </ArrowWrapper>

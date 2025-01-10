@@ -1,4 +1,4 @@
-import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import { userReducer, builderReducer } from "./slices";
 import { authApi } from "./API/Auth";
 import { userInfoApi } from "./API/userInfo";

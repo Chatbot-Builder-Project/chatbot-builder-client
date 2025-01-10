@@ -4,12 +4,13 @@ import { ActionButton } from "../../component.styles";
 export const CanvasConfigContainerBar = styled.div`
   position: absolute;
   display: flex;
+
   align-items: center;
   padding: 10px;
   top: 10px;
   right: 20px;
   height: 50px;
-  width: 400px;
+  width: auto;
   // background-color: #ffffff;
   border-radius: 20px 20px;
   // box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);

@@ -47,7 +47,11 @@ function BaseNode({
         nodeWidth: nodeElement?.offsetWidth ?? 0,
         nodeHeight: nodeElement?.offsetHeight ?? 0,
         mouseOffset,
-      } as NodeData;
+      } as NodeData & {
+        nodeWidth: number;
+        nodeHeight: number;
+        mouseOffset: { x: number; y: number };
+      };
     },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),

@@ -20,6 +20,4 @@ export const NodeContainer = styled.div<{
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
   background-color: ${(props) => props.theme.colors.nodeBackground};
   border-radius: 10px;
-  width: 200px;
-  height: 100px;
 `;

@@ -4,7 +4,7 @@ import {
   PayloadAction,
 } from "@reduxjs/toolkit";
 import { RootState } from "../../../store";
-import { NodeData, DataLink, FlowLink, BuilderState } from "./types";
+import { NodeData, DataLink, FlowLink, BuilderState, NodeType } from "./types";
 
 const nodesAdapter = createEntityAdapter<NodeData>({
   selectId: (node) => node.info.id,
@@ -18,56 +18,7 @@ const flowLinksAdapter = createEntityAdapter<FlowLink>({
   selectId: (link) => link.info.id,
 });
 
-const defaultNodes: NodeData[] = [
-  {
-    type: "Static",
-    info: {
-      id: 4,
-      name: "test 1",
-    },
-    visual: {
-      x: 5000,
-      y: 5000,
-    },
-    data: {
-      type: "Text",
-      text: "Hello user, say something.",
-    },
-    outputPort: {
-      info: {
-        id: 5,
-        name: "OutputPort_5",
-      },
-      visual: { x: 0, y: 0 },
-      nodeId: 4,
-      dataType: "Text",
-    },
-  },
-  {
-    type: "Static",
-    info: {
-      id: 6,
-      name: "test 2",
-    },
-    visual: {
-      x: 5500,
-      y: 5000,
-    },
-    data: {
-      type: "Text",
-      text: "Hello user, say something.",
-    },
-    outputPort: {
-      info: {
-        id: 5,
-        name: "OutputPort_5",
-      },
-      visual: { x: 0, y: 0 },
-      nodeId: 4,
-      dataType: "Text",
-    },
-  },
-];
+const defaultNodes: NodeData[] = [];
 
 const initialState: BuilderState = {
   nodes: nodesAdapter.setAll(nodesAdapter.getInitialState(), defaultNodes),
@@ -75,6 +26,7 @@ const initialState: BuilderState = {
   flowLinks: flowLinksAdapter.getInitialState(),
   selectedNodeId: null,
   startNodeId: 1,
+  nextNodeId: 1,
 };
 
 const builderSlice = createSlice({
@@ -82,7 +34,16 @@ const builderSlice = createSlice({
   initialState,
   reducers: {
     addNode: (state, action: PayloadAction<NodeData>) => {
-      nodesAdapter.addOne(state.nodes, action.payload);
+      const newId = state.nextNodeId;
+      state.nextNodeId += 1;
+      const newNode = {
+        ...action.payload,
+        info: {
+          ...action.payload.info,
+          id: newId,
+        },
+      };
+      nodesAdapter.addOne(state.nodes, newNode);
     },
     updateNodePosition: (
       state,

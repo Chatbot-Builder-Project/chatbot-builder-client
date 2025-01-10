@@ -14,9 +14,7 @@ const ItemConfigSidebar = () => {
 
   return (
     <>
-      <Container $isOpened={!!selectedNodeId}>
-        {selectedNode?.info.name}
-      </Container>
+      <Container $isOpened={!!selectedNodeId}>{selectedNode?.type}</Container>
     </>
   );
 };

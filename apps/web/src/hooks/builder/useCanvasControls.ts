@@ -51,6 +51,88 @@ export const useCanvasControls = (ref: React.RefObject<HTMLDivElement>) => {
     },
     [ref]
   );
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button === 1 || ctrlRef.current) {
+        e.preventDefault();
+
+        velocityRef.current = { x: 0, y: 0 };
+        draggingRef.current = true;
+        dragStartRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
+
+        updateCursor();
+      }
+    },
+    [updateCursor]
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (draggingRef.current && dragStartRef.current && ref.current) {
+        const deltaX = e.clientX - dragStartRef.current.x;
+        const deltaY = e.clientY - dragStartRef.current.y;
+        let deltaTime = Date.now() - dragStartRef.current.time;
+        if (deltaTime < 1) deltaTime = 1;
+        const newX = posRef.current.x + deltaX / scale;
+        const newY = posRef.current.y + deltaY / scale;
+
+        if (Number.isNaN(newX) || Number.isNaN(newY)) return;
+
+        updatePosition(newX, newY, scale);
+
+        velocityRef.current = {
+          x: deltaX / deltaTime,
+          y: deltaY / deltaTime,
+        };
+
+        dragStartRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
+      }
+    },
+    [ref, scale, updatePosition]
+  );
+
+  const handleMouseUp = useCallback(() => {
+    draggingRef.current = false;
+    dragStartRef.current = null;
+
+    const DECELERATION = 0.03;
+    const SLIDE_INTERVAL = 5;
+
+    const slide = () => {
+      const velocity = velocityRef.current;
+      if (Math.abs(velocity.x) > 0.1 || Math.abs(velocity.y) > 0.1) {
+        const newX = posRef.current.x + velocity.x * SLIDE_INTERVAL;
+        const newY = posRef.current.y + velocity.y * SLIDE_INTERVAL;
+
+        updatePosition(newX, newY, scale);
+
+        velocityRef.current = {
+          x: velocity.x * (1 - DECELERATION),
+          y: velocity.y * (1 - DECELERATION),
+        };
+
+        requestAnimationFrame(slide);
+      } else {
+        velocityRef.current = { x: 0, y: 0 };
+      }
+    };
+
+    slide();
+    updateCursor();
+  }, [updatePosition, scale, updateCursor]);
+
+  const resetPosition = useCallback(() => {
+    if (ref.current) {
+      posRef.current = { x: 0, y: 0 };
+      ref.current.style.transition = "transform 0.2s ease-out";
+      ref.current.style.transform = "translate(-50%, -50%)";
+      setTimeout(() => {
+        if (ref.current) {
+          ref.current.style.transition = "";
+        }
+      }, 300);
+    }
+  }, [ref]);
 
   useEffect(() => {
     if (ref.current) {
@@ -107,86 +189,6 @@ export const useCanvasControls = (ref: React.RefObject<HTMLDivElement>) => {
       window.removeEventListener("wheel", handleWheel);
     };
   }, [ref, updateCursor]);
-
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (e.button === 1 || ctrlRef.current) {
-        e.preventDefault();
-
-        velocityRef.current = { x: 0, y: 0 };
-        draggingRef.current = true;
-        dragStartRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
-
-        updateCursor();
-      }
-    },
-    [updateCursor]
-  );
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (draggingRef.current && dragStartRef.current && ref.current) {
-        const deltaX = e.clientX - dragStartRef.current.x;
-        const deltaY = e.clientY - dragStartRef.current.y;
-        const deltaTime = Date.now() - dragStartRef.current.time;
-
-        const newX = posRef.current.x + deltaX / scale;
-        const newY = posRef.current.y + deltaY / scale;
-        updatePosition(newX, newY, scale);
-
-        velocityRef.current = {
-          x: deltaX / deltaTime,
-          y: deltaY / deltaTime,
-        };
-
-        dragStartRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
-      }
-    },
-    [ref, scale, updatePosition]
-  );
-
-  const handleMouseUp = useCallback(() => {
-    draggingRef.current = false;
-    dragStartRef.current = null;
-
-    const DECELERATION = 0.04;
-    const SLIDE_INTERVAL = 4;
-
-    const slide = () => {
-      const velocity = velocityRef.current;
-      if (Math.abs(velocity.x) > 0.1 || Math.abs(velocity.y) > 0.1) {
-        const newX = posRef.current.x + velocity.x * SLIDE_INTERVAL;
-        const newY = posRef.current.y + velocity.y * SLIDE_INTERVAL;
-
-        updatePosition(newX, newY, scale);
-
-        velocityRef.current = {
-          x: velocity.x * (1 - DECELERATION),
-          y: velocity.y * (1 - DECELERATION),
-        };
-
-        requestAnimationFrame(slide);
-      } else {
-        velocityRef.current = { x: 0, y: 0 };
-      }
-    };
-
-    slide();
-    updateCursor();
-  }, [updatePosition, scale, updateCursor]);
-
-  const resetPosition = useCallback(() => {
-    if (ref.current) {
-      posRef.current = { x: 0, y: 0 };
-      ref.current.style.transition = "transform 0.2s ease-out";
-      ref.current.style.transform = "translate(-50%, -50%)";
-      setTimeout(() => {
-        if (ref.current) {
-          ref.current.style.transition = "";
-        }
-      }, 500);
-    }
-  }, [ref]);
 
   return {
     scale,

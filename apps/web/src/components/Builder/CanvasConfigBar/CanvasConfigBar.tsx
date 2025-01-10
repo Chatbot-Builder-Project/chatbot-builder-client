@@ -1,4 +1,4 @@
-import { useCanvas } from '../../../contexts/CanvasContext';
+import { useCanvas } from "../../../contexts/CanvasContext";
 import {
   CanvasConfigContainerBar,
   SaveButton,
@@ -12,12 +12,10 @@ const CanvasConfigBar = () => {
 
   const handleSave = () => {
     // TODO: Implement save functionality
-    console.log("Saving...");
   };
 
   const handlePublish = () => {
     // TODO: Implement publish functionality
-    console.log("Publishing...");
   };
 
   return (

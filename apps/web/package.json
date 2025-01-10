@@ -11,7 +11,11 @@
   },
   "dependencies": {
     "@chatbot-builder/client": "1.0.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@hookform/resolvers": "^3.9.1",
+    "@mui/icons-material": "^6.3.1",
+    "@mui/material": "^6.3.1",
     "@tabler/icons-react": "^3.28.1",
     "@types/lodash": "^4.17.14",
     "lodash": "^4.17.21",

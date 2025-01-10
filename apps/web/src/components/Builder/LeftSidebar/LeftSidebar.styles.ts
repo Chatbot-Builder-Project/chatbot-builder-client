@@ -17,3 +17,13 @@ export const LeftSidebarContainer = styled.div`
   top: 0;
   z-index: 2;
 `;
+
+export const NodesContainer = styled.div`
+  width: 100%;
+  padding: 10px;
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+`;
