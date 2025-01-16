@@ -109,7 +109,6 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
     const updated = [...points];
     updated[pointIndex].position = { x: data.x, y: data.y };
     setPoints(updated);
-    updatePath();
   };
 
   const handleDragStop = (pointId: string) => {
@@ -141,7 +140,6 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
     updated.splice(pointIndex, 0, newPoints[0]);
     updated.splice(pointIndex + 2, 0, newPoints[1]);
     setPoints(updated);
-    updatePath();
   };
 
   useEffect(() => {
