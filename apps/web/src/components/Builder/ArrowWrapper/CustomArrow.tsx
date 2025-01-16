@@ -8,6 +8,7 @@ interface Point {
 }
 
 interface ControlPoint {
+  preview?: boolean;
   id: string;
   position: Point;
 }
@@ -48,13 +49,18 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
   ): string => {
     if (points.length < 2) return "";
 
+    const nonPreviewPoints = points.filter((point) => !point.preview);
+
+    if (nonPreviewPoints.length < 2) return "";
+
     const d: string[] = [];
 
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = i === 0 ? points[0] : points[i - 1];
-      const p1 = points[i];
-      const p2 = points[i + 1];
-      const p3 = i === points.length - 2 ? p2 : points[i + 2];
+    for (let i = 0; i < nonPreviewPoints.length - 1; i++) {
+      const p0 = i === 0 ? nonPreviewPoints[0] : nonPreviewPoints[i - 1];
+      const p1 = nonPreviewPoints[i];
+      const p2 = nonPreviewPoints[i + 1];
+      const p3 =
+        i === nonPreviewPoints.length - 2 ? p2 : nonPreviewPoints[i + 2];
 
       const cp1x =
         p1.position.x + ((p2.position.x - p0.position.x) * tension) / 6;
@@ -108,6 +114,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
 
     const updated = [...points];
     updated[pointIndex].position = { x: data.x, y: data.y };
+    updated[pointIndex].preview = false;
     setPoints(updated);
   };
 
@@ -127,6 +134,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
           x: prev.position.x + (current.position.x - prev.position.x) * 0.6,
           y: prev.position.y + (current.position.y - prev.position.y) * 0.6,
         },
+        preview: true,
       },
       {
         id: `control-${Math.random()}`,
@@ -134,11 +142,17 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
           x: current.position.x + (next.position.x - current.position.x) * 0.4,
           y: current.position.y + (next.position.y - current.position.y) * 0.4,
         },
+        preview: true,
       },
     ];
 
-    updated.splice(pointIndex, 0, newPoints[0]);
-    updated.splice(pointIndex + 2, 0, newPoints[1]);
+    if (!points[pointIndex - 1].preview && !points[pointIndex + 1].preview) {
+      updated.splice(pointIndex, 0, newPoints[0]);
+      updated.splice(pointIndex + 2, 0, newPoints[1]);
+    } else {
+      updated[pointIndex - 1] = newPoints[0];
+      updated[pointIndex + 1] = newPoints[1];
+    }
     setPoints(updated);
   };
 
@@ -148,15 +162,16 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
 
     if (start && end) {
       setPoints([
-        { id: "start-point", position: start },
+        { id: "start-point", position: start, preview: false },
         {
           id: "control-1",
           position: {
             x: (start.x + end.x) / 2,
             y: (start.y + end.y) / 2,
           },
+          preview: true,
         },
-        { id: "end-point", position: end },
+        { id: "end-point", position: end, preview: false },
       ]);
     }
 
@@ -235,8 +250,8 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
               onStop={() => handleDragStop(point.id)}
             >
               <circle
-                r={5}
-                fill="#007AFF"
+                r={point.preview ? 3 : 5}
+                fill={point.preview ? "#007AFF" : "#007AFF"}
                 stroke="#fff"
                 strokeWidth={2}
                 style={{ cursor: "move", pointerEvents: "auto" }}
