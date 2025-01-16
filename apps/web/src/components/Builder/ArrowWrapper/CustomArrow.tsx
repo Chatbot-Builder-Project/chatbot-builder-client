@@ -18,7 +18,7 @@ interface ArrowConnectorProps {
 }
 
 const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
-  const { canvasRef } = useCanvas();
+  const { canvasRef, scale } = useCanvas();
   const pathRef = useRef<SVGPathElement>(null);
   const [points, setPoints] = useState<ControlPoint[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -33,45 +33,54 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
 
     const canvasRect = canvasRef.current.getBoundingClientRect();
     const elementRect = element.getBoundingClientRect();
-    if (isOnLeft) {
-      return {
-        x: elementRect.left - canvasRect.left,
-        y: elementRect.top + elementRect.height / 2 - canvasRect.top,
-      };
-    }
+
     return {
-      x: elementRect.right - canvasRect.left,
-      y: elementRect.top + elementRect.height / 2 - canvasRect.top,
+      x:
+        ((isOnLeft ? elementRect.left : elementRect.right) - canvasRect.left) /
+        scale,
+      y: (elementRect.top - canvasRect.top + elementRect.height / 2) / scale,
     };
   };
 
-  const buildSinglePath = (
-    start: Point,
+  const catmullRomToBezier = (
     points: ControlPoint[],
-    end: Point
-  ) => {
-    if (points.length === 0) {
-      const midX = (start.x + end.x) / 2;
-      const midY = (start.y + end.y) / 2;
-      return `M ${start.x},${start.y} S ${midX},${midY} ${end.x},${end.y}`;
+    tension: number = 0.5
+  ): string => {
+    if (points.length < 2) return "";
+
+    const d: string[] = [];
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = i === 0 ? points[0] : points[i - 1];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = i === points.length - 2 ? p2 : points[i + 2];
+
+      const cp1x =
+        p1.position.x + ((p2.position.x - p0.position.x) * tension) / 6;
+      const cp1y =
+        p1.position.y + ((p2.position.y - p0.position.y) * tension) / 6;
+
+      const cp2x =
+        p2.position.x - ((p3.position.x - p1.position.x) * tension) / 6;
+      const cp2y =
+        p2.position.y - ((p3.position.y - p1.position.y) * tension) / 6;
+
+      if (i === 0) {
+        d.push(`M${p1.position.x},${p1.position.y}`);
+      }
+
+      d.push(
+        `C${cp1x},${cp1y},${cp2x},${cp2y},${p2.position.x},${p2.position.y}`
+      );
     }
 
-    let pathD = `M ${start.x},${start.y}`;
-    
-    // First smooth curve
-    const firstCp = points[0].position;
-    pathD += ` C ${firstCp.x},${firstCp.y} ${firstCp.x},${firstCp.y} ${firstCp.x},${firstCp.y}`;
-    
-    // Subsequent smooth curves
-    for (let i = 1; i < points.length; i++) {
-      const cp = points[i].position;
-      pathD += ` S ${cp.x},${cp.y} ${cp.x},${cp.y}`;
-    }
-    
-    // Final smooth curve to end
-    pathD += ` S ${(points[points.length - 1].position.x + end.x) / 2},${(points[points.length - 1].position.y + end.y) / 2} ${end.x},${end.y}`;
-    
-    return pathD;
+    return d.join(" ");
+  };
+
+  const buildSinglePath = (points: ControlPoint[]) => {
+    if (points.length < 3) return "";
+    return catmullRomToBezier(points);
   };
 
   const updatePath = () => {
@@ -79,84 +88,103 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
     const end = getElementPosition(endId, true);
     if (!start || !end) return;
 
-    pathRef.current?.setAttribute("d", buildSinglePath(start, points, end));
+    const updatedPoints = [...points];
+    if (updatedPoints.length >= 2) {
+      updatedPoints[0].position = start;
+      updatedPoints[updatedPoints.length - 1].position = end;
+      setPoints(updatedPoints);
+    }
+
+    requestAnimationFrame(() => {
+      pathRef.current?.setAttribute("d", buildSinglePath(updatedPoints));
+    });
   };
 
   const handleDrag = (e: any, data: any, pointId: string) => {
+    if (!svgRef.current) return;
+
     const pointIndex = points.findIndex((p) => p.id === pointId);
-    if (pointIndex < 0) return;
-
-    const svgRect = svgRef.current?.getBoundingClientRect();
-    if (!svgRect) return;
-
-    // Calculate SVG coordinates
-    const svgX = data.x;
-    const svgY = data.y;
+    if (pointIndex <= 0 || pointIndex >= points.length - 1) return;
 
     const updated = [...points];
-    updated[pointIndex].position = {
-      x: svgX,
-      y: svgY,
-    };
+    updated[pointIndex].position = { x: data.x, y: data.y };
     setPoints(updated);
     updatePath();
   };
 
   const handleDragStop = (pointId: string) => {
     const pointIndex = points.findIndex((p) => p.id === pointId);
-    if (pointIndex < 0) return;
+    if (pointIndex <= 0 || pointIndex >= points.length - 1) return;
 
     const updated = [...points];
-    // Example logic to add another control point after dragging stops
-    updated.splice(pointIndex + 1, 0, {
-      id: `control-${Math.random()}`,
-      position: {
-        x:
-          (updated[pointIndex].position.x +
-            updated[Math.min(pointIndex + 1, updated.length - 1)].position.x) /
-          2,
-        y:
-          (updated[pointIndex].position.y +
-            updated[Math.min(pointIndex + 1, updated.length - 1)].position.y) /
-          2,
+    const current = updated[pointIndex];
+    const prev = updated[pointIndex - 1];
+    const next = updated[pointIndex + 1];
+
+    const newPoints = [
+      {
+        id: `control-${Math.random()}`,
+        position: {
+          x: prev.position.x + (current.position.x - prev.position.x) * 0.6,
+          y: prev.position.y + (current.position.y - prev.position.y) * 0.6,
+        },
       },
-    });
+      {
+        id: `control-${Math.random()}`,
+        position: {
+          x: current.position.x + (next.position.x - current.position.x) * 0.4,
+          y: current.position.y + (next.position.y - current.position.y) * 0.4,
+        },
+      },
+    ];
+
+    updated.splice(pointIndex, 0, newPoints[0]);
+    updated.splice(pointIndex + 2, 0, newPoints[1]);
     setPoints(updated);
     updatePath();
   };
 
   useEffect(() => {
-    if (points.length === 0) {
-      const start = getElementPosition(startId);
-      const end = getElementPosition(endId, true);
-      if (start && end) {
-        setPoints([
-          {
-            id: "control-1",
-            position: {
-              x: start.x + (end.x - start.x) / 2,
-              y: start.y + (end.y - start.y) / 2,
-            },
-          },
-        ]);
-      }
-    }
-    updatePath();
+    const start = getElementPosition(startId);
+    const end = getElementPosition(endId, true);
 
-    const observer = new MutationObserver(() => {
-      requestAnimationFrame(updatePath);
-    });
+    if (start && end) {
+      setPoints([
+        { id: "start-point", position: start },
+        {
+          id: "control-1",
+          position: {
+            x: (start.x + end.x) / 2,
+            y: (start.y + end.y) / 2,
+          },
+        },
+        { id: "end-point", position: end },
+      ]);
+    }
 
     const startEl = document.getElementById(startId);
     const endEl = document.getElementById(endId);
 
+    const observer = new MutationObserver(() => updatePath());
+    const resizeObserver = new ResizeObserver(() => updatePath());
+
     if (startEl && endEl) {
-      observer.observe(startEl, { attributes: true });
-      observer.observe(endEl, { attributes: true });
+      [startEl, endEl].forEach((el) => {
+        observer.observe(el, {
+          attributes: true,
+          characterData: true,
+          childList: true,
+          subtree: true,
+        });
+        resizeObserver.observe(el);
+      });
     }
 
-    return () => observer.disconnect();
-  }, [startId, endId]); 
+    return () => {
+      observer.disconnect();
+      resizeObserver.disconnect();
+    };
+  }, [startId, endId, scale]);
 
   return (
     <svg
@@ -169,6 +197,8 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
         height: "100%",
         overflow: "visible",
         pointerEvents: "none",
+        transform: `scale(${scale})`,
+        transformOrigin: "0 0",
       }}
     >
       <defs>
@@ -184,45 +214,38 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
         </marker>
       </defs>
 
-      {buildSinglePath(
-        getElementPosition(startId)!,
-        points,
-        getElementPosition(endId, true)!
-      ) && (
+      {points.length >= 3 && (
         <path
+          ref={pathRef}
           fill="none"
           stroke="#666"
           strokeWidth="2"
           markerEnd="url(#arrowhead)"
-          d={buildSinglePath(
-            getElementPosition(startId)!,
-            points,
-            getElementPosition(endId, true)!
-          )}
+          d={buildSinglePath(points)}
         />
       )}
 
-      {points.map((point) => {
-        return (
-          <Draggable
-            key={point.id}
-            position={{
-              x: point.position.x,
-              y: point.position.y,
-            }}
-            onDrag={(e, data) => handleDrag(e, data, point.id)}
-            onStop={() => handleDragStop(point.id)}
-          >
-            <circle
-              r={5}
-              fill="#007AFF"
-              stroke="#fff"
-              strokeWidth={2}
-              style={{ cursor: "move", pointerEvents: "auto" }}
-            />
-          </Draggable>
-        );
-      })}
+      {points.map(
+        (point, index) =>
+          index > 0 &&
+          index < points.length - 1 && (
+            <Draggable
+              key={point.id}
+              position={point.position}
+              scale={1}
+              onDrag={(e, data) => handleDrag(e, data, point.id)}
+              onStop={() => handleDragStop(point.id)}
+            >
+              <circle
+                r={5}
+                fill="#007AFF"
+                stroke="#fff"
+                strokeWidth={2}
+                style={{ cursor: "move", pointerEvents: "auto" }}
+              />
+            </Draggable>
+          )
+      )}
     </svg>
   );
 };
