@@ -14,3 +14,8 @@ export const SidebarNodeContainer = styled.div`
     background-color: #e0e0e0;
   }
 `;
+
+export const AccordionSummaryTypography = styled.p`
+  color: ${(props) => props.theme.colors.lightText};
+  font-size: 16px;
+`;

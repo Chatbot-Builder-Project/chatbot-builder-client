@@ -118,6 +118,7 @@ const Canvas: React.FC = () => {
           drop(node);
           if (node) canvasRef.current = node;
         }}
+        data-canvas="true"
         onClick={handleCanvasClick}
         onMouseDown={handleMouseDown}
         style={{
@@ -128,6 +129,7 @@ const Canvas: React.FC = () => {
           backgroundPosition: `center`,
           backgroundSize: `35px 35px`,
           position: "relative",
+          overflow: "hidden",
         }}
       >
         <div
@@ -146,9 +148,8 @@ const Canvas: React.FC = () => {
         >
           +
         </div>
-        <ArrowWrapper>
-          <NodesLayer onPositionChange={handleNodePositionChange} />
-        </ArrowWrapper>
+        <NodesLayer onPositionChange={handleNodePositionChange} />
+        <ArrowWrapper />
       </div>
     </div>
   );

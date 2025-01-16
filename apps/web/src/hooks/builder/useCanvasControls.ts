@@ -1,12 +1,15 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import { CANVAS_DIMENSIONS } from "../../components/Builder/Canvas";
 import { LEFT_SIDEBAR_WIDTH } from "../../components/Builder/LeftSidebar";
+import { useXarrow } from "react-xarrows";
 
 export const useCanvasControls = (ref: React.RefObject<HTMLDivElement>) => {
   const [scale, setScale] = useState(1);
   const ctrlRef = useRef(false);
   const draggingRef = useRef(false);
   const posRef = useRef({ x: 0, y: 0 });
+  const updateXArrow = useXarrow();
+
   const dragStartRef = useRef<{ x: number; y: number; time: number } | null>(
     null
   );
@@ -44,7 +47,7 @@ export const useCanvasControls = (ref: React.RefObject<HTMLDivElement>) => {
       const constrainedY = Math.max(Math.min(newY, maxOffsetY), -maxOffsetY);
 
       posRef.current = { x: constrainedX, y: constrainedY };
-
+      updateXArrow();
       if (ref.current) {
         ref.current.style.transform = `translate(calc(-50% + ${constrainedX}px), calc(-50% + ${constrainedY}px))`;
       }
@@ -170,9 +173,22 @@ export const useCanvasControls = (ref: React.RefObject<HTMLDivElement>) => {
     const handleWheel = (e: WheelEvent) => {
       if (draggingRef.current) return;
       e.preventDefault();
-      setScale((prevScale) =>
-        Math.min(Math.max(prevScale - e.deltaY * 0.001, MIN_SCALE), MAX_SCALE)
-      );
+
+      const isTouchpad = e.deltaMode === 0 && Math.abs(e.deltaX) !== 0;
+
+      if (e.ctrlKey) {
+        setScale((prevScale) =>
+          Math.min(Math.max(prevScale - e.deltaY * 0.01, MIN_SCALE), MAX_SCALE)
+        );
+      } else if (isTouchpad) {
+        const newX = posRef.current.x - e.deltaX / scale;
+        const newY = posRef.current.y - e.deltaY / scale;
+        updatePosition(newX, newY, scale);
+      } else {
+        setScale((prevScale) =>
+          Math.min(Math.max(prevScale - e.deltaY * 0.001, MIN_SCALE), MAX_SCALE)
+        );
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -188,10 +204,12 @@ export const useCanvasControls = (ref: React.RefObject<HTMLDivElement>) => {
       window.removeEventListener("mouseup", handleMouseUp);
       window.removeEventListener("wheel", handleWheel);
     };
-  }, [ref, updateCursor]);
+  }, [ref, updateCursor, scale, updatePosition]);
 
   return {
+    posRef,
     scale,
+    position: posRef.current,
     isCtrlPressed: ctrlRef.current,
     isWheelPressed: draggingRef.current,
     handleMouseDown,

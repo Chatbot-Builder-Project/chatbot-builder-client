@@ -1,33 +1,22 @@
-import React, { memo } from "react";
-import Xarrow, { Xwrapper } from "react-xarrows";
+import { memo } from "react";
+import { selectAllFlowLinks } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
+import { useSelector } from "react-redux";
+import ArrowConnector from "./CustomArrow";
 
-interface ArrowWrapperProps {
-  children: React.ReactNode;
-}
+const ArrowWrapper = memo(() => {
+  const flowLinks = useSelector(selectAllFlowLinks);
 
-function ArrowWrapper({ children }: ArrowWrapperProps) {
-  const connections: Array<{
-    start: string;
-    end: string;
-  }> = [];
   return (
-    <Xwrapper>
-      {children}
-      {connections.map(({ start, end }) => (
-        <Xarrow
-          key={`${start}-${end}`}
-          start={start}
-          end={end}
-          strokeWidth={3}
-          SVGcanvasProps={{
-            color: "red",
-          }}
-          color="#888"
-          path="grid"
+    <>
+      {flowLinks.map((link) => (
+        <ArrowConnector
+          key={link.info.id}
+          endId={`node-${link.targetNodeId}`}
+          startId={`node-${link.sourceNodeId}`}
         />
       ))}
-    </Xwrapper>
+    </>
   );
-}
+});
 
-export default memo(ArrowWrapper);
+export default ArrowWrapper;

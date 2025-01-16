@@ -6,22 +6,22 @@ import {
   selectSelectedNodeId,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { NodesLayerProps } from "./types";
+import Node from "../Nodes/Node";
 
 const NodesLayer: React.FC<NodesLayerProps> = ({ onPositionChange }) => {
-  const nodes = useSelector(selectNodeIds, shallowEqual);
+  const nodesIds = useSelector(selectNodeIds, shallowEqual);
   const selectedNodeId = useSelector(selectSelectedNodeId);
 
   return (
     <>
-      {nodes.map((node) => (
+      {nodesIds.map((nodeId) => (
         <BaseNode
-          key={`${node}`}
-          id={node as number}
-          isSelected={selectedNodeId === node}
+          key={`${nodeId}`}
+          id={nodeId as number}
+          render={(node) => <Node node={node} />}
+          isSelected={selectedNodeId === nodeId}
           onPositionChange={onPositionChange}
-        >
-          <div>{node}</div>
-        </BaseNode>
+        />
       ))}
     </>
   );

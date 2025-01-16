@@ -4,7 +4,7 @@ import {
   PayloadAction,
 } from "@reduxjs/toolkit";
 import { RootState } from "../../../store";
-import { NodeData, DataLink, FlowLink, BuilderState, NodeType } from "./types";
+import { NodeData, DataLink, FlowLink, BuilderState } from "./types";
 
 const nodesAdapter = createEntityAdapter<NodeData>({
   selectId: (node) => node.info.id,
@@ -27,6 +27,7 @@ const initialState: BuilderState = {
   selectedNodeId: null,
   startNodeId: 1,
   nextNodeId: 1,
+  pendingFlowLinkSourceId: null,
 };
 
 const builderSlice = createSlice({
@@ -40,6 +41,7 @@ const builderSlice = createSlice({
         ...action.payload,
         info: {
           ...action.payload.info,
+          name: `${action.payload.type}_Node_${newId}`,
           id: newId,
         },
       };
@@ -73,8 +75,35 @@ const builderSlice = createSlice({
     removeFlowLink: (state, action: PayloadAction<number>) => {
       flowLinksAdapter.removeOne(state.flowLinks, action.payload);
     },
+    updateNode: (state, action: PayloadAction<Omit<NodeData, "visual">>) => {
+      const node = state.nodes.entities[action.payload.info.id];
+      if (node) {
+        const visual = node.visual;
+        nodesAdapter.updateOne(state.nodes, {
+          id: action.payload.info.id,
+          changes: { ...action.payload, visual },
+        });
+      }
+    },
     setStartNode: (state, action: PayloadAction<number>) => {
       state.startNodeId = action.payload;
+    },
+    setPendingFlowLinkSource: (state, action: PayloadAction<number | null>) => {
+      state.pendingFlowLinkSourceId = action.payload;
+    },
+    createFlowLink: (state, action: PayloadAction<number>) => {
+      if (state.pendingFlowLinkSourceId) {
+        const newLink: FlowLink = {
+          info: {
+            id: state.nextNodeId++,
+            name: `FlowLink_${state.nextNodeId}`,
+          },
+          sourceNodeId: state.pendingFlowLinkSourceId,
+          targetNodeId: action.payload,
+        };
+        flowLinksAdapter.addOne(state.flowLinks, newLink);
+        state.pendingFlowLinkSourceId = null;
+      }
     },
   },
 });
@@ -97,6 +126,9 @@ export const selectSelectedNodeId = (state: RootState) =>
 export const selectStartNodeId = (state: RootState) =>
   state.builder.startNodeId;
 
+export const selectPendingFlowLinkSourceId = (state: RootState) =>
+  state.builder.pendingFlowLinkSourceId;
+
 export const {
   addNode,
   updateNodePosition,
@@ -107,6 +139,9 @@ export const {
   addFlowLink,
   removeFlowLink,
   setStartNode,
+  updateNode,
+  setPendingFlowLinkSource,
+  createFlowLink,
 } = builderSlice.actions;
 
 export default builderSlice.reducer;

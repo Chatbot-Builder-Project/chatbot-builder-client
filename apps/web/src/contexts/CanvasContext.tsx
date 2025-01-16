@@ -4,6 +4,7 @@ import { useCanvasControls } from "../hooks/builder";
 interface CanvasContextType {
   canvasRef: React.MutableRefObject<HTMLDivElement | null>;
   scale: number;
+  posRef: React.MutableRefObject<{ x: number; y: number }>;
   isCtrlPressed: boolean;
   isWheelPressed: boolean;
   handleMouseDown: (e: React.MouseEvent) => void;

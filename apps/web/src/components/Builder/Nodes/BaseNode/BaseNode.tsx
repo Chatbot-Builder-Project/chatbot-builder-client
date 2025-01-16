@@ -1,6 +1,6 @@
 import { useRef, memo } from "react";
 import { useDrag } from "react-dnd";
-import { NodeContainer } from "./BaseNode.styles";
+import { BaseNodeContainer } from "./BaseNode.styles";
 import { useXarrow } from "react-xarrows";
 import { NodeData } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 import { BaseNodeProps } from "./types";
@@ -11,17 +11,12 @@ import {
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { RootState } from "@chatbot-builder/store/store";
 
-function BaseNode({
-  id,
-  children,
-  onPositionChange,
-  isSelected,
-}: BaseNodeProps) {
+function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
   const updateXArrow = useXarrow();
-  const data = useSelector((state: RootState) => selectNodeById(state, id));
+  const node = useSelector((state: RootState) => selectNodeById(state, id));
   const nodeRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
-
+  console.log("123123");
   const [{ isDragging }, drag] = useDrag<
     NodeData,
     { x: number; y: number },
@@ -43,7 +38,7 @@ function BaseNode({
       }
 
       return {
-        ...data!,
+        ...node!,
         nodeWidth: nodeElement?.offsetWidth ?? 0,
         nodeHeight: nodeElement?.offsetHeight ?? 0,
         mouseOffset,
@@ -58,8 +53,8 @@ function BaseNode({
     }),
     end: (_item, monitor) => {
       const dropResult = monitor.getDropResult();
-      if (dropResult && onPositionChange && data) {
-        onPositionChange(data.info.id, dropResult.x, dropResult.y);
+      if (dropResult && onPositionChange && node) {
+        onPositionChange(node.info.id, dropResult.x, dropResult.y);
       }
     },
   }));
@@ -68,10 +63,11 @@ function BaseNode({
     e.stopPropagation();
     dispatch(setSelectedNode(id));
   };
+  if (!node) return null;
 
   return (
-    <NodeContainer
-      id={id?.toString()}
+    <BaseNodeContainer
+      id={`node-${id}`}
       ref={(node) => {
         nodeRef.current = node;
         drag(node);
@@ -79,12 +75,12 @@ function BaseNode({
       $isSelected={isSelected}
       onClick={handleNodeClick}
       onDragEnd={updateXArrow}
-      $x={data?.visual.x || 0}
-      $y={data?.visual.y || 0}
+      $x={node?.visual.x || 0}
+      $y={node?.visual.y || 0}
       $isDragging={isDragging}
     >
-      {children}
-    </NodeContainer>
+      {render && render(node)}
+    </BaseNodeContainer>
   );
 }
 

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const NodeContainer = styled.div<{
+export const BaseNodeContainer = styled.div<{
   $x: number;
   $y: number;
   $isDragging: boolean;
@@ -19,5 +19,5 @@ export const NodeContainer = styled.div<{
       : `border: 2px solid transparent;`}
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
   background-color: ${(props) => props.theme.colors.nodeBackground};
-  border-radius: 10px;
+  border-radius: 99px;
 `;

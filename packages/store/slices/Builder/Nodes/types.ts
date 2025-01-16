@@ -87,4 +87,5 @@ export interface BuilderState {
   selectedNodeId: number | null;
   startNodeId: number | null;
   nextNodeId: number;
+  pendingFlowLinkSourceId: number | null;
 }

@@ -2,6 +2,12 @@ import {
   NodeType,
   NodeTemplates,
 } from "@chatbot-builder/store/slices/Builder/Nodes/types";
+import {
+  IconRoute,
+  IconDatabaseExport,
+  IconSwitch2,
+  IconPrompt,
+} from "@tabler/icons-react";
 
 export const NODES: NodeTemplates = {
   [NodeType.Interaction]: {
@@ -59,4 +65,11 @@ export const NODES: NodeTemplates = {
     },
     inputPorts: [],
   },
+};
+
+export const NODES_ICONS = {
+  [NodeType.Interaction]: <IconRoute />,
+  [NodeType.Static]: <IconDatabaseExport />,
+  [NodeType.Switch]: <IconSwitch2 />,
+  [NodeType.Prompt]: <IconPrompt />,
 };
