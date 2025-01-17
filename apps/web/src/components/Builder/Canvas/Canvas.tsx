@@ -1,6 +1,6 @@
 import {
   setSelectedNode,
-  updateNodePosition,
+  updateNodeVisual,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import React, { useCallback, useMemo } from "react";
 import { useDrop } from "react-dnd";
@@ -11,6 +11,7 @@ import { clamp } from "lodash";
 import NodesLayer from "./NodesLayer";
 import { ArrowWrapper } from "../ArrowWrapper";
 import { useCanvas } from "../../../contexts/CanvasContext";
+import { NodeVisual } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 
 const Canvas: React.FC = () => {
   const dispatch = useDispatch();
@@ -61,8 +62,13 @@ const Canvas: React.FC = () => {
   );
 
   const handleNodePositionChange = useCallback(
-    (id: number, x: number, y: number) => {
-      dispatch(updateNodePosition({ id, x, y }));
+    (id: number, visual: NodeVisual) => {
+      dispatch(
+        updateNodeVisual({
+          id,
+          visual: visual,
+        })
+      );
     },
     [dispatch]
   );
@@ -80,12 +86,10 @@ const Canvas: React.FC = () => {
       ) => {
         const clientOffset = monitor.getClientOffset();
         if (!clientOffset) return;
-        const dropPosition = calculateDropPosition(clientOffset, item);
-
-        return dropPosition;
+        return calculateDropPosition(clientOffset, item);
       },
     }),
-    [calculateDropPosition, handleNodePositionChange]
+    [calculateDropPosition]
   );
 
   const canvasStyle = useMemo(
@@ -118,6 +122,7 @@ const Canvas: React.FC = () => {
           drop(node);
           if (node) canvasRef.current = node;
         }}
+        id="canvas"
         data-canvas="true"
         onClick={handleCanvasClick}
         onMouseDown={handleMouseDown}

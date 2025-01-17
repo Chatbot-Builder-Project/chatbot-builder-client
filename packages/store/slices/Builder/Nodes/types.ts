@@ -18,17 +18,21 @@ interface Port {
   dataType: string;
 }
 
+export interface NodeVisual {
+  x?: number;
+  y?: number;
+  width?: number;
+  height?: number;
+}
+
 interface BaseNode {
   type: NodeType;
   info: BaseInfo;
-  visual: {
-    x: number;
-    y: number;
-  };
+  visual: NodeVisual;
 }
 
-export type NodeTemplate<T extends NodeData> = Omit<T, 'info'> & {
-  info: { id: 0; name: '' };
+export type NodeTemplate<T extends NodeData> = Omit<T, "info"> & {
+  info: { id: 0; name: "" };
 };
 
 export type NodeTemplates = {
@@ -74,10 +78,23 @@ export interface DataLink {
   targetPortId: number;
 }
 
+interface Point {
+  x: number;
+  y: number;
+}
+
+export interface ControlPoint {
+  id: string;
+  position: Point;
+}
+
 export interface FlowLink {
   info: BaseInfo;
   sourceNodeId: number;
   targetNodeId: number;
+  visual?: {
+    points: ControlPoint[];
+  };
 }
 
 export interface BuilderState {

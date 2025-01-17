@@ -11,6 +11,7 @@ const ArrowWrapper = memo(() => {
       {flowLinks.map((link) => (
         <ArrowConnector
           key={link.info.id}
+          linkId={link.info.id}
           endId={`node-${link.targetNodeId}`}
           startId={`node-${link.sourceNodeId}`}
         />

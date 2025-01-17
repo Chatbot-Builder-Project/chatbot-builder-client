@@ -4,7 +4,14 @@ import {
   PayloadAction,
 } from "@reduxjs/toolkit";
 import { RootState } from "../../../store";
-import { NodeData, DataLink, FlowLink, BuilderState } from "./types";
+import {
+  NodeData,
+  DataLink,
+  FlowLink,
+  BuilderState,
+  ControlPoint,
+  NodeVisual,
+} from "./types";
 
 const nodesAdapter = createEntityAdapter<NodeData>({
   selectId: (node) => node.info.id,
@@ -47,14 +54,14 @@ const builderSlice = createSlice({
       };
       nodesAdapter.addOne(state.nodes, newNode);
     },
-    updateNodePosition: (
+    updateNodeVisual: (
       state,
-      action: PayloadAction<{ id: number; x: number; y: number }>
+      action: PayloadAction<{ id: number; visual: NodeVisual }>
     ) => {
-      const { id, x, y } = action.payload;
+      const { id, visual } = action.payload;
       const node = state.nodes.entities[id];
       if (node) {
-        node.visual = { x, y };
+        node.visual = { ...node.visual, ...visual };
       }
     },
     removeNode: (state, action: PayloadAction<number>) => {
@@ -100,10 +107,25 @@ const builderSlice = createSlice({
           },
           sourceNodeId: state.pendingFlowLinkSourceId,
           targetNodeId: action.payload,
+          visual: {
+            points: [],
+          },
         };
         flowLinksAdapter.addOne(state.flowLinks, newLink);
         state.pendingFlowLinkSourceId = null;
       }
+    },
+    updateFlowLinkPoints: (
+      state,
+      action: PayloadAction<{ linkId: number; points: ControlPoint[] }>
+    ) => {
+      const { linkId, points } = action.payload;
+      flowLinksAdapter.updateOne(state.flowLinks, {
+        id: linkId,
+        changes: {
+          visual: { points },
+        },
+      });
     },
   },
 });
@@ -131,7 +153,7 @@ export const selectPendingFlowLinkSourceId = (state: RootState) =>
 
 export const {
   addNode,
-  updateNodePosition,
+  updateNodeVisual,
   removeNode,
   setSelectedNode,
   addDataLink,
@@ -142,6 +164,7 @@ export const {
   updateNode,
   setPendingFlowLinkSource,
   createFlowLink,
+  updateFlowLinkPoints,
 } = builderSlice.actions;
 
 export default builderSlice.reducer;

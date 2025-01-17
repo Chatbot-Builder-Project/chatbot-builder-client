@@ -1,7 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Draggable, { DraggableEvent } from "react-draggable";
+import {
+  updateFlowLinkPoints,
+  selectFlowLinkById,
+  selectNodeById,
+} from "@chatbot-builder/store/slices/Builder/Nodes/slice";
+import { RootState } from "@chatbot-builder/store/store";
 import { useCanvas } from "../../../contexts/CanvasContext";
-import { cloneDeep } from "lodash";
 
 interface Point {
   x: number;
@@ -16,31 +22,47 @@ interface ControlPoint {
 interface ArrowConnectorProps {
   startId: string;
   endId: string;
+  linkId: number;
 }
 
-const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
-  const { canvasRef, scale } = useCanvas();
+const ArrowConnector: React.FC<ArrowConnectorProps> = ({
+  startId,
+  endId,
+  linkId,
+}) => {
+  const dispatch = useDispatch();
+  const { scale } = useCanvas();
   const pathRef = useRef<SVGPathElement>(null);
-  const [points, setPoints] = useState<ControlPoint[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  const getElementPosition = (
-    elementId: string,
-    isOnLeft?: boolean
-  ): Point | null => {
-    if (!canvasRef.current) return null;
-    const element = document.getElementById(elementId);
-    if (!element) return null;
+  const flowLink = useSelector((state: RootState) =>
+    selectFlowLinkById(state, linkId)
+  );
+  const sourceNode = useSelector((state: RootState) =>
+    selectNodeById(state, parseInt(startId.replace("node-", "")))
+  );
+  const targetNode = useSelector((state: RootState) =>
+    selectNodeById(state, parseInt(endId.replace("node-", "")))
+  );
+  const points = flowLink?.visual?.points || [];
 
-    const canvasRect = canvasRef.current.getBoundingClientRect();
-    const elementRect = element.getBoundingClientRect();
+  const nodePositions = useMemo(() => {
+    if (!sourceNode?.visual || !targetNode?.visual) return null;
 
     return {
-      x:
-        ((isOnLeft ? elementRect.left : elementRect.right) - canvasRect.left) /
-        scale,
-      y: (elementRect.top - canvasRect.top + elementRect.height / 2) / scale,
+      start: {
+        x: sourceNode.visual.x + (sourceNode.visual.width || 0),
+        y: sourceNode.visual.y + (sourceNode.visual.height || 0) / 2,
+      },
+      end: {
+        x: targetNode.visual.x,
+        y: targetNode.visual.y + (targetNode.visual.height || 0) / 2,
+      },
     };
+  }, [sourceNode?.visual, targetNode?.visual]);
+
+  const updatePoints = (newPoints: ControlPoint[]) => {
+    dispatch(updateFlowLinkPoints({ linkId, points: newPoints }));
   };
 
   const catmullRomToBezier = (
@@ -82,22 +104,24 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
     return catmullRomToBezier(points);
   };
 
-  const updatePath = () => {
-    const start = getElementPosition(startId);
-    const end = getElementPosition(endId, true);
-    if (!start || !end) return;
+  useEffect(() => {
+    if (!nodePositions) return;
 
-    const updatedPoints = cloneDeep(points);
-    if (updatedPoints.length >= 2) {
-      updatedPoints[0].position = start;
-      updatedPoints[updatedPoints.length - 1].position = end;
-      setPoints(updatedPoints);
+    if (points.length >= 2) {
+      const updatedPoints = points.map((point, index) => {
+        if (index === 0) return { ...point, position: nodePositions.start };
+        if (index === points.length - 1)
+          return { ...point, position: nodePositions.end };
+        return point;
+      });
+      updatePoints(updatedPoints);
+    } else {
+      updatePoints([
+        { id: "start-point", position: nodePositions.start },
+        { id: "end-point", position: nodePositions.end },
+      ]);
     }
-
-    requestAnimationFrame(() => {
-      pathRef.current?.setAttribute("d", buildSinglePath(updatedPoints));
-    });
-  };
+  }, [nodePositions]);
 
   function distanceToSegment(
     px: number,
@@ -152,68 +176,31 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
   }
 
   const createNewPoint = (e: React.MouseEvent<SVGPathElement>) => {
-    if (!svgRef.current || !canvasRef.current) return;
+    if (!svgRef.current) return;
     const svgRect = svgRef.current.getBoundingClientRect();
     const x = (e.clientX - svgRect.left) / scale;
     const y = (e.clientY - svgRect.top) / scale;
 
-    setPoints((prev) => {
-      const segmentIndex = findClosestSegmentIndex(prev, x, y);
-      const newPoints = [...prev];
-      newPoints.splice(segmentIndex + 1, 0, {
-        id: `point-${Date.now()}`,
-        position: { x, y },
-      });
-      return newPoints;
+    const segmentIndex = findClosestSegmentIndex(points, x, y);
+    const newPoints = [...points];
+    newPoints.splice(segmentIndex + 1, 0, {
+      id: `point-${Date.now()}`,
+      position: { x, y },
     });
+    updatePoints(newPoints);
   };
 
   const handleDrag = (_: DraggableEvent, data: Point, pointId: string) => {
     if (!svgRef.current) return;
 
     const pointIndex = points.findIndex((p) => p.id === pointId);
-    if (pointIndex < 0) return; // Allow all points to be moved, including first or last
+    if (pointIndex < 0) return;
 
-    const updated = [...points];
-    updated[pointIndex].position = { x: data.x, y: data.y };
-    setPoints(updated);
+    const updated = points.map((p, index) =>
+      index === pointIndex ? { ...p, position: { x: data.x, y: data.y } } : p
+    );
+    updatePoints(updated);
   };
-
-  useEffect(() => {
-    const start = getElementPosition(startId);
-    const end = getElementPosition(endId, true);
-
-    if (start && end) {
-      setPoints([
-        { id: "start-point", position: start },
-        { id: "end-point", position: end },
-      ]);
-    }
-
-    const startEl = document.getElementById(startId);
-    const endEl = document.getElementById(endId);
-
-    const observer = new MutationObserver(() => updatePath());
-    const resizeObserver = new ResizeObserver(() => updatePath());
-
-    if (startEl && endEl) {
-      [startEl, endEl].forEach((el) => {
-        observer.observe(el, {
-          attributes: true,
-          characterData: true,
-          childList: true,
-          subtree: true,
-        });
-        resizeObserver.observe(el);
-      });
-    }
-
-    return () => {
-      observer.disconnect();
-      resizeObserver.disconnect();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startId, endId, scale]);
 
   return (
     <svg
@@ -225,9 +212,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
         width: "100%",
         height: "100%",
         overflow: "visible",
-        // Change pointerEvents to "auto" so clicking is enabled
         pointerEvents: "auto",
-        transform: `scale(${scale})`,
         transformOrigin: "0 0",
       }}
     >
@@ -263,7 +248,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
             key={point.id}
             position={point.position}
             onDrag={(e, data) => handleDrag(e, data, point.id)}
-            scale={1}
+            scale={scale}
           >
             <circle
               r={5}
@@ -279,4 +264,4 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
   );
 };
 
-export default ArrowConnector;
+export default React.memo(ArrowConnector);

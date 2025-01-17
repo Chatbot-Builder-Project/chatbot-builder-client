@@ -1,18 +1,17 @@
-import { useRef, memo } from "react";
+import { useRef, memo, useEffect } from "react";
 import { useDrag } from "react-dnd";
 import { BaseNodeContainer } from "./BaseNode.styles";
-import { useXarrow } from "react-xarrows";
 import { NodeData } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 import { BaseNodeProps } from "./types";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectNodeById,
   setSelectedNode,
+  updateNodeVisual, // Update import
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { RootState } from "@chatbot-builder/store/store";
 
 function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
-  const updateXArrow = useXarrow();
   const node = useSelector((state: RootState) => selectNodeById(state, id));
   const nodeRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
@@ -54,10 +53,24 @@ function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
     end: (_item, monitor) => {
       const dropResult = monitor.getDropResult();
       if (dropResult && onPositionChange && node) {
-        onPositionChange(node.info.id, dropResult.x, dropResult.y);
+        onPositionChange(node.info.id, { x: dropResult.x, y: dropResult.y });
       }
     },
   }));
+
+  useEffect(() => {
+    if (node && nodeRef && nodeRef.current?.offsetWidth) {
+      dispatch(
+        updateNodeVisual({
+          id: node.info.id,
+          visual: {
+            width: nodeRef.current?.offsetWidth,
+            height: nodeRef.current?.offsetHeight,
+          },
+        })
+      );
+    }
+  }, [dispatch, nodeRef.current]);
 
   const handleNodeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -74,7 +87,6 @@ function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
       }}
       $isSelected={isSelected}
       onClick={handleNodeClick}
-      onDragEnd={updateXArrow}
       $x={node?.visual.x || 0}
       $y={node?.visual.y || 0}
       $isDragging={isDragging}
