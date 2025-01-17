@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Draggable, { DraggableEvent } from "react-draggable";
 import {
@@ -7,7 +7,6 @@ import {
   selectNodeById,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { RootState } from "@chatbot-builder/store/store";
-import { useCanvas } from "../../../contexts/CanvasContext";
 
 interface Point {
   x: number;
@@ -31,9 +30,41 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
   linkId,
 }) => {
   const dispatch = useDispatch();
-  const { scale } = useCanvas();
   const pathRef = useRef<SVGPathElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const lastCreatedPointRef = useRef<string | null>(null);
+  const [scale, setScale] = useState<number>(1);
+
+  // Add effect to watch canvas zoom changes
+  useEffect(() => {
+    const updateScale = () => {
+      const canvasElement = document.getElementById("canvas");
+      const zoomValue = canvasElement?.style.zoom;
+      setScale(zoomValue ? Number(zoomValue) : 1);
+    };
+
+    // Initial scale
+    updateScale();
+
+    // Create MutationObserver to watch for style changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "style") {
+          updateScale();
+        }
+      });
+    });
+
+    const canvasElement = document.getElementById("canvas");
+    if (canvasElement) {
+      observer.observe(canvasElement, {
+        attributes: true,
+        attributeFilter: ["style"],
+      });
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const flowLink = useSelector((state: RootState) =>
     selectFlowLinkById(state, linkId)
@@ -47,7 +78,15 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
   const points = flowLink?.visual?.points || [];
 
   const nodePositions = useMemo(() => {
-    if (!sourceNode?.visual || !targetNode?.visual) return null;
+    if (
+      !sourceNode?.visual ||
+      !targetNode?.visual ||
+      !sourceNode.visual.x ||
+      !sourceNode.visual.y ||
+      !targetNode.visual.y ||
+      !targetNode.visual.x
+    )
+      return null;
 
     return {
       start: {
@@ -175,22 +214,43 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
     return index;
   }
 
-  const createNewPoint = (e: React.MouseEvent<SVGPathElement>) => {
+  const handlePathMouseDown = (e: React.MouseEvent<SVGPathElement>) => {
     if (!svgRef.current) return;
     const svgRect = svgRef.current.getBoundingClientRect();
     const x = (e.clientX - svgRect.left) / scale;
     const y = (e.clientY - svgRect.top) / scale;
 
     const segmentIndex = findClosestSegmentIndex(points, x, y);
+    const newPointId = `point-${Date.now()}`;
     const newPoints = [...points];
     newPoints.splice(segmentIndex + 1, 0, {
-      id: `point-${Date.now()}`,
+      id: newPointId,
       position: { x, y },
     });
+    lastCreatedPointRef.current = newPointId;
     updatePoints(newPoints);
+
+    // Wait for the next tick to ensure the point is rendered
+    setTimeout(() => {
+      const pointElement = document.querySelector(
+        `[data-point-id="${newPointId}"]`
+      );
+      if (pointElement) {
+        const mouseDownEvent = new MouseEvent("mousedown", {
+          clientX: e.clientX,
+          clientY: e.clientY,
+          bubbles: true,
+        });
+        pointElement.dispatchEvent(mouseDownEvent);
+      }
+    }, 0);
   };
 
-  const handleDrag = (_: DraggableEvent, data: Point, pointId: string) => {
+  const handleDrag = (
+    e: DraggableEvent,
+    data: { x: number; y: number },
+    pointId: string
+  ) => {
     if (!svgRef.current) return;
 
     const pointIndex = points.findIndex((p) => p.id === pointId);
@@ -201,7 +261,6 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
     );
     updatePoints(updated);
   };
-
   return (
     <svg
       ref={svgRef}
@@ -219,13 +278,13 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
       <defs>
         <marker
           id="arrowhead"
-          markerWidth="10"
-          markerHeight="7"
-          refX="9"
-          refY="3.5"
+          markerWidth="4"
+          markerHeight="4"
+          refX="3"
+          refY="2"
           orient="auto"
         >
-          <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+          <polygon points="0 0, 4 2, 0 4" fill="#666" />
         </marker>
       </defs>
 
@@ -237,8 +296,8 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
           strokeWidth="5"
           markerEnd="url(#arrowhead)"
           d={buildSinglePath(points)}
-          style={{ cursor: "crosshair	", pointerEvents: "auto" }}
-          onMouseDown={createNewPoint}
+          style={{ cursor: "crosshair", pointerEvents: "auto" }}
+          onMouseDown={handlePathMouseDown}
         />
       )}
 
@@ -255,7 +314,8 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
               fill="#007AFF"
               stroke="#fff"
               strokeWidth={2}
-              style={{ cursor: "move", pointerEvents: "auto" }}
+              style={{ cursor: "grab", pointerEvents: "auto" }}
+              data-point-id={point.id}
             />
           </Draggable>
         )

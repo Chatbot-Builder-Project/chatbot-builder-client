@@ -15,7 +15,7 @@ function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
   const node = useSelector((state: RootState) => selectNodeById(state, id));
   const nodeRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
-  console.log("123123");
+
   const [{ isDragging }, drag] = useDrag<
     NodeData,
     { x: number; y: number },
