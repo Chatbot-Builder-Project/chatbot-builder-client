@@ -7,22 +7,8 @@ import {
   selectNodeById,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { RootState } from "@chatbot-builder/store/store";
-
-interface Point {
-  x: number;
-  y: number;
-}
-
-interface ControlPoint {
-  id: string;
-  position: Point;
-}
-
-interface ArrowConnectorProps {
-  startId: string;
-  endId: string;
-  linkId: number;
-}
+import { ControlPoint } from "@chatbot-builder/store/slices/Builder/Nodes/types";
+import { ArrowConnectorProps } from "./types";
 
 const ArrowConnector: React.FC<ArrowConnectorProps> = ({
   startId,
@@ -35,7 +21,6 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
   const lastCreatedPointRef = useRef<string | null>(null);
   const [scale, setScale] = useState<number>(1);
 
-  // Add effect to watch canvas zoom changes
   useEffect(() => {
     const updateScale = () => {
       const canvasElement = document.getElementById("canvas");
@@ -43,10 +28,8 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
       setScale(zoomValue ? Number(zoomValue) : 1);
     };
 
-    // Initial scale
     updateScale();
 
-    // Create MutationObserver to watch for style changes
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.attributeName === "style") {
@@ -230,7 +213,6 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
     lastCreatedPointRef.current = newPointId;
     updatePoints(newPoints);
 
-    // Wait for the next tick to ensure the point is rendered
     setTimeout(() => {
       const pointElement = document.querySelector(
         `[data-point-id="${newPointId}"]`

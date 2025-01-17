@@ -70,6 +70,7 @@ function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
         })
       );
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, nodeRef.current]);
 
   const handleNodeClick = (e: React.MouseEvent) => {

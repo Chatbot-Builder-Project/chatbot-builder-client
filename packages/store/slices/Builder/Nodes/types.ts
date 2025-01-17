@@ -78,7 +78,7 @@ export interface DataLink {
   targetPortId: number;
 }
 
-interface Point {
+export interface Point {
   x: number;
   y: number;
 }
