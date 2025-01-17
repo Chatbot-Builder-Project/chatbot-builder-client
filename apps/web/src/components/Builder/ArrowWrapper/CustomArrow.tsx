@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import Draggable from "react-draggable";
+import Draggable, { DraggableEvent } from "react-draggable";
 import { useCanvas } from "../../../contexts/CanvasContext";
+import { cloneDeep } from "lodash";
 
 interface Point {
   x: number;
@@ -8,7 +9,6 @@ interface Point {
 }
 
 interface ControlPoint {
-  preview?: boolean;
   id: string;
   position: Point;
 }
@@ -45,47 +45,40 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
 
   const catmullRomToBezier = (
     points: ControlPoint[],
-    tension: number = 0.5
+    tension: number = 0.4
   ): string => {
     if (points.length < 2) return "";
 
-    const nonPreviewPoints = points.filter((point) => !point.preview);
-
-    if (nonPreviewPoints.length < 2) return "";
-
     const d: string[] = [];
 
-    for (let i = 0; i < nonPreviewPoints.length - 1; i++) {
-      const p0 = i === 0 ? nonPreviewPoints[0] : nonPreviewPoints[i - 1];
-      const p1 = nonPreviewPoints[i];
-      const p2 = nonPreviewPoints[i + 1];
-      const p3 =
-        i === nonPreviewPoints.length - 2 ? p2 : nonPreviewPoints[i + 2];
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = i === 0 ? points[0] : points[i - 1];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = i === points.length - 2 ? p2 : points[i + 2];
 
-      const cp1x =
+      const b0x = p1.position.x;
+      const b0y = p1.position.y;
+      const b1x =
         p1.position.x + ((p2.position.x - p0.position.x) * tension) / 6;
-      const cp1y =
+      const b1y =
         p1.position.y + ((p2.position.y - p0.position.y) * tension) / 6;
-
-      const cp2x =
+      const b2x =
         p2.position.x - ((p3.position.x - p1.position.x) * tension) / 6;
-      const cp2y =
+      const b2y =
         p2.position.y - ((p3.position.y - p1.position.y) * tension) / 6;
+      const b3x = p2.position.x;
+      const b3y = p2.position.y;
 
-      if (i === 0) {
-        d.push(`M${p1.position.x},${p1.position.y}`);
-      }
-
-      d.push(
-        `C${cp1x},${cp1y},${cp2x},${cp2y},${p2.position.x},${p2.position.y}`
-      );
+      if (!i) d.push(`M${b0x},${b0y}`);
+      d.push(`C${b1x},${b1y},${b2x},${b2y},${b3x},${b3y}`);
     }
 
     return d.join(" ");
   };
 
   const buildSinglePath = (points: ControlPoint[]) => {
-    if (points.length < 3) return "";
+    if (points.length < 2) return "";
     return catmullRomToBezier(points);
   };
 
@@ -94,7 +87,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
     const end = getElementPosition(endId, true);
     if (!start || !end) return;
 
-    const updatedPoints = [...points];
+    const updatedPoints = cloneDeep(points);
     if (updatedPoints.length >= 2) {
       updatedPoints[0].position = start;
       updatedPoints[updatedPoints.length - 1].position = end;
@@ -106,53 +99,83 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
     });
   };
 
-  const handleDrag = (e: any, data: any, pointId: string) => {
+  function distanceToSegment(
+    px: number,
+    py: number,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ) {
+    // Simple line-segment distance function
+    const A = px - x1;
+    const B = py - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+    const dot = A * C + B * D;
+    const lenSq = C * C + D * D;
+    let param = -1;
+    if (lenSq !== 0) param = dot / lenSq;
+    let xx, yy;
+    if (param < 0) {
+      xx = x1;
+      yy = y1;
+    } else if (param > 1) {
+      xx = x2;
+      yy = y2;
+    } else {
+      xx = x1 + param * C;
+      yy = y1 + param * D;
+    }
+    const dx = px - xx;
+    const dy = py - yy;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function findClosestSegmentIndex(
+    points: ControlPoint[],
+    px: number,
+    py: number
+  ) {
+    let minDist = Infinity;
+    let index = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p1 = points[i].position;
+      const p2 = points[i + 1].position;
+      const dist = distanceToSegment(px, py, p1.x, p1.y, p2.x, p2.y);
+      if (dist < minDist) {
+        minDist = dist;
+        index = i;
+      }
+    }
+    return index;
+  }
+
+  const createNewPoint = (e: React.MouseEvent<SVGPathElement>) => {
+    if (!svgRef.current || !canvasRef.current) return;
+    const svgRect = svgRef.current.getBoundingClientRect();
+    const x = (e.clientX - svgRect.left) / scale;
+    const y = (e.clientY - svgRect.top) / scale;
+
+    setPoints((prev) => {
+      const segmentIndex = findClosestSegmentIndex(prev, x, y);
+      const newPoints = [...prev];
+      newPoints.splice(segmentIndex + 1, 0, {
+        id: `point-${Date.now()}`,
+        position: { x, y },
+      });
+      return newPoints;
+    });
+  };
+
+  const handleDrag = (_: DraggableEvent, data: Point, pointId: string) => {
     if (!svgRef.current) return;
 
     const pointIndex = points.findIndex((p) => p.id === pointId);
-    if (pointIndex <= 0 || pointIndex >= points.length - 1) return;
+    if (pointIndex < 0) return; // Allow all points to be moved, including first or last
 
     const updated = [...points];
     updated[pointIndex].position = { x: data.x, y: data.y };
-    updated[pointIndex].preview = false;
-    setPoints(updated);
-  };
-
-  const handleDragStop = (pointId: string) => {
-    const pointIndex = points.findIndex((p) => p.id === pointId);
-    if (pointIndex <= 0 || pointIndex >= points.length - 1) return;
-
-    const updated = [...points];
-    const current = updated[pointIndex];
-    const prev = updated[pointIndex - 1];
-    const next = updated[pointIndex + 1];
-
-    const newPoints = [
-      {
-        id: `control-${Math.random()}`,
-        position: {
-          x: prev.position.x + (current.position.x - prev.position.x) * 0.6,
-          y: prev.position.y + (current.position.y - prev.position.y) * 0.6,
-        },
-        preview: true,
-      },
-      {
-        id: `control-${Math.random()}`,
-        position: {
-          x: current.position.x + (next.position.x - current.position.x) * 0.4,
-          y: current.position.y + (next.position.y - current.position.y) * 0.4,
-        },
-        preview: true,
-      },
-    ];
-
-    if (!points[pointIndex - 1].preview && !points[pointIndex + 1].preview) {
-      updated.splice(pointIndex, 0, newPoints[0]);
-      updated.splice(pointIndex + 2, 0, newPoints[1]);
-    } else {
-      updated[pointIndex - 1] = newPoints[0];
-      updated[pointIndex + 1] = newPoints[1];
-    }
     setPoints(updated);
   };
 
@@ -162,16 +185,8 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
 
     if (start && end) {
       setPoints([
-        { id: "start-point", position: start, preview: false },
-        {
-          id: "control-1",
-          position: {
-            x: (start.x + end.x) / 2,
-            y: (start.y + end.y) / 2,
-          },
-          preview: true,
-        },
-        { id: "end-point", position: end, preview: false },
+        { id: "start-point", position: start },
+        { id: "end-point", position: end },
       ]);
     }
 
@@ -197,6 +212,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
       observer.disconnect();
       resizeObserver.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startId, endId, scale]);
 
   return (
@@ -209,7 +225,8 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
         width: "100%",
         height: "100%",
         overflow: "visible",
-        pointerEvents: "none",
+        // Change pointerEvents to "auto" so clicking is enabled
+        pointerEvents: "auto",
         transform: `scale(${scale})`,
         transformOrigin: "0 0",
       }}
@@ -227,37 +244,36 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({ startId, endId }) => {
         </marker>
       </defs>
 
-      {points.length >= 3 && (
+      {points.length >= 2 && (
         <path
           ref={pathRef}
           fill="none"
           stroke="#666"
-          strokeWidth="2"
+          strokeWidth="5"
           markerEnd="url(#arrowhead)"
           d={buildSinglePath(points)}
+          style={{ cursor: "crosshair	", pointerEvents: "auto" }}
+          onMouseDown={createNewPoint}
         />
       )}
 
-      {points.map(
-        (point, index) =>
-          index > 0 &&
-          index < points.length - 1 && (
-            <Draggable
-              key={point.id}
-              position={point.position}
-              scale={1}
-              onDrag={(e, data) => handleDrag(e, data, point.id)}
-              onStop={() => handleDragStop(point.id)}
-            >
-              <circle
-                r={point.preview ? 3 : 5}
-                fill={point.preview ? "#007AFF" : "#007AFF"}
-                stroke="#fff"
-                strokeWidth={2}
-                style={{ cursor: "move", pointerEvents: "auto" }}
-              />
-            </Draggable>
-          )
+      {points.map((point) =>
+        point.id === "start-point" || point.id === "end-point" ? null : (
+          <Draggable
+            key={point.id}
+            position={point.position}
+            onDrag={(e, data) => handleDrag(e, data, point.id)}
+            scale={1}
+          >
+            <circle
+              r={5}
+              fill="#007AFF"
+              stroke="#fff"
+              strokeWidth={2}
+              style={{ cursor: "move", pointerEvents: "auto" }}
+            />
+          </Draggable>
+        )
       )}
     </svg>
   );

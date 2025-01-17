@@ -20,4 +20,5 @@ export const BaseNodeContainer = styled.div<{
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
   background-color: ${(props) => props.theme.colors.nodeBackground};
   border-radius: 99px;
+  z-index: 20;
 `;
