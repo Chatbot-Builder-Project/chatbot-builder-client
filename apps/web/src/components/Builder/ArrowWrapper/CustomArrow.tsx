@@ -160,6 +160,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
         { id: "end-point", position: nodePositions.end },
       ]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodePositions]);
 
   function distanceToSegment(
@@ -170,7 +171,6 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
     x2: number,
     y2: number
   ) {
-    // Simple line-segment distance function
     const A = px - x1;
     const B = py - y1;
     const C = x2 - x1;
@@ -247,7 +247,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
   };
 
   const handleDrag = (
-    e: DraggableEvent,
+    _: DraggableEvent,
     data: { x: number; y: number },
     pointId: string
   ) => {
