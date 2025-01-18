@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo, useState } from "react";
+import React, { useRef, useMemo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Draggable, { DraggableEvent } from "react-draggable";
 import {
@@ -14,40 +14,12 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
   startId,
   endId,
   linkId,
+  svgRef,
+  scale,
 }) => {
   const dispatch = useDispatch();
   const pathRef = useRef<SVGPathElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
   const lastCreatedPointRef = useRef<string | null>(null);
-  const [scale, setScale] = useState<number>(1);
-
-  useEffect(() => {
-    const updateScale = () => {
-      const canvasElement = document.getElementById("canvas");
-      const zoomValue = canvasElement?.style.zoom;
-      setScale(zoomValue ? Number(zoomValue) : 1);
-    };
-
-    updateScale();
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === "style") {
-          updateScale();
-        }
-      });
-    });
-
-    const canvasElement = document.getElementById("canvas");
-    if (canvasElement) {
-      observer.observe(canvasElement, {
-        attributes: true,
-        attributeFilter: ["style"],
-      });
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   const flowLink = useSelector((state: RootState) =>
     selectFlowLinkById(state, linkId)
@@ -89,7 +61,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
 
   const catmullRomToBezier = (
     points: ControlPoint[],
-    tension: number = 0.4
+    tension: number = 1.3
   ): string => {
     if (points.length < 2) return "";
 
@@ -244,32 +216,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
     updatePoints(updated);
   };
   return (
-    <svg
-      ref={svgRef}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        overflow: "visible",
-        pointerEvents: "auto",
-        transformOrigin: "0 0",
-      }}
-    >
-      <defs>
-        <marker
-          id="arrowhead"
-          markerWidth="4"
-          markerHeight="4"
-          refX="3"
-          refY="2"
-          orient="auto"
-        >
-          <polygon points="0 0, 4 2, 0 4" fill="#666" />
-        </marker>
-      </defs>
-
+    <>
       {points.length >= 2 && (
         <path
           ref={pathRef}
@@ -280,6 +227,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
           d={buildSinglePath(points)}
           style={{ cursor: "crosshair", pointerEvents: "auto" }}
           onMouseDown={handlePathMouseDown}
+          onClick={() => console.log("asdasdasdasd")}
         />
       )}
 
@@ -302,7 +250,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
           </Draggable>
         )
       )}
-    </svg>
+    </>
   );
 };
 
