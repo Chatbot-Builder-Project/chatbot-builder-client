@@ -5,6 +5,9 @@ import {
   updateFlowLinkPoints,
   selectFlowLinkById,
   selectNodeById,
+  setSelected,
+  selectElementId,
+  removeFlowLink,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { RootState } from "@chatbot-builder/store/store";
 import { ControlPoint } from "@chatbot-builder/store/slices/Builder/Nodes/types";
@@ -20,6 +23,8 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
   const dispatch = useDispatch();
   const pathRef = useRef<SVGPathElement>(null);
   const lastCreatedPointRef = useRef<string | null>(null);
+  const mouseDownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const mousePositionRef = useRef<{ x: number; y: number } | null>(null);
 
   const flowLink = useSelector((state: RootState) =>
     selectFlowLinkById(state, linkId)
@@ -31,6 +36,9 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
     selectNodeById(state, parseInt(endId.replace("node-", "")))
   );
   const points = flowLink?.visual?.points || [];
+
+  const selectedId = useSelector(selectElementId);
+  const isSelected = selectedId === linkId;
 
   const nodePositions = useMemo(() => {
     if (
@@ -118,6 +126,18 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nodePositions]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Delete" && isSelected) {
+        dispatch(removeFlowLink(linkId));
+        dispatch(setSelected(null));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [dispatch, isSelected, linkId]);
+
   function distanceToSegment(
     px: number,
     py: number,
@@ -169,42 +189,87 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
     return index;
   }
 
-  const handlePathMouseDown = (e: React.MouseEvent<SVGPathElement>) => {
+  const handlePathInteraction = (e: React.MouseEvent<SVGPathElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!svgRef.current) return;
     const svgRect = svgRef.current.getBoundingClientRect();
     const x = (e.clientX - svgRect.left) / scale;
     const y = (e.clientY - svgRect.top) / scale;
 
-    const segmentIndex = findClosestSegmentIndex(points, x, y);
-    const newPointId = `point-${Date.now()}`;
-    const newPoints = [...points];
-    newPoints.splice(segmentIndex + 1, 0, {
-      id: newPointId,
-      position: { x, y },
-    });
-    lastCreatedPointRef.current = newPointId;
-    updatePoints(newPoints);
+    mousePositionRef.current = { x, y };
 
-    setTimeout(() => {
-      const pointElement = document.querySelector(
-        `[data-point-id="${newPointId}"]`
-      );
-      if (pointElement) {
-        const mouseDownEvent = new MouseEvent("mousedown", {
-          clientX: e.clientX,
-          clientY: e.clientY,
-          bubbles: true,
-        });
-        pointElement.dispatchEvent(mouseDownEvent);
+    mouseDownTimerRef.current = setTimeout(() => {
+      const segmentIndex = findClosestSegmentIndex(points, x, y);
+      const newPointId = `point-${Date.now()}`;
+      const newPoints = [...points];
+      newPoints.splice(segmentIndex + 1, 0, {
+        id: newPointId,
+        position: { x, y },
+      });
+      lastCreatedPointRef.current = newPointId;
+      updatePoints(newPoints);
+
+      setTimeout(() => {
+        const pointElement = document.querySelector(
+          `[data-point-id="${newPointId}"]`
+        );
+        if (pointElement) {
+          const mouseDownEvent = new MouseEvent("mousedown", {
+            clientX: e.clientX,
+            clientY: e.clientY,
+            bubbles: true,
+          });
+          pointElement.dispatchEvent(mouseDownEvent);
+        }
+      }, 0);
+    }, 100);
+
+    const handleMouseUp = (e: MouseEvent) => {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      if (mouseDownTimerRef.current) {
+        clearTimeout(mouseDownTimerRef.current);
+
+        if (mousePositionRef.current) {
+          const dx =
+            e.clientX - (svgRect.left + mousePositionRef.current.x * scale);
+          const dy =
+            e.clientY - (svgRect.top + mousePositionRef.current.y * scale);
+          const moved = Math.sqrt(dx * dx + dy * dy) > 5; // Small threshold for movement
+
+          if (!moved) {
+            if (isSelected) {
+              dispatch(setSelected(null));
+            } else {
+              dispatch(setSelected(linkId));
+            }
+          }
+        }
       }
-    }, 0);
+
+      mousePositionRef.current = null;
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    window.addEventListener("mouseup", handleMouseUp);
   };
 
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (mouseDownTimerRef.current) {
+        clearTimeout(mouseDownTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleDrag = (
-    _: DraggableEvent,
+    e: DraggableEvent,
     data: { x: number; y: number },
     pointId: string
   ) => {
+    e.preventDefault();
     if (!svgRef.current) return;
 
     const pointIndex = points.findIndex((p) => p.id === pointId);
@@ -221,13 +286,12 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
         <path
           ref={pathRef}
           fill="none"
-          stroke="#666"
+          stroke={isSelected ? "#007AFF" : "#666"}
           strokeWidth="5"
-          markerEnd="url(#arrowhead)"
+          markerEnd={`url(#${isSelected ? "arrowhead-selected" : "arrowhead"})`}
           d={buildSinglePath(points)}
-          style={{ cursor: "crosshair", pointerEvents: "auto" }}
-          onMouseDown={handlePathMouseDown}
-          onClick={() => console.log("asdasdasdasd")}
+          style={{ cursor: "pointer", pointerEvents: "auto" }}
+          onMouseDown={handlePathInteraction}
         />
       )}
 

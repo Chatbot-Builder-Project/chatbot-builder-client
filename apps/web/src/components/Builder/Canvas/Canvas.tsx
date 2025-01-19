@@ -1,5 +1,5 @@
 import {
-  setSelectedNode,
+  setSelected,
   updateNodeVisual,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import React, { useCallback, useMemo } from "react";
@@ -107,8 +107,24 @@ const Canvas: React.FC = () => {
     []
   );
 
-  const handleCanvasClick = useCallback(() => {
-    dispatch(setSelectedNode(null));
+  const handleCanvasClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      dispatch(setSelected(null));
+    },
+    [dispatch]
+  );
+
+  React.useEffect(() => {
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        dispatch(setSelected(null));
+      }
+    };
+
+    document.addEventListener("keydown", handleEscapeKey);
+    return () => document.removeEventListener("keydown", handleEscapeKey);
   }, [dispatch]);
 
   return (

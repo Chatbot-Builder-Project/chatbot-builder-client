@@ -39,6 +39,7 @@ const ArrowWrapper = memo(() => {
   return (
     <svg
       ref={svgRef}
+      onClick={(e) => e.stopPropagation()}
       style={{
         position: "absolute",
         top: 0,
@@ -46,7 +47,7 @@ const ArrowWrapper = memo(() => {
         width: "100%",
         height: "100%",
         overflow: "visible",
-        pointerEvents: "auto",
+        pointerEvents: "none",
         transformOrigin: "0 0",
       }}
     >
@@ -60,6 +61,16 @@ const ArrowWrapper = memo(() => {
           orient="auto"
         >
           <polygon points="0 0, 4 2, 0 4" fill="#666" />
+        </marker>
+        <marker
+          id="arrowhead-selected"
+          markerWidth="4"
+          markerHeight="4"
+          refX="3"
+          refY="2"
+          orient="auto"
+        >
+          <polygon points="0 0, 4 2, 0 4" fill="#007AFF" />
         </marker>
       </defs>
       {flowLinks.map((link) => (

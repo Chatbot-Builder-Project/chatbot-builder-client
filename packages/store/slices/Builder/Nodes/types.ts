@@ -101,7 +101,7 @@ export interface BuilderState {
   nodes: EntityState<NodeData>;
   dataLinks: EntityState<DataLink>;
   flowLinks: EntityState<FlowLink>;
-  selectedNodeId: number | null;
+  selectedId: number | null;
   startNodeId: number | null;
   nextNodeId: number;
   pendingFlowLinkSourceId: number | null;

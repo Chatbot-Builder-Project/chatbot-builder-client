@@ -1,6 +1,6 @@
 import {
   selectNodeById,
-  selectSelectedNodeId,
+  selectElementId, // Changed from selectSelectedNodeId
   updateNode,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import {
@@ -20,9 +20,10 @@ import { cloneDeep } from "lodash";
 
 const ItemConfigSidebar = () => {
   const dispatch = useDispatch();
-  const selectedNodeId = useSelector(selectSelectedNodeId);
-  const selectedNode = useSelector((state: RootState) =>
-    selectedNodeId ? selectNodeById(state, selectedNodeId) : null
+  const selectedId = useSelector(selectElementId); // Changed from selectSelectedNodeId
+  const selectedNode = useSelector(
+    (state: RootState) =>
+      selectedId ? selectNodeById(state, selectedId) : null // Changed from selectedNodeId
   );
 
   const { register, reset, watch } = useForm({

@@ -6,8 +6,9 @@ import { BaseNodeProps } from "./types";
 import { useDispatch, useSelector } from "react-redux";
 import {
   selectNodeById,
-  setSelectedNode,
-  updateNodeVisual, // Update import
+  updateNodeVisual,
+  removeNode,
+  setSelected,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { RootState } from "@chatbot-builder/store/store";
 
@@ -70,12 +71,24 @@ function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
         })
       );
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, nodeRef.current]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Delete" && isSelected) {
+        dispatch(removeNode(id));
+        dispatch(setSelected(null));
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [dispatch, id, isSelected]);
 
   const handleNodeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch(setSelectedNode(id));
+    dispatch(setSelected(id));
   };
   if (!node) return null;
 

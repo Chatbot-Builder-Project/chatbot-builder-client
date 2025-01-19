@@ -31,7 +31,7 @@ const initialState: BuilderState = {
   nodes: nodesAdapter.setAll(nodesAdapter.getInitialState(), defaultNodes),
   dataLinks: dataLinksAdapter.getInitialState(),
   flowLinks: flowLinksAdapter.getInitialState(),
-  selectedNodeId: null,
+  selectedId: null, // Combined selection
   startNodeId: 1,
   nextNodeId: 1,
   pendingFlowLinkSourceId: null,
@@ -65,10 +65,27 @@ const builderSlice = createSlice({
       }
     },
     removeNode: (state, action: PayloadAction<number>) => {
-      nodesAdapter.removeOne(state.nodes, action.payload);
+      const nodeId = action.payload;
+
+      const dataLinksToRemove = Object.values(state.dataLinks.entities)
+        .filter(
+          (link) =>
+            link?.sourcePortId === nodeId || link?.targetPortId === nodeId
+        )
+        .map((link) => link!.info.id);
+      dataLinksAdapter.removeMany(state.dataLinks, dataLinksToRemove);
+      const flowLinksToRemove = Object.values(state.flowLinks.entities)
+        .filter(
+          (link) =>
+            link?.sourceNodeId === nodeId || link?.targetNodeId === nodeId
+        )
+        .map((link) => link!.info.id);
+      flowLinksAdapter.removeMany(state.flowLinks, flowLinksToRemove);
+
+      nodesAdapter.removeOne(state.nodes, nodeId);
     },
-    setSelectedNode: (state, action: PayloadAction<number | null>) => {
-      state.selectedNodeId = action.payload;
+    setSelected: (state, action: PayloadAction<number | null>) => {
+      state.selectedId = action.payload;
     },
     addDataLink: (state, action: PayloadAction<DataLink>) => {
       dataLinksAdapter.addOne(state.dataLinks, action.payload);
@@ -142,8 +159,7 @@ export const { selectAll: selectAllDataLinks, selectById: selectDataLinkById } =
 export const { selectAll: selectAllFlowLinks, selectById: selectFlowLinkById } =
   flowLinksAdapter.getSelectors<RootState>((state) => state.builder.flowLinks);
 
-export const selectSelectedNodeId = (state: RootState) =>
-  state.builder.selectedNodeId;
+export const selectElementId = (state: RootState) => state.builder.selectedId;
 
 export const selectStartNodeId = (state: RootState) =>
   state.builder.startNodeId;
@@ -155,7 +171,7 @@ export const {
   addNode,
   updateNodeVisual,
   removeNode,
-  setSelectedNode,
+  setSelected, // Export new action
   addDataLink,
   removeDataLink,
   addFlowLink,
