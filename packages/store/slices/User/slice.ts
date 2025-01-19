@@ -13,7 +13,7 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    setUser: (_state, { payload }: PayloadAction<Required<User>>) => ({
+    setUser: (_state, { payload }: PayloadAction<User>) => ({
       // TODO: Remove this hardcoded values
       ...payload,
       isAuthenticated: true,

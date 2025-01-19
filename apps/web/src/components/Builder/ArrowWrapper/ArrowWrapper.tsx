@@ -1,7 +1,11 @@
 import { memo, useRef, useState, useEffect } from "react";
-import { selectAllFlowLinks } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
+import {
+  selectAllFlowLinks,
+  selectPendingFlowLinkSourceId,
+} from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { useSelector } from "react-redux";
 import ArrowConnector from "./CustomArrow";
+import PendingArrow from "./PendingArrow"; // Add this new import
 
 const ArrowWrapper = memo(() => {
   const flowLinks = useSelector(selectAllFlowLinks);
@@ -36,6 +40,8 @@ const ArrowWrapper = memo(() => {
     return () => observer.disconnect();
   }, []);
 
+  const pendingSourceId = useSelector(selectPendingFlowLinkSourceId);
+
   return (
     <svg
       ref={svgRef}
@@ -60,7 +66,7 @@ const ArrowWrapper = memo(() => {
           refY="2"
           orient="auto"
         >
-          <polygon points="0 0, 4 2, 0 4" fill="#666" />
+          <polygon points="0 0, 4 2, 0 4" fill="#fff" />
         </marker>
         <marker
           id="arrowhead-selected"
@@ -70,7 +76,7 @@ const ArrowWrapper = memo(() => {
           refY="2"
           orient="auto"
         >
-          <polygon points="0 0, 4 2, 0 4" fill="#007AFF" />
+          <polygon points="0 0, 4 2, 0 4" fill="#009bff" />
         </marker>
       </defs>
       {flowLinks.map((link) => (
@@ -83,6 +89,13 @@ const ArrowWrapper = memo(() => {
           scale={scale}
         />
       ))}
+      {pendingSourceId && (
+        <PendingArrow
+          sourceId={pendingSourceId}
+          svgRef={svgRef}
+          scale={scale}
+        />
+      )}
     </svg>
   );
 });

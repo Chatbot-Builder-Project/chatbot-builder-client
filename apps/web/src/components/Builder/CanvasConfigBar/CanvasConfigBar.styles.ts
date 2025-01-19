@@ -4,16 +4,16 @@ import { ActionButton } from "../../component.styles";
 export const CanvasConfigContainerBar = styled.div`
   position: absolute;
   display: flex;
-
+  z-index: 3;
   align-items: center;
+  justify-content: flex-end;
   padding: 10px;
-  top: 10px;
-  right: 20px;
+  top: 0px;
+  right: 0px;
   height: 50px;
-  width: auto;
-  // background-color: #ffffff;
-  border-radius: 20px 20px;
-  // box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+  width: 100%;
+  background-color: #111111;
+  border-bottom: 2px solid #252525;
 `;
 
 export const SaveButton = styled(ActionButton)`

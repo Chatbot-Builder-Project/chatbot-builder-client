@@ -1,4 +1,5 @@
 import {
+  setPendingFlowLinkSource,
   setSelected,
   updateNodeVisual,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
@@ -94,7 +95,7 @@ const Canvas: React.FC = () => {
 
   const canvasStyle = useMemo(
     () => ({
-      backgroundColor: "#f3f4f8",
+      backgroundColor: "#1d1d1d",
       width: CANVAS_DIMENSIONS.width,
       height: CANVAS_DIMENSIONS.height,
       position: "absolute" as const,
@@ -112,6 +113,7 @@ const Canvas: React.FC = () => {
       e.stopPropagation();
       e.preventDefault();
       dispatch(setSelected(null));
+      dispatch(setPendingFlowLinkSource(null));
     },
     [dispatch]
   );
@@ -120,6 +122,7 @@ const Canvas: React.FC = () => {
     const handleEscapeKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         dispatch(setSelected(null));
+        dispatch(setPendingFlowLinkSource(null));
       }
     };
 
@@ -145,7 +148,7 @@ const Canvas: React.FC = () => {
         style={{
           ...canvasStyle,
           backgroundImage: `
-            radial-gradient(circle at center, #d7d8db 2px, transparent 1px)
+            radial-gradient(circle at center,rgba(67, 67, 67, 0.25) 2px, transparent 1px)
             `,
           backgroundPosition: `center`,
           backgroundSize: `35px 35px`,
@@ -161,7 +164,7 @@ const Canvas: React.FC = () => {
             opacity: 0.5,
             transform: "translate(-50%, -50%)",
             fontSize: "48px",
-            color: "#d7d8db",
+            color: "#fff",
             fontWeight: "bold",
             pointerEvents: "none",
             userSelect: "none",

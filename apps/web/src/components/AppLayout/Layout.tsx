@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { isNil } from "lodash";
 import appLogo from "@chatbot-builder/client/public/assets/icons/appLogo.png";
 import {
@@ -8,6 +8,8 @@ import {
   Navbar,
   NavLinks,
   NavLink,
+  ContentsContainer,
+  Wrapper,
 } from "./Layout.styles";
 import { useUser } from "@chatbot-builder/store/slices/User";
 
@@ -20,37 +22,40 @@ type NavigationLink = {
 const navigationLinks: NavigationLink[] = [
   { path: "/", label: "Home" },
   { path: "/marketplace", label: "Marketplace" },
-  { path: "/builder", label: "Builder", isLoggedIn: true },
+  { path: "/dashboard", label: "Dashboard", isLoggedIn: true },
   { path: "/auth/login", label: "Login", isLoggedIn: false },
 ];
 
 const AppLayout: React.FC = () => {
   const { user } = useUser();
 
-  const shouldShowLink = ({ isLoggedIn }: NavigationLink) => 
-    isNil(isLoggedIn) || 
-    (isLoggedIn === user.isAuthenticated);
+  const shouldShowLink = ({ isLoggedIn }: NavigationLink) =>
+    isNil(isLoggedIn) || isLoggedIn === user.isAuthenticated;
 
   return (
     <>
       <Navbar>
-        <AppTitle>
-          <AppLogo src={appLogo} alt="app-logo" />
-          AI Builder
-        </AppTitle>
-        <NavLinks>
-          {navigationLinks
-            .filter(shouldShowLink)
-            .map(({ path, label }) => (
+        <ContentsContainer>
+          <Link to="/">
+            <AppTitle>
+              <AppLogo src={appLogo} alt="app-logo" />
+              AI Builder
+            </AppTitle>
+          </Link>
+          <NavLinks>
+            {navigationLinks.filter(shouldShowLink).map(({ path, label }) => (
               <NavLink key={path} to={path}>
                 {label}
               </NavLink>
             ))}
-        </NavLinks>
+          </NavLinks>
+        </ContentsContainer>
       </Navbar>
-      <AppContainer>
-        <Outlet />
-      </AppContainer>
+      <Wrapper>
+        <AppContainer>
+          <Outlet />
+        </AppContainer>
+      </Wrapper>
     </>
   );
 };

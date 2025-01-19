@@ -4,6 +4,7 @@ import { withProtectedPage } from "../components/withProtectedPage";
 import { Builder } from "../pages/Builder";
 import { Home } from "../pages/Home";
 import { Login } from "../pages/Login";
+import { Dashboard } from "../pages/Dashboard";
 import { NotFound } from "../pages/NotFound";
 import { Signup } from "../pages/Signup";
 import { BuilderLayout } from "../components/Builder/Layout";
@@ -16,6 +17,7 @@ const routes = [
     element: <AppLayout />,
     children: [
       { path: "/", element: <Home /> },
+      { path: "/dashboard", element: <Dashboard /> },
       { path: "*", element: <NotFound /> },
     ],
   },

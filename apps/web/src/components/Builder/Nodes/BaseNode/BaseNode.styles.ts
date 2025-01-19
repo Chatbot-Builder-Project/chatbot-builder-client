@@ -15,10 +15,11 @@ export const BaseNodeContainer = styled.div<{
   padding: 10px;
   ${(props) =>
     props.$isSelected
-      ? `border: 2px solid ${props.theme.colors.primary};`
-      : `border: 2px solid transparent;`}
+      ? `border: 3px solid ${props.theme.colors.primary};`
+      : `border: 3px solid ${props.theme.colors.dark};`}
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
   background-color: ${(props) => props.theme.colors.nodeBackground};
-  border-radius: 99px;
+  border-radius: 5px;
   z-index: 20;
+  transition: border-color 0.2s ease-in-out;
 `;

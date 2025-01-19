@@ -18,10 +18,11 @@ export const NodeTitle = styled.div`
   font-size: 16px;
   line-height: 20px;
   height: 20px;
+  color: ${(props) => props.theme.colors.lightText};
 `;
 export const NodeTypeText = styled.div`
   font-size: 12px;
-  color: #666;
+  color: ${(props) => props.theme.colors.lightText};
 `;
 
 export const Wrapper = styled.div`
@@ -30,7 +31,7 @@ export const Wrapper = styled.div`
   flex-direction: column;
 `;
 
-export const  NextNode = styled.div`
+export const NextNode = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,7 +49,6 @@ export const  NextNode = styled.div`
     background-color: ${(props) => props.theme.colors.muted};
   }
 `;
-
 
 export const PrevNode = styled.div`
   display: flex;

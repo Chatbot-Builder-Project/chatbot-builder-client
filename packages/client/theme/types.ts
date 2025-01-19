@@ -8,7 +8,10 @@ interface ThemeColors {
   primaryGradient: string;
   text: string;
   lightText: string;
+  gray: string;
+
   muted: string;
+  purple: string;
   dark: string;
   brightYellow: string;
   brightOrange: string;

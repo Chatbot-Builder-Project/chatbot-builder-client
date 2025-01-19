@@ -13,7 +13,23 @@ const GlobalStyle = createGlobalStyle`
     color: ${(props) => props.theme.colors.primary};
     line-height: 1.6;
     min-height: 100vh; 
-    overflow: hidden;
+    overflow-x: hidden;
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: ${(props) => props.theme.colors.dark};
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: ${(props) => props.theme.colors.gray};
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: ${(props) => props.theme.colors.nodeBackground};
+    }
   }
 
   button {

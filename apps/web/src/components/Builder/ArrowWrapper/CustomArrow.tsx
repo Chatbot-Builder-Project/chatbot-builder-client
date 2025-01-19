@@ -286,7 +286,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
         <path
           ref={pathRef}
           fill="none"
-          stroke={isSelected ? "#007AFF" : "#666"}
+          stroke={isSelected ? "#009bff" : "#fff"}
           strokeWidth="5"
           markerEnd={`url(#${isSelected ? "arrowhead-selected" : "arrowhead"})`}
           d={buildSinglePath(points)}
@@ -305,7 +305,7 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
           >
             <circle
               r={5}
-              fill="#007AFF"
+              fill="#009bff"
               stroke="#fff"
               strokeWidth={2}
               style={{ cursor: "grab", pointerEvents: "auto" }}

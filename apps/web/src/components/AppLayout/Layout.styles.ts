@@ -18,12 +18,30 @@ export const AppLogo = styled.img`
 `;
 
 export const AppContainer = styled.div`
+  max-width: 1400px;
+  width: 100%;
   margin-top: 4rem;
   padding: 2rem;
   background-color: ${({ theme }) => theme.colors.background};
   min-height: 100vh;
+  height: 100%;
   font-family: ${({ theme }) => theme.fonts.body};
   ${({ theme }) => theme.colors.primaryGradient};
+`;
+
+export const ContentsContainer = styled.div`
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+`;
+
+export const Wrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
 `;
 
 export const Navbar = styled.nav`
@@ -32,13 +50,15 @@ export const Navbar = styled.nav`
   justify-content: space-between;
   align-items: center;
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 150;
-  border-radius: 99px;
+  top: 0;
   width: 100%;
-  max-width: 700px;
+  // top: 20px;
+  // left: 50%;
+  // transform: translateX(-50%);
+  z-index: 150;
+  // border-radius: 99px;
+  width: 100%;
+  // max-width: 700px;
   padding: 1rem 2rem;
   background-color: ${({ theme }) => theme.colors.dark};
   color: ${({ theme }) => theme.colors.lightText};
