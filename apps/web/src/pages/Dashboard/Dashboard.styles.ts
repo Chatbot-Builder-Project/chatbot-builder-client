@@ -30,13 +30,52 @@ export const StatisticsSection = styled.aside`
   border-radius: 8px;
   animation: ${fadeIn} 0.6s ease-out;
   color: ${({ theme }) => theme.colors.lightText};
+  display: flex;
+  flex-direction: column;
+
   h2 {
-    margin-bottom: ${({ theme }) => theme.spacing.md};
+    font-size: ${({ theme }) => theme.fontSizes.medium};
+    color: ${({ theme }) => theme.colors.lightText};
+    margin-bottom: ${({ theme }) => theme.spacing.sm};
   }
 
   div {
     margin: ${({ theme }) => theme.spacing.sm} 0;
   }
+`;
+
+export const StatItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.md};
+  background: ${({ theme }) => theme.colors.secondaryBackground};
+  border-radius: 8px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateX(4px);
+    background: ${({ theme }) => theme.colors.nodeBackground};
+  }
+
+  svg {
+    padding: ${({ theme }) => theme.spacing.xs};
+    background: ${({ theme }) => theme.colors.primary}11;
+    border-radius: 8px;
+  }
+`;
+
+export const StatValue = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.large};
+  font-weight: bold;
+  color: ${({ theme }) => theme.colors.primary};
+  line-height: 1;
+`;
+
+export const StatLabel = styled.div`
+  font-size: ${({ theme }) => theme.fontSizes.small};
+  color: ${({ theme }) => theme.colors.lightText};
+  opacity: 0.8;
+  margin-top: ${({ theme }) => theme.spacing.xs};
 `;
 
 export const MainContent = styled.main`

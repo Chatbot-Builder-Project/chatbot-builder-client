@@ -1,4 +1,4 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import { isNil } from "lodash";
 import appLogo from "@chatbot-builder/client/public/assets/icons/appLogo.png";
 import {
@@ -28,10 +28,10 @@ const navigationLinks: NavigationLink[] = [
 
 const AppLayout: React.FC = () => {
   const { user } = useUser();
-
+  const location = useLocation();
   const shouldShowLink = ({ isLoggedIn }: NavigationLink) =>
     isNil(isLoggedIn) || isLoggedIn === user.isAuthenticated;
-
+  console.log(location.pathname);
   return (
     <>
       <Navbar>
@@ -44,7 +44,11 @@ const AppLayout: React.FC = () => {
           </Link>
           <NavLinks>
             {navigationLinks.filter(shouldShowLink).map(({ path, label }) => (
-              <NavLink key={path} to={path}>
+              <NavLink
+                key={path}
+                to={path}
+                isActive={location.pathname === path}
+              >
                 {label}
               </NavLink>
             ))}

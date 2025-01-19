@@ -71,10 +71,13 @@ export const NavLinks = styled.div`
   font-weight: 600;
 `;
 
-export const NavLink = styled(Link)`
+export const NavLink = styled(Link)<{ isActive: boolean }>`
   color: ${({ theme }) => theme.colors.lightText};
   text-decoration: none;
   transition: color 0.2s ease-in-out;
+  font-size: ${({ theme }) => theme.fontSizes.medium};
+  color: ${({ theme, isActive }) =>
+    isActive ? theme.colors.primary : theme.colors.lightText};
 
   &:hover {
     color: ${({ theme }) => theme.colors.muted};

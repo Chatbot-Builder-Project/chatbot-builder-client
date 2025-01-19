@@ -10,14 +10,19 @@ import {
   SettingsButton,
   PopupMenuItem,
   PopupContainer,
+  StatItem,
+  StatValue,
+  StatLabel,
 } from "./Dashboard.styles";
 import {
   IconSearch,
   IconSettings,
-  IconBuildingFactory,
   IconEdit,
   IconTrash,
   IconTools,
+  IconMessageCircle2,
+  IconRobot,
+  IconMessages,
 } from "@tabler/icons-react";
 import { Popover } from "@mui/material";
 import { useState } from "react";
@@ -36,10 +41,28 @@ const Dashboard = () => {
   return (
     <DashboardContainer>
       <StatisticsSection>
-        <h2>Statistics</h2>
-        <div>Total Chats: 150</div>
-        <div>Active Bots: 3</div>
-        <div>Messages Today: 247</div>
+        <h2>General Statistics</h2>
+        <StatItem>
+          <IconMessageCircle2 size={32} color="#009bff" />
+          <div>
+            <StatValue>150</StatValue>
+            <StatLabel>Total Chats</StatLabel>
+          </div>
+        </StatItem>
+        <StatItem>
+          <IconRobot size={32} color="#009bff" />
+          <div>
+            <StatValue>3</StatValue>
+            <StatLabel>Active Bots</StatLabel>
+          </div>
+        </StatItem>
+        <StatItem>
+          <IconMessages size={32} color="#009bff" />
+          <div>
+            <StatValue>247</StatValue>
+            <StatLabel>Messages Today</StatLabel>
+          </div>
+        </StatItem>
       </StatisticsSection>
 
       <MainContent>
