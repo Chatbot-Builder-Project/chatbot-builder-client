@@ -1,0 +1,173 @@
+{
+  "name": "Restaurant Worfklow",
+  "description": "A simple restaurant chatbot with Menu and CustomerSupport options",
+  "graph": {
+    "startNodeId": 1,
+    "nodes": [
+      {
+        "Type": "Interaction",
+        "info": { "id": 1, "name": "WelcomeInteraction" },
+        "visual": { "x": 0, "y": 0 },
+        "textInputPort": {
+          "info": { "id": 2, "name": "WelcomeInteractionInput" },
+          "visual": { "x": 0, "y": 0 },
+          "nodeId": 1,
+          "dataType": "Text"
+        },
+        "outputEnumId": 8,
+        "optionOutputPort": {
+          "info": { "id": 3, "name": "WelcomeInteractionOutput" },
+          "visual": { "x": 0, "y": 0 },
+          "nodeId": 1,
+          "dataType": "Option"
+        },
+        "outputOptionMetas": {
+          "Menu": { "Description": "Explore our diverse menu!" },
+          "CustomerSupport": { "Description": "Reach our customer support." }
+        }
+      },
+      {
+        "Type": "Static",
+        "info": { "id": 4, "name": "WelcomeText" },
+        "visual": { "x": 0, "y": 0 },
+        "data": {
+          "type": "Text",
+          "text": "Welcome to our restaurant!\nPlease choose one of the options."
+        },
+        "outputPort": {
+          "info": { "id": 5, "name": "WelcomeTextOutput" },
+          "visual": { "x": 0, "y": 0 },
+          "nodeId": 4,
+          "dataType": "Text"
+        }
+      },
+      {
+        "Type": "Switch",
+        "info": { "id": 9, "name": "WelcomeSwitch" },
+        "visual": { "x": 0, "y": 0 },
+        "enumId": 8,
+        "inputPort": {
+          "info": { "id": 10, "name": "WelcomeSwitchInput" },
+          "visual": { "x": 0, "y": 0 },
+          "nodeId": 9,
+          "dataType": "Option"
+        },
+        "optionFlowLinkIds": { "Menu": 12, "CustomerSupport": 13 }
+      },
+      {
+        "Type": "Prompt",
+        "info": { "id": 14, "name": "MenuPrompt" },
+        "visual": { "x": 0, "y": 0 },
+        "template": "# The Gourmet Spot\n\n## Starters\n- **Garlic Bread (4 pcs)** - $5.99  \n- **Tomato Basil Soup** - $6.49  \n- **Crispy Calamari with Lemon Aioli** - $9.99  \n\n## Salads\n- **Caesar Salad** - $8.99  \n- **Greek Salad** - $9.99  \n- **Avocado Quinoa Bowl** - $12.99  \n\n## Mains\n- **Grilled Salmon with Herb Butter** - $18.99  \n- **Chicken Alfredo Pasta** - $15.99  \n- **Vegan Mushroom Risotto** - $14.99  \n\n## Sides\n- **Truffle Fries** - $4.99  \n- **Steamed Vegetables** - $3.99  \n\n## Desserts\n- **Chocolate Lava Cake** - $7.99  \n- **New York Cheesecake** - $6.99  \n- **Fresh Fruit Platter** - $5.99  \n\n## Drinks\n- **Soft Drinks (Coke, Sprite, etc.)** - $2.50  \n- **House Lemonade** - $3.50  \n- **Craft Beer (ask for selection)** - $5.99  ",
+        "outputPort": {
+          "info": { "id": 16, "name": "MenuPromptOutput" },
+          "visual": { "x": 0, "y": 0 },
+          "nodeId": 14,
+          "dataType": "Text"
+        },
+        "inputPorts": []
+      },
+      {
+        "Type": "Prompt",
+        "info": { "id": 15, "name": "CustomerSupportPrompt" },
+        "visual": { "x": 0, "y": 0 },
+        "template": "If you have any questions, concerns, or feedback, feel free to reach out to us!\n\n### Contact Us\n- **Phone:** (555) 123-4567  \n- **Email:** support@gourmetspot.com  \n- **Hours:** Monday to Sunday, 9:00 AM - 9:00 PM  \n\n### Visit Us\n**Address:**  \n123 Foodie Lane, Gourmet City, GC 56789  \n\nWe value your feedback and look forward to assisting you!",
+        "outputPort": {
+          "info": { "id": 17, "name": "CustomerSupportPrompt" },
+          "visual": { "x": 0, "y": 0 },
+          "nodeId": 15,
+          "dataType": "Text"
+        },
+        "inputPorts": []
+      }
+    ],
+    "dataLinks": [
+      {
+        "info": {
+          "id": 6,
+          "name": "WelcomeTextOutput_WelcomeInteractionInput_DataLink"
+        },
+        "visual": { "x": 0, "y": 0 },
+        "sourcePortId": 5,
+        "targetPortId": 2
+      },
+      {
+        "info": {
+          "id": 11,
+          "name": "WelcomeInteractionOutput_WelcomeSwitchInput_DataLink"
+        },
+        "visual": { "x": 0, "y": 0 },
+        "sourcePortId": 3,
+        "targetPortId": 10
+      },
+      {
+        "info": {
+          "id": 18,
+          "name": "MenuPromptOutput_WelcomeInteractionInput_DataLink"
+        },
+        "visual": { "x": 0, "y": 0 },
+        "sourcePortId": 16,
+        "targetPortId": 2
+      },
+      {
+        "info": {
+          "id": 19,
+          "name": "CustomerSupportOutput_WelcomeInteractionInput_DataLink"
+        },
+        "visual": { "x": 0, "y": 0 },
+        "sourcePortId": 17,
+        "targetPortId": 2
+      }
+    ],
+    "flowLinks": [
+      {
+        "info": {
+          "id": 7,
+          "name": "WelcomeInteraction_WelcomeSwitch_FlowLink"
+        },
+        "visual": { "x": 0, "y": 0 },
+        "sourceNodeId": 1,
+        "targetNodeId": 9
+      },
+      {
+        "info": { "id": 12, "name": "WelcomeSwitch_MenuPrompt_FlowLink" },
+        "visual": { "x": 0, "y": 0 },
+        "sourceNodeId": 9,
+        "targetNodeId": 14
+      },
+      {
+        "info": {
+          "id": 13,
+          "name": "WelcomeSwitch_CustomerSupportPrompt_FlowLink"
+        },
+        "visual": { "x": 0, "y": 0 },
+        "sourceNodeId": 9,
+        "targetNodeId": 15
+      },
+      {
+        "info": { "id": 20, "name": "MenuPrompt_WelcomeInteraction_FlowLink" },
+        "visual": { "x": 0, "y": 0 },
+        "sourceNodeId": 14,
+        "targetNodeId": 1
+      },
+      {
+        "info": {
+          "id": 21,
+          "name": "CustomerSupportPrompt_WelcomeInteraction_FlowLink"
+        },
+        "visual": { "x": 0, "y": 0 },
+        "sourceNodeId": 15,
+        "targetNodeId": 1
+      }
+    ],
+    "enums": [
+      {
+        "info": { "id": 8, "name": "WelcomeEnum" },
+        "options": [
+          { "type": "Option", "option": "Menu" },
+          { "type": "Option", "option": "CustomerSupport" }
+        ]
+      }
+    ]
+  }
+}
