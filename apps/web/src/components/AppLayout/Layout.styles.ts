@@ -33,9 +33,10 @@ export const ContentsContainer = styled.div`
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 200px 1fr 200px;
+  gap: 2rem;
   align-items: center;
-  display: flex;
 `;
 
 export const Wrapper = styled.div`
@@ -67,8 +68,30 @@ export const Navbar = styled.nav`
 export const NavLinks = styled.div`
   display: flex;
   gap: 2rem;
-  margin-left: 2rem;
+  justify-content: center;
   font-weight: 600;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 500px;
+`;
+
+export const UserSection = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  min-width: max-content;
+`;
+
+export const AuthButton = styled(Link)`
+  color: ${({ theme }) => theme.colors.lightText};
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+  font-size: ${({ theme }) => theme.fontSizes.medium};
+  font-weight: 600;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary};
+  }
 `;
 
 export const NavLink = styled(Link)<{ isActive: boolean }>`

@@ -1,14 +1,11 @@
 import { useRef, useEffect, useCallback, useState } from "react";
-import { CANVAS_DIMENSIONS } from "../../components/Builder/Canvas";
 import { LEFT_SIDEBAR_WIDTH } from "../../components/Builder/LeftSidebar";
-import { useXarrow } from "react-xarrows";
 
 export const useCanvasControls = (ref: React.RefObject<HTMLDivElement>) => {
   const [scale, setScale] = useState(1);
   const ctrlRef = useRef(false);
   const draggingRef = useRef(false);
   const posRef = useRef({ x: 0, y: 0 });
-  const updateXArrow = useXarrow();
 
   const dragStartRef = useRef<{ x: number; y: number; time: number } | null>(
     null
@@ -26,8 +23,10 @@ export const useCanvasControls = (ref: React.RefObject<HTMLDivElement>) => {
   }, [ref]);
 
   const calculateMaxOffsets = (currentScale: number) => {
-    const scaledWidth = CANVAS_DIMENSIONS.width * currentScale;
-    const scaledHeight = CANVAS_DIMENSIONS.height * currentScale;
+    if (!ref.current) return { maxOffsetX: 0, maxOffsetY: 0 };
+
+    const scaledWidth = ref.current.offsetWidth * currentScale;
+    const scaledHeight = ref.current.offsetHeight * currentScale;
     const maxOffsetX = (scaledWidth - window.innerWidth) / (2 * currentScale);
     const maxOffsetY = (scaledHeight - window.innerHeight) / (2 * currentScale);
     return {
@@ -47,7 +46,7 @@ export const useCanvasControls = (ref: React.RefObject<HTMLDivElement>) => {
       const constrainedY = Math.max(Math.min(newY, maxOffsetY), -maxOffsetY);
 
       posRef.current = { x: constrainedX, y: constrainedY };
-      updateXArrow();
+
       if (ref.current) {
         ref.current.style.transform = `translate(calc(-50% + ${constrainedX}px), calc(-50% + ${constrainedY}px))`;
       }

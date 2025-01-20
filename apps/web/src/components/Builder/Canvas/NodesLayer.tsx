@@ -7,6 +7,7 @@ import {
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { NodesLayerProps } from "./types";
 import Node from "../Nodes/Node";
+import { ArrowsLayer } from "../ArrowsLayer";
 
 const NodesLayer: React.FC<NodesLayerProps> = ({ onPositionChange }) => {
   const nodesIds = useSelector(selectNodeIds, shallowEqual);
@@ -23,6 +24,7 @@ const NodesLayer: React.FC<NodesLayerProps> = ({ onPositionChange }) => {
           onPositionChange={onPositionChange}
         />
       ))}
+      <ArrowsLayer />
     </>
   );
 };

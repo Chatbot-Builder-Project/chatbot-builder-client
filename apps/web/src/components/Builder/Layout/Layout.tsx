@@ -5,20 +5,17 @@ import { Outlet } from "react-router-dom";
 import { ItemConfigSidebar } from "../ItemConfigSidebar";
 import { CanvasConfigBar } from "../CanvasConfigBar";
 import { CanvasProvider } from "../../../contexts/CanvasContext";
-import { Xwrapper } from "react-xarrows";
 
 const BuilderLayout: React.FC = () => {
   return (
-    <Xwrapper>
-      <CanvasProvider>
-        <DndProvider backend={HTML5Backend}>
-          <LeftSidebar />
-          <Outlet />
-          <ItemConfigSidebar />
-          <CanvasConfigBar />
-        </DndProvider>
-      </CanvasProvider>
-    </Xwrapper>
+    <CanvasProvider>
+      <DndProvider backend={HTML5Backend}>
+        <LeftSidebar />
+        <Outlet />
+        <ItemConfigSidebar />
+        <CanvasConfigBar />
+      </DndProvider>
+    </CanvasProvider>
   );
 };
 

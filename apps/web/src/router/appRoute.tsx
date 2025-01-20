@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createBrowserRouter, RouteObject } from "react-router-dom";
 import { withProtectedPage } from "../components/withProtectedPage";
-import { Builder } from "../pages/Builder";
+import { ChatBuilder, FlowBuilder } from "../pages/Builder";
 import { Home } from "../pages/Home";
 import { Login } from "../pages/Login";
 import { Dashboard } from "../pages/Dashboard";
@@ -32,7 +32,10 @@ const routes = [
   {
     path: "/builder",
     element: <BuilderLayout />,
-    children: [{ path: "/builder", element: <Builder /> }],
+    children: [
+      { path: "/builder/flow", element: <FlowBuilder /> },
+      { path: "/builder/chat", element: <ChatBuilder /> },
+    ],
   },
 ];
 

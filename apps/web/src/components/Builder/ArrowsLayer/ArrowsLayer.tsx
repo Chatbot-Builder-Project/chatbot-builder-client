@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import ArrowConnector from "./CustomArrow";
 import PendingArrow from "./PendingArrow"; // Add this new import
 
-const ArrowWrapper = memo(() => {
+const ArrowsLayer = memo(() => {
   const flowLinks = useSelector(selectAllFlowLinks);
   const svgRef = useRef<SVGSVGElement>(null);
   const [scale, setScale] = useState<number>(1);
@@ -100,4 +100,4 @@ const ArrowWrapper = memo(() => {
   );
 });
 
-export default ArrowWrapper;
+export default ArrowsLayer;

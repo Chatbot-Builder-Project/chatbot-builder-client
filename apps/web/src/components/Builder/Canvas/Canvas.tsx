@@ -7,14 +7,13 @@ import React, { useCallback, useMemo } from "react";
 import { useDrop } from "react-dnd";
 import { useDispatch } from "react-redux";
 import { BaseNodeData } from "../../../types/nodes";
-import { CANVAS_DIMENSIONS, WRAPPER_STYLES } from "./utils";
+import { WRAPPER_STYLES } from "./utils";
 import { clamp } from "lodash";
-import NodesLayer from "./NodesLayer";
-import { ArrowWrapper } from "../ArrowWrapper";
 import { useCanvas } from "../../../contexts/CanvasContext";
 import { NodeVisual } from "@chatbot-builder/store/slices/Builder/Nodes/types";
+import { CanvasProps } from "./types";
 
-const Canvas: React.FC = () => {
+const Canvas: React.FC<CanvasProps> = ({ children, dimensions }) => {
   const dispatch = useDispatch();
   const { canvasRef, handleMouseDown, handleMouseMove, handleMouseUp, scale } =
     useCanvas();
@@ -40,26 +39,26 @@ const Canvas: React.FC = () => {
       const position = {
         x:
           (dropPosition.x - centerOffset.x) / scale +
-          CANVAS_DIMENSIONS.width / 2,
+          dimensions.width / 2,
         y:
           (dropPosition.y - centerOffset.y) / scale +
-          CANVAS_DIMENSIONS.height / 2,
+          dimensions.height / 2,
       };
 
       return {
         x: clamp(
           position.x - item.mouseOffset.x / scale,
           0,
-          CANVAS_DIMENSIONS.width - item.nodeWidth / scale
+          dimensions.width - item.nodeWidth / scale
         ),
         y: clamp(
           position.y - item.mouseOffset.y / scale,
           0,
-          CANVAS_DIMENSIONS.height - item.nodeHeight / scale
+          dimensions.height - item.nodeHeight / scale
         ),
       };
     },
-    [scale, canvasRef]
+    [scale, canvasRef, dimensions]
   );
 
   const handleNodePositionChange = useCallback(
@@ -96,8 +95,8 @@ const Canvas: React.FC = () => {
   const canvasStyle = useMemo(
     () => ({
       backgroundColor: "#1d1d1d",
-      width: CANVAS_DIMENSIONS.width,
-      height: CANVAS_DIMENSIONS.height,
+      width: dimensions.width,
+      height: dimensions.height,
       position: "absolute" as const,
       cursor: "default",
       left: "50%",
@@ -105,7 +104,7 @@ const Canvas: React.FC = () => {
       transform: `translate(-50%, -50%)`,
       transformOrigin: "center",
     }),
-    []
+    [dimensions]
   );
 
   const handleCanvasClick = useCallback(
@@ -172,8 +171,7 @@ const Canvas: React.FC = () => {
         >
           +
         </div>
-        <NodesLayer onPositionChange={handleNodePositionChange} />
-        <ArrowWrapper />
+        {children({ onPositionChange: handleNodePositionChange })}
       </div>
     </div>
   );
