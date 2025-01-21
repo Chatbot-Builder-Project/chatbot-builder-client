@@ -6,8 +6,10 @@ const CHAT_DIMENSIONS = {
   height: 4000,
 };
 
-const FlowBuilder: React.FC = () => {
-  return <Canvas dimensions={CHAT_DIMENSIONS}>{() => <CustomChatEditor />}</Canvas>;
+const ChatBuilder: React.FC = () => {
+  return (
+    <Canvas dimensions={CHAT_DIMENSIONS}>{() => <CustomChatEditor />}</Canvas>
+  );
 };
 
-export default FlowBuilder;
+export default ChatBuilder;

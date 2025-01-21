@@ -1,21 +1,12 @@
-import { NodeType } from "@chatbot-builder/store/slices/Builder/Nodes/types";
-import { NODES } from "../Nodes/nodes";
-import { LeftSidebarContainer, NodesContainer, SidebarTitle } from "./LeftSidebar.styles";
-import { SidebarNode } from "./SidebarNode";
+import { LeftSidebarContainer } from "./LeftSidebar.styles";
+import { LeftSidebarProps } from "./types";
+import { FlowSidebar } from "./FlowSidebar";
+import { ChatSidebar } from "./ChatSidebar";
 
-const LeftSidebar: React.FC = () => {
+const LeftSidebar: React.FC<LeftSidebarProps> = ({ mode }) => {
   return (
     <LeftSidebarContainer>
-      <SidebarTitle>Nodes</SidebarTitle>
-      <NodesContainer>
-        {Object.entries(NODES).map(([nodeType, value]) => (
-          <SidebarNode
-            key={nodeType}
-            nodeType={nodeType as NodeType}
-            nodeDetails={value}
-          />
-        ))}
-      </NodesContainer>
+      {mode === "flow" ? <FlowSidebar /> : <ChatSidebar />}
     </LeftSidebarContainer>
   );
 };

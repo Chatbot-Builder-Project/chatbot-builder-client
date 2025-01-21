@@ -1,22 +1,14 @@
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
 import { LeftSidebar } from "../LeftSidebar";
-import { Outlet } from "react-router-dom";
-import { ItemConfigSidebar } from "../ItemConfigSidebar";
-import { CanvasConfigBar } from "../CanvasConfigBar";
-import { CanvasProvider } from "../../../contexts/CanvasContext";
+import { LayoutContainer, MainContent } from "./Layout.styles";
+import { LayoutProps } from "./types";
 
-const BuilderLayout: React.FC = () => {
+const Layout: React.FC<LayoutProps> = ({ children, mode }) => {
   return (
-    <CanvasProvider>
-      <DndProvider backend={HTML5Backend}>
-        <LeftSidebar />
-        <Outlet />
-        <ItemConfigSidebar />
-        <CanvasConfigBar />
-      </DndProvider>
-    </CanvasProvider>
+    <LayoutContainer>
+      <LeftSidebar mode={mode} />
+      <MainContent>{children}</MainContent>
+    </LayoutContainer>
   );
 };
 
-export default BuilderLayout;
+export default Layout;

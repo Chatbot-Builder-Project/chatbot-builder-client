@@ -1,7 +1,8 @@
 import { ReactNode } from "react";
 
-interface LayoutProps {
-  children: ReactNode;
-}
+export type BuilderMode = "flow" | "chat";
 
-export type { LayoutProps };
+export interface LayoutProps {
+  children: ReactNode;
+  mode: BuilderMode;
+}

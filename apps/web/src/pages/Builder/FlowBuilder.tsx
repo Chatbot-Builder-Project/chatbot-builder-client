@@ -9,7 +9,9 @@ const FLOW_DIMENSIONS = {
 const FlowBuilder: React.FC = () => {
   return (
     <Canvas dimensions={FLOW_DIMENSIONS}>
-      {({ onPositionChange }) => <NodesLayer onPositionChange={onPositionChange} />}
+      {({ onPositionChange }) => (
+        <NodesLayer onPositionChange={onPositionChange} />
+      )}
     </Canvas>
   );
 };
