@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createBrowserRouter, RouteObject } from "react-router-dom";
 import { withProtectedPage } from "../components/withProtectedPage";
 import { ChatBuilder, FlowBuilder } from "../pages/Builder";
@@ -11,7 +10,12 @@ import { BuilderLayout } from "../components/Builder/Layout";
 import { AuthLayout } from "../components/Auth/Layout";
 import { AppLayout } from "../components/AppLayout";
 
-const routes = [
+type AppRouteObject = RouteObject & {
+  children?: AppRouteObject[];
+  element?: React.ReactElement;
+};
+
+const routes: AppRouteObject[] = [
   {
     path: "/",
     element: <AppLayout />,
@@ -39,15 +43,22 @@ const routes = [
   },
 ];
 
-const createProtectedRoutes = (routes: any): RouteObject[] => {
-  return routes.map((route: any) => {
+const createProtectedRoutes = (routes: AppRouteObject[]): RouteObject[] => {
+  return routes.map((route) => {
     if (!route.element) return route;
 
-    const WrappedComponent = withProtectedPage(route.element.type);
-    return {
-      ...route,
-      element: <WrappedComponent />,
-    };
+    const elementType = route.element.type;
+    if (typeof elementType === "function" || typeof elementType === "object") {
+      const WrappedComponent = withProtectedPage(elementType);
+      const { children, ...routeWithoutChildren } = route;
+      return {
+        ...routeWithoutChildren,
+        element: <WrappedComponent />,
+        children: children ? createProtectedRoutes(children) : undefined,
+        index: route.index || undefined,
+      } as RouteObject;
+    }
+    return route;
   });
 };
 
