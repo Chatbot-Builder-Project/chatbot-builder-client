@@ -17,11 +17,11 @@ const HeaderContainer = styled.div`
 `;
 
 export const ChatHeader = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch(setSelected("header"));
+    // dispatch(setSelected("header"));
   };
 
   return <HeaderContainer onClick={handleClick} />;

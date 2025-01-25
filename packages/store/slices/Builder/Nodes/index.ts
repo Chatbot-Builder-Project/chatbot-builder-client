@@ -1,1 +1,1 @@
-export { default as builderReducer } from "./slice";
+export { default as nodesReducer } from "./slice";

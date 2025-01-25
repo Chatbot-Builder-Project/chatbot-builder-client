@@ -1,2 +1,2 @@
 export { userReducer } from "./User";
-export { builderReducer } from "./Builder/Nodes";
+export { builderReducer } from "./Builder";

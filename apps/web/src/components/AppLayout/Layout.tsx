@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { isNil } from "lodash";
-import { IconUser } from "@tabler/icons-react";
-import appLogo from "@chatbot-builder/client/public/assets/icons/appLogo.png";
+import { IconUserFilled } from "@tabler/icons-react";
+import appLogo from "@chatbot-builder/client/public/assets/icons/appLogo.svg";
 import {
   AppContainer,
   AppLogo,
@@ -39,12 +39,10 @@ const AppLayout: React.FC = () => {
     <>
       <Navbar>
         <ContentsContainer>
-          <Link to="/">
-            <AppTitle>
-              <AppLogo src={appLogo} alt="app-logo" />
-              AI Builder
-            </AppTitle>
-          </Link>
+          <AppTitle to="/">
+            <AppLogo src={appLogo} alt="app-logo" />
+            Flowverse
+          </AppTitle>
           <NavLinks>
             {navigationLinks.filter(shouldShowLink).map(({ path, label }) => (
               <NavLink
@@ -59,7 +57,7 @@ const AppLayout: React.FC = () => {
           <UserSection>
             {user.isAuthenticated ? (
               <Link to="/profile">
-                <IconUser size={24} color="white" />
+                <IconUserFilled size={24} color="white" />
               </Link>
             ) : (
               <>

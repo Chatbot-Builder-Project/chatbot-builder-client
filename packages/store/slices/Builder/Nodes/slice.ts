@@ -151,27 +151,32 @@ export const {
   selectAll: selectAllNodes,
   selectById: selectNodeById,
   selectIds: selectNodeIds,
-} = nodesAdapter.getSelectors<RootState>((state) => state.builder.nodes);
+} = nodesAdapter.getSelectors<RootState>((state) => state.builder.nodes.nodes);
 
 export const { selectAll: selectAllDataLinks, selectById: selectDataLinkById } =
-  dataLinksAdapter.getSelectors<RootState>((state) => state.builder.dataLinks);
+  dataLinksAdapter.getSelectors<RootState>(
+    (state) => state.builder.nodes.dataLinks
+  );
 
 export const { selectAll: selectAllFlowLinks, selectById: selectFlowLinkById } =
-  flowLinksAdapter.getSelectors<RootState>((state) => state.builder.flowLinks);
+  flowLinksAdapter.getSelectors<RootState>(
+    (state) => state.builder.nodes.flowLinks
+  );
 
-export const selectElementId = (state: RootState) => state.builder.selectedId;
+export const selectElementId = (state: RootState) =>
+  state.builder.nodes.selectedId;
 
 export const selectStartNodeId = (state: RootState) =>
-  state.builder.startNodeId;
+  state.builder.nodes.startNodeId;
 
 export const selectPendingFlowLinkSourceId = (state: RootState) =>
-  state.builder.pendingFlowLinkSourceId;
+  state.builder.nodes.pendingFlowLinkSourceId;
 
 export const {
   addNode,
   updateNodeVisual,
   removeNode,
-  setSelected, // Export new action
+  setSelected,
   addDataLink,
   removeDataLink,
   addFlowLink,

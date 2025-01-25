@@ -1,6 +1,4 @@
 import styled from "styled-components";
-import { useDispatch } from "react-redux";
-import { setSelected } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 
 const InputContainer = styled.div`
   height: 60px;
@@ -17,11 +15,11 @@ const InputContainer = styled.div`
 `;
 
 export const ChatInput = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch(setSelected("input"));
+    // dispatch(setSelected("input"));
   };
 
   return <InputContainer onClick={handleClick} />;

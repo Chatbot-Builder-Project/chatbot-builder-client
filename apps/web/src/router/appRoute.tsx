@@ -9,6 +9,7 @@ import { Signup } from "../pages/Signup";
 import { BuilderLayout } from "../components/Builder/Layout";
 import { AuthLayout } from "../components/Auth/Layout";
 import { AppLayout } from "../components/AppLayout";
+import { DashboardLayout } from "../pages/Dashboard/Layout.tsx";
 
 type AppRouteObject = RouteObject & {
   children?: AppRouteObject[];
@@ -21,9 +22,13 @@ const routes: AppRouteObject[] = [
     element: <AppLayout />,
     children: [
       { path: "/", element: <Home /> },
-      { path: "/dashboard", element: <Dashboard /> },
       { path: "*", element: <NotFound /> },
     ],
+  },
+  {
+    path: "/dashboard",
+    element: <DashboardLayout />,
+    children: [{ path: "/dashboard", element: <Dashboard /> }],
   },
   {
     path: "/auth",

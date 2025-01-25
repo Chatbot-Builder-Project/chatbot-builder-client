@@ -9,12 +9,13 @@ interface ThemeColors {
   text: string;
   lightText: string;
   gray: string;
-
+  lightGray: string;
   muted: string;
   purple: string;
   dark: string;
   brightYellow: string;
   brightOrange: string;
+  black: string;
   brightGreen: string;
   brightAqua: string;
   brightPink: string;
@@ -33,6 +34,8 @@ export interface Theme {
     medium: string;
     large: string;
     xl: string;
+    xxl: string;
+    veryLarge: string;
   };
   spacing: {
     xs: string;

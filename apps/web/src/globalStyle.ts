@@ -9,7 +9,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    background-color: ${(props) => props.theme.colors.background};
+    background-color: ${(props) => props.theme.colors.black};
     color: ${(props) => props.theme.colors.primary};
     line-height: 1.6;
     min-height: 100vh; 
