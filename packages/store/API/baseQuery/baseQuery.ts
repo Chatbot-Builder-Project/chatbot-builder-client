@@ -7,7 +7,8 @@ import type {
 } from "@reduxjs/toolkit/query";
 import { QueryError } from "./types";
 
-const baseUrl = import.meta.env.VITE_API_URL;
+const baseUrl =
+  "http://chatbot-builder-production-dns.israelcentral.cloudapp.azure.com:8080/api/v1";
 
 export const fetchBaseQueryWithAuthHandling: BaseQueryFn<
   string | FetchArgs,
