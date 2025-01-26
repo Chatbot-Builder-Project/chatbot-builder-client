@@ -1,20 +1,18 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
+import { store } from "@chatbot-builder/store";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import { View, StyleSheet } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider } from "react-redux";
-import store from "@chatbot-builder/store/store";
+import { Canvas } from "./components/Builder/Canvas";
+import { ErrorBoundary } from "./components/ErrorBoundary/ErrorBoundary";
+import { useFonts } from "expo-font";
 import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { ErrorBoundary } from "./src/components/ErrorBoundary/ErrorBoundary";
-import { HomeScreen } from "./src/screens/Home/HomeScreen";
-import { Canvas } from "./src/components/Builder/Canvas";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import * as Font from "expo-font";
 
 const Tab = createBottomTabNavigator();
 
 export default function App() {
-  const [fontsLoaded] = Font.useFonts({
+  const [fontsLoaded] = useFonts({
     FunnelSans: require("./assets/fonts/Funnel_Sans/FunnelSans-VariableFont_wght.ttf"),
     "FunnelSans-Italic": require("./assets/fonts/Funnel_Sans/FunnelSans-Italic-VariableFont_wght.ttf"),
     Montserrat: require("./assets/fonts/Montserrat/Montserrat-VariableFont_wght.ttf"),
