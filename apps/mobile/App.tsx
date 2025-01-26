@@ -10,6 +10,7 @@ import { HomeScreen } from "./src/screens/Home/HomeScreen";
 import { Canvas } from "./src/components/Builder/Canvas";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as Font from "expo-font";
+import { CanvasProvider } from "./src/contexts/CanvasContext";
 
 const Tab = createBottomTabNavigator();
 
@@ -26,17 +27,20 @@ export default function App() {
   }
 
   return (
-    <ErrorBoundary>
-      <Provider store={store}>
-        <GestureHandlerRootView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ErrorBoundary>
+        <Provider store={store}>
           <NavigationContainer>
-            <Canvas />
+            <CanvasProvider>
+              <Canvas />
+            </CanvasProvider>
           </NavigationContainer>
-        </GestureHandlerRootView>
-      </Provider>
-    </ErrorBoundary>
+        </Provider>
+      </ErrorBoundary>
+    </GestureHandlerRootView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
