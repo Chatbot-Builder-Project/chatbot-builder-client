@@ -10,7 +10,7 @@ import {
   PrevNode,
   Wrapper,
 } from "./Node.styles";
-import { NODES_ICONS } from "./nodes";
+import { NODES_ICONS } from "@chatbot-builder/client/nodes";
 import { NodeProps } from "./types";
 import {
   selectPendingFlowLinkSourceId,

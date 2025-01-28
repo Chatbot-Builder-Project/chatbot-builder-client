@@ -1,41 +1,21 @@
-import React, {
-  useRef,
-  useEffect,
-  useCallback,
-  useState,
-  useMemo,
-} from "react";
-import { Button, View, Dimensions, ImageBackground } from "react-native";
+import React, { useCallback, useState } from "react";
+import { View, Dimensions } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
-  withDecay,
 } from "react-native-reanimated";
 import { StyleSheet } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import GridBackground from "./GridBackground";
-import Svg, { Circle, Defs, Pattern, Rect } from "react-native-svg";
+import _ from "lodash";
+import ControlBar from "./ControlBar";
+import ConfigBar from "./ConfigBar";
+import NodesLayer from "./NodesLayer";
 
-const calculateMaxOffsets = (currentScale: number) => {
-  const scaledWidth = 5000 * currentScale;
-  const scaledHeight = 5000 * currentScale;
-
-  return {
-    maxOffsetX: Math.max((scaledWidth - window.width) / (2 * currentScale), 0),
-    maxOffsetY: Math.max(
-      (scaledHeight - window.height) / (2 * currentScale),
-      0
-    ),
-  };
-};
-
-const constrainPosition = (x: number, y: number, currentScale: number) => {
-  const { maxOffsetX, maxOffsetY } = calculateMaxOffsets(currentScale);
-  return {
-    x: Math.min(Math.max(x, -maxOffsetX), maxOffsetX),
-    y: Math.min(Math.max(y, -maxOffsetY), maxOffsetY),
-  };
+const FLOW_DIMENSIONS = {
+  width: 5000,
+  height: 5000,
 };
 
 interface CanvasProps {
@@ -43,87 +23,81 @@ interface CanvasProps {
   dimensions?: { width: number; height: number };
 }
 
-const FLOW_DIMENSIONS = {
-  width: 5000,
-  height: 5000,
-};
-
 const window = Dimensions.get("window");
 
 const Canvas: React.FC<CanvasProps> = ({
   children,
   dimensions = FLOW_DIMENSIONS,
 }) => {
+  const width = dimensions.width;
+  const height = dimensions.height;
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const savedTranslateX = useSharedValue(0);
   const savedTranslateY = useSharedValue(0);
-  const width = dimensions.width;
-  const height = dimensions.height;
 
-  const ref = useRef<Animated.View>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
 
-  useEffect(() => {
-    translateX.value = -width / 2 + window.width / 2;
-    translateY.value = -height / 2 + window.height / 2;
-    savedTranslateX.value = translateX.value;
-    savedTranslateY.value = translateY.value;
-  }, [translateX, translateY, savedTranslateX, savedTranslateY, width, height]);
+  const handleNodeSelect = (id: number) => {
+    setSelectedNodeId(id);
+  };
 
   const resetPosition = useCallback(() => {
-    translateX.value = withSpring(-width / 2 + window.width / 2, {
-      stiffness: 100,
-    });
-    translateY.value = withSpring(-height / 2 + window.height / 2, {
-      stiffness: 100,
-    });
-    savedTranslateX.value = translateX.value;
-    savedTranslateY.value = translateY.value;
-  }, [
-    scale,
-    translateX,
-    translateY,
-    savedScale,
-    savedTranslateX,
-    savedTranslateY,
-    width,
-    window.width,
-    height,
-    window.height,
-  ]);
+    translateX.value = withSpring(0, { stiffness: 50 });
+    translateY.value = withSpring(0, { stiffness: 50 });
+    savedTranslateX.value = 0;
+    savedTranslateY.value = 0;
+  }, [translateX, translateY, savedTranslateX, savedTranslateY]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
-      { translateX: translateX.value as number },
-      { translateY: translateY.value as number },
-      { scale: scale.value as number },
-    ] as const,
+      { translateX: "-50%" },
+      { translateY: "-50%" },
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: scale.value },
+    ],
   }));
 
   const panGesture = Gesture.Pan()
+    .runOnJS(true)
     .onStart(() => {
       savedTranslateX.value = translateX.value;
       savedTranslateY.value = translateY.value;
     })
     .onUpdate((event) => {
-      const scaleValue = scale.value || 1;
-      const newX = savedTranslateX.value + event.translationX / scaleValue;
-      const newY = savedTranslateY.value + event.translationY / scaleValue;
-      translateX.value = newX;
-      translateY.value = newY;
-    })
-    .onEnd((event) => {
-      const scaleValue = scale.value || 1;
-      translateX.value = withDecay({
-        deceleration: 0.997,
-        velocity: event.velocityX / scaleValue,
-      });
-      translateY.value = withDecay({
-        velocity: event.velocityY / scaleValue,
-        deceleration: 0.997,
-      });
+      const scaleValue = Math.min(Math.max(scale.value || 1, 0.5), 2);
+      let newTX = savedTranslateX.value + event.translationX / scaleValue;
+      let newTY = savedTranslateY.value + event.translationY / scaleValue;
+
+      // Calculate constraints for X axis
+      const scaledWidth = width * scaleValue;
+      const viewportWidth = window.width;
+      let maxTX = 0;
+      let minTX = 0;
+      if (scaledWidth > viewportWidth) {
+        maxTX = (scaledWidth - viewportWidth) / (2 * scaleValue);
+        minTX = -maxTX;
+      }
+
+      // Calculate constraints for Y axis
+      const scaledHeight = height * scaleValue;
+      const viewportHeight = window.height;
+      let maxTY = 0;
+      let minTY = 0;
+      if (scaledHeight > viewportHeight) {
+        maxTY = (scaledHeight - viewportHeight) / (2 * scaleValue);
+        minTY = -maxTY;
+      }
+
+      // Apply constraints
+      newTX = Math.min(Math.max(newTX, minTX), maxTX);
+      newTY = Math.min(Math.max(newTY, minTY), maxTY);
+
+      translateX.value = newTX;
+      translateY.value = newTY;
     });
 
   const pinchGesture = Gesture.Pinch()
@@ -132,7 +106,7 @@ const Canvas: React.FC<CanvasProps> = ({
     })
     .onUpdate((event) => {
       const newScale = savedScale.value * event.scale;
-      scale.value = Math.min(Math.max(newScale, 0.8), 2);
+      scale.value = Math.min(Math.max(newScale, 0.5), 2);
     })
     .onEnd(() => {
       savedScale.value = scale.value;
@@ -144,7 +118,6 @@ const Canvas: React.FC<CanvasProps> = ({
     <View style={styles.root}>
       <GestureDetector gesture={composedGesture}>
         <Animated.View
-          ref={ref}
           style={[
             styles.canvas,
             animatedStyle,
@@ -156,11 +129,15 @@ const Canvas: React.FC<CanvasProps> = ({
         >
           <GridBackground />
           <Animated.Text style={styles.centerMarker}>+</Animated.Text>
-          {children}
+          <NodesLayer scale={scale.value} />
         </Animated.View>
       </GestureDetector>
+      <View style={styles.configBar}>
+        <ConfigBar resetPosition={resetPosition} />
+      </View>
+
       <View style={styles.buttonContainer}>
-        <Button title="Reset" onPress={resetPosition} />
+        <ControlBar />
       </View>
     </View>
   );
@@ -170,6 +147,13 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: "#1d1d1d",
+  },
+  nodesBar: {
+    position: "absolute",
+    width: "100%",
+    height: 100,
+    backgroundColor: "#1d1d1d",
+    zIndex: 99,
   },
   canvas: {
     backgroundColor: "#1d1d1d",
@@ -195,12 +179,19 @@ const styles = StyleSheet.create({
     color: "#fff",
     opacity: 0.5,
     fontWeight: "bold",
-    transform: [{ translateX: "-50%" }, { translateY: "-50%" }],
   },
   buttonContainer: {
     position: "absolute",
-    bottom: 20,
+    bottom: 35,
     right: 20,
+  },
+  configBar: {
+    position: "absolute",
+    top: 50,
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
   },
 });
 

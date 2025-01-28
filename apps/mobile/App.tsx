@@ -6,7 +6,6 @@ import store from "@chatbot-builder/store/store";
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { ErrorBoundary } from "./src/components/ErrorBoundary/ErrorBoundary";
-import { HomeScreen } from "./src/screens/Home/HomeScreen";
 import { Canvas } from "./src/components/Builder/Canvas";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import * as Font from "expo-font";
@@ -30,6 +29,7 @@ export default function App() {
       <ErrorBoundary>
         <Provider store={store}>
           <NavigationContainer>
+            <StatusBar style="light" backgroundColor="000" />
             <Canvas />
           </NavigationContainer>
         </Provider>

@@ -3,7 +3,7 @@ import { BaseNode } from "../Nodes/BaseNode";
 import { shallowEqual, useSelector } from "react-redux";
 import {
   selectNodeIds,
-  selectElementId, // Changed from selectSelectedNodeId
+  selectElementId,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { NodesLayerProps } from "./types";
 import Node from "../Nodes/Node";
@@ -11,7 +11,7 @@ import { ArrowsLayer } from "../ArrowsLayer";
 
 const NodesLayer: React.FC<NodesLayerProps> = ({ onPositionChange }) => {
   const nodesIds = useSelector(selectNodeIds, shallowEqual);
-  const selectedId = useSelector(selectElementId); // Changed from selectSelectedNodeId
+  const selectedId = useSelector(selectElementId);
 
   return (
     <>
@@ -20,7 +20,7 @@ const NodesLayer: React.FC<NodesLayerProps> = ({ onPositionChange }) => {
           key={`${nodeId}`}
           id={nodeId as number}
           render={(node) => <Node node={node} />}
-          isSelected={selectedId === nodeId} // Changed from selectedNodeId
+          isSelected={selectedId === nodeId}
           onPositionChange={onPositionChange}
         />
       ))}
