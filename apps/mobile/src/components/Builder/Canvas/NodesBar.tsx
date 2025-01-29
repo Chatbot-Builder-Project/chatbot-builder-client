@@ -24,7 +24,6 @@ const NodesBar = () => {
   const dispatch = useDispatch();
 
   const handleAddNode = (node: NodeData) => {
-    console.log("asdasdasdsa");
     dispatch(
       addNode({
         ...node,

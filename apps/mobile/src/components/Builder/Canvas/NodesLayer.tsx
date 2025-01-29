@@ -4,9 +4,8 @@ import {
   selectNodeIds,
   selectElementId,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
-import Node from "../Nodes/Node";
 import BaseNode from "./BaseNode";
-// import { ArrowsLayer } from "../ArrowsLayer";
+import ArrowsLayer from "./ArrowsLayer";
 
 interface NodesLayerProps {
   scale: number;
@@ -18,10 +17,15 @@ const NodesLayer: React.FC<NodesLayerProps> = ({ scale }) => {
 
   return (
     <>
+      <ArrowsLayer />
       {nodesIds.map((nodeId) => (
-        <BaseNode key={`${nodeId}`} scale={scale} id={nodeId as number} />
+        <BaseNode
+          key={`${nodeId}`}
+          isSelected={selectedId === nodeId}
+          scale={scale}
+          id={nodeId as number}
+        />
       ))}
-      {/* <ArrowsLayer /> */}
     </>
   );
 };
