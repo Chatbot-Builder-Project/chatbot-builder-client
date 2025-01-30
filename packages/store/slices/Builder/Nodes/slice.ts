@@ -158,10 +158,13 @@ export const { selectAll: selectAllDataLinks, selectById: selectDataLinkById } =
     (state) => state.builder.nodes.dataLinks
   );
 
-export const { selectAll: selectAllFlowLinks, selectById: selectFlowLinkById } =
-  flowLinksAdapter.getSelectors<RootState>(
-    (state) => state.builder.nodes.flowLinks
-  );
+export const {
+  selectAll: selectAllFlowLinks,
+  selectById: selectFlowLinkById,
+  selectIds: selectFlowLinkIds,
+} = flowLinksAdapter.getSelectors<RootState>(
+  (state) => state.builder.nodes.flowLinks
+);
 
 export const selectElementId = (state: RootState) =>
   state.builder.nodes.selectedId;

@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import { View, Dimensions } from "react-native";
 import Animated, {
   useAnimatedProps,
@@ -7,6 +7,7 @@ import Animated, {
   withSpring,
   useDerivedValue,
   runOnJS,
+  useAnimatedReaction,
 } from "react-native-reanimated";
 import { StyleSheet } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
@@ -41,11 +42,14 @@ const Canvas: React.FC<CanvasProps> = ({
   const savedTranslateX = useSharedValue(0);
   const savedTranslateY = useSharedValue(0);
 
-  const [currentScale, setCurrentScale] = useState(1);
+  const [scaleState, setScaleState] = useState(1);
 
-  useDerivedValue(() => {
-    runOnJS(setCurrentScale)(scale.get());
-  }, [scale]);
+  useAnimatedReaction(
+    () => scale.value,
+    (currentScale) => {
+      runOnJS(setScaleState)(currentScale);
+    }
+  );
 
   const resetPosition = useCallback(() => {
     translateX.set(withSpring(0, { stiffness: 50 }));
@@ -165,7 +169,7 @@ const Canvas: React.FC<CanvasProps> = ({
         >
           <GridBackground />
           <Animated.Text style={styles.centerMarker}>+</Animated.Text>
-          <NodesLayer scale={currentScale} />
+          <NodesLayer scale={scaleState} />
         </Animated.View>
       </GestureDetector>
       <View style={styles.configBar}>

@@ -14,7 +14,7 @@ interface NodesLayerProps {
 const NodesLayer: React.FC<NodesLayerProps> = ({ scale }) => {
   const nodesIds = useSelector(selectNodeIds, shallowEqual);
   const selectedId = useSelector(selectElementId);
-
+  console.log("sdasdasd",scale);
   return (
     <>
       <ArrowsLayer />
@@ -30,4 +30,4 @@ const NodesLayer: React.FC<NodesLayerProps> = ({ scale }) => {
   );
 };
 
-export default memo(NodesLayer);
+export default NodesLayer;

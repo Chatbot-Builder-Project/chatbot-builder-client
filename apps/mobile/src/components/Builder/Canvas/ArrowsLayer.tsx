@@ -1,19 +1,18 @@
 import React, { memo, useState } from "react";
 import { View } from "react-native";
-import { useSelector } from "react-redux";
+import { shallowEqual, useSelector } from "react-redux";
 import { Svg, Defs, Marker, Polygon } from "react-native-svg";
 import {
   selectAllFlowLinks,
+  selectFlowLinkIds,
   selectPendingFlowLinkSourceId,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import CustomArrow from "./CustomArrow";
 import PendingArrow from "./PendingArrow";
 
 const ArrowsLayer = memo(() => {
-  const flowLinks = useSelector(selectAllFlowLinks);
-  const pendingSourceId = useSelector(selectPendingFlowLinkSourceId);
-  const [scale, setScale] = useState(1);
-  console.log(flowLinks);
+  const flowLinksIds = useSelector(selectFlowLinkIds, shallowEqual);
+  // const pendingSourceId = useSelector(selectPendingFlowLinkSourceId);
   return (
     <Svg
       style={{
@@ -24,6 +23,7 @@ const ArrowsLayer = memo(() => {
         left: 0,
         overflow: "visible",
         backgroundColor: "transparent",
+
         // pointerEvents: "none",
         // transform: [{ translateX: 0 }, { translateY: 0 }, { scale: scale }],
       }}
@@ -50,12 +50,12 @@ const ArrowsLayer = memo(() => {
           <Polygon points="0,0 4,2 0,4" fill="#009bff" />
         </Marker>
       </Defs>
-      {flowLinks.map((link) => (
-        <CustomArrow key={link.info.id} linkId={link.info.id} scale={scale} />
+      {flowLinksIds.map((linkId) => (
+        <CustomArrow key={linkId} linkId={linkId}  />
       ))}
-      {pendingSourceId && (
-        <PendingArrow sourceId={pendingSourceId} scale={scale} />
-      )}
+      {/* {pendingSourceId && (
+        <PendingArrow sourceId={pendingSourceId} />
+      )} */}
     </Svg>
   );
 });
