@@ -152,7 +152,7 @@ const Canvas: React.FC<CanvasProps> = ({
       savedScale.set(scale.get());
     });
 
-  const composedGesture = Gesture.Simultaneous(panGesture, pinchGesture);
+  const composedGesture = Gesture.Exclusive(pinchGesture, panGesture);
 
   return (
     <View style={styles.root}>

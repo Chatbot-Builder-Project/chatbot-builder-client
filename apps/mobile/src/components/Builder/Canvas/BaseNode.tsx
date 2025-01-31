@@ -92,9 +92,9 @@ function BaseNode({ scale, id, isSelected }: BaseNodeProps) {
     transform: [{ translateY: withSpring(isSelected ? -30 : 0) }],
   }));
 
-  const composedGesture = Gesture.Simultaneous(panGesture, clickGesture);
+  const composedGesture = Gesture.Exclusive(panGesture, clickGesture);
   if (!node) return null;
-  console.log(node);
+
   return (
     <GestureDetector gesture={composedGesture}>
       <Animated.View style={animatedStyle}>

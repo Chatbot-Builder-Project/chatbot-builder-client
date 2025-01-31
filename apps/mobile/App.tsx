@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider } from "react-redux";
 import store from "@chatbot-builder/store/store";
-import React from "react";
+import React, { StrictMode } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { ErrorBoundary } from "./src/components/ErrorBoundary/ErrorBoundary";
 import { Canvas } from "./src/components/Builder/Canvas";
