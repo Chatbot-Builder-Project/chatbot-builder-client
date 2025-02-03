@@ -1,11 +1,8 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { isNil } from "lodash";
 import { IconUserFilled } from "@tabler/icons-react";
-import appLogo from "@chatbot-builder/client/public/assets/icons/appLogo.svg";
 import {
   AppContainer,
-  AppLogo,
-  AppTitle,
   Navbar,
   NavLinks,
   NavLink,
@@ -15,6 +12,7 @@ import {
   AuthButton,
 } from "./Layout.styles";
 import { useUser } from "@chatbot-builder/store/slices/User";
+import AppLogo from "../AppLogo";
 
 type NavigationLink = {
   path: string;
@@ -39,10 +37,7 @@ const AppLayout: React.FC = () => {
     <>
       <Navbar>
         <ContentsContainer>
-          <AppTitle to="/">
-            <AppLogo src={appLogo} alt="app-logo" />
-            Flowverse
-          </AppTitle>
+          <AppLogo />
           <NavLinks>
             {navigationLinks.filter(shouldShowLink).map(({ path, label }) => (
               <NavLink

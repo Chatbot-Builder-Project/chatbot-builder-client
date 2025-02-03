@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { NodeData } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 import { useRef } from "react";
 import { SidebarNodeContainer } from "./SidebarNode.styles";
+import { NODES_ICONS } from "@chatbot-builder/client/nodes";
 
 const SidebarNode: React.FC<SidebarNodeProps> = ({ nodeType, nodeDetails }) => {
   const dispatch = useDispatch();
@@ -50,10 +51,13 @@ const SidebarNode: React.FC<SidebarNodeProps> = ({ nodeType, nodeDetails }) => {
         const newNode: NodeData = {
           ...nodeDetails,
           visual: {
-            x: dropResult.x,
-            y: dropResult.y,
+            data: {
+              x: dropResult.x,
+              y: dropResult.y,
+            },
           },
         };
+        console.log("AasdasdSAD", newNode);
         dispatch(addNode(newNode));
       }
     },
@@ -66,6 +70,7 @@ const SidebarNode: React.FC<SidebarNodeProps> = ({ nodeType, nodeDetails }) => {
         drag(node);
       }}
     >
+      {NODES_ICONS[nodeType]}
       {nodeType}
     </SidebarNodeContainer>
   );

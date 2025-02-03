@@ -101,8 +101,8 @@ function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
       }}
       $isSelected={isSelected}
       onClick={handleNodeClick}
-      $x={node?.visual.x || 0}
-      $y={node?.visual.y || 0}
+      $x={node?.visual.data.x || 0}
+      $y={node?.visual.data.y || 0}
       $isDragging={isDragging}
     >
       {render && render(node)}

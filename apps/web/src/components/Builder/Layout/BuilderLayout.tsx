@@ -17,7 +17,7 @@ const BuilderLayout: React.FC = () => {
         <Layout mode={mode}>
           <Outlet />
           <ItemConfigSidebar />
-          <CanvasConfigBar />
+          <CanvasConfigBar mode={mode} />
         </Layout>
       </CanvasProvider>
     </DndProvider>

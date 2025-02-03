@@ -38,11 +38,12 @@ export const NextNode = styled.div`
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  right: -25px;
-  width: 25px;
-  height: 25px;
+
+  right: -13px;
+  width: 15px;
+  height: 15px;
   cursor: pointer;
-  border-radius: 50%;
+  rotate: 45deg;
   background-color: ${(props) => props.theme.colors.primary};
   transition: background-color 0.3s;
   &:hover {

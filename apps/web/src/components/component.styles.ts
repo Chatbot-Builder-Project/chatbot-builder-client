@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 export const ActionButton = styled.button`
@@ -12,4 +13,21 @@ export const ActionButton = styled.button`
   &:hover {
     transform: translateY(-1px);
   }
+`;
+
+export const AppTitle = styled(Link)`
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  font-weight: 700;
+  font-size: ${({ theme }) => theme.fontSizes.medium};
+  font-family: ${({ theme }) => theme.fonts.heading};
+  color: ${({ theme }) => theme.colors.lightText};
+`;
+
+export const AppLogoContainer = styled.img`
+  width: 23px;
+  height: 23px;
 `;

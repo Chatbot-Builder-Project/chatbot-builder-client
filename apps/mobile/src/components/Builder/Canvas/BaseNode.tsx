@@ -26,13 +26,12 @@ interface BaseNodeProps {
 
 function BaseNode({ scale, id, isSelected }: BaseNodeProps) {
   const node = useSelector((state: RootState) => selectNodeById(state, id));
-  const translateX = useSharedValue(node.visual.x);
-  const translateY = useSharedValue(node.visual.y);
+  const translateX = useSharedValue(node.visual.data.x);
+  const translateY = useSharedValue(node.visual.data.y);
   const dispatch = useDispatch();
   const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
   const pendingSourceId = useSelector(selectPendingFlowLinkSourceId);
-
   const panGesture = Gesture.Pan()
     .runOnJS(true)
     .onStart(() => {

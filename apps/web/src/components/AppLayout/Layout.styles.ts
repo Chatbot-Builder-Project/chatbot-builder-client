@@ -1,23 +1,6 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-export const AppTitle = styled(Link)`
-  display: flex;
-  width: fit-content;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 5px;
-  font-weight: 700;
-  font-size: ${({ theme }) => theme.fontSizes.medium};
-  font-family: ${({ theme }) => theme.fonts.heading};
-  color: ${({ theme }) => theme.colors.lightText};
-`;
-
-export const AppLogo = styled.img`
-  width: 23px;
-  height: 23px;
-`;
-
 export const AppContainer = styled.div`
   max-width: 1400px;
   width: 100%;

@@ -1,3 +1,4 @@
+// import html2canvas from "html2canvas";
 import {
   setPendingFlowLinkSource,
   setSelected,
@@ -12,11 +13,14 @@ import { clamp } from "lodash";
 import { useCanvas } from "../../../contexts/CanvasContext";
 import { NodeVisual } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 import { CanvasProps } from "./types";
+import { setSelectedComponent } from "@chatbot-builder/store/slices/Builder/Chat";
 
 const Canvas: React.FC<CanvasProps> = ({ children, dimensions }) => {
   const dispatch = useDispatch();
   const { canvasRef, handleMouseDown, handleMouseMove, handleMouseUp, scale } =
     useCanvas();
+
+  // const [isDownloading, setIsDownloading] = React.useState(false);
 
   const calculateDropPosition = useCallback(
     (
@@ -37,12 +41,8 @@ const Canvas: React.FC<CanvasProps> = ({ children, dimensions }) => {
       };
 
       const position = {
-        x:
-          (dropPosition.x - centerOffset.x) / scale +
-          dimensions.width / 2,
-        y:
-          (dropPosition.y - centerOffset.y) / scale +
-          dimensions.height / 2,
+        x: (dropPosition.x - centerOffset.x) / scale + dimensions.width / 2,
+        y: (dropPosition.y - centerOffset.y) / scale + dimensions.height / 2,
       };
 
       return {
@@ -72,6 +72,55 @@ const Canvas: React.FC<CanvasProps> = ({ children, dimensions }) => {
     },
     [dispatch]
   );
+
+  // const createFileName = (extension: string, name: string) => {
+  //   const timestamp = new Date().toISOString().slice(0, 10);
+  //   return `${name}_${timestamp}.${extension}`;
+  // };
+
+  // const handleDownloadScreenshot = React.useCallback(async () => {
+  //   const element = document.getElementById("canvas-wrapper");
+  //   if (!element) return;
+
+  //   setIsDownloading(true);
+  //   try {
+  //     const rect = element.getBoundingClientRect();
+
+  //     const canvas = await html2canvas(element, {
+  //       scale: window.devicePixelRatio,
+  //       useCORS: true,
+  //       allowTaint: true,
+  //       logging: true,
+  //       backgroundColor: "#1d1d1d",
+  //       width: window.innerWidth,
+  //       height: window.innerHeight,
+  //       x: rect.left,
+  //       y: rect.top,
+  //       scrollX: -window.scrollX,
+  //       scrollY: -window.scrollY,
+  //       foreignObjectRendering: true,
+  //       onclone: (documentClone) => {
+  //         const clonedElement = documentClone.getElementById("canvas-wrapper");
+  //         if (clonedElement) {
+  //           clonedElement.style.backgroundImage = `radial-gradient(circle at center,rgba(67, 67, 67, 0.25) 2px, transparent 1px)`;
+  //           clonedElement.style.backgroundSize = `35px 35px`;
+  //           clonedElement.style.backgroundPosition = `center`;
+  //           clonedElement.style.backgroundRepeat = "repeat";
+  //         }
+  //       },
+  //     });
+
+  //     const imgData = canvas.toDataURL("image/png", 1.0);
+  //     const link = document.createElement("a");
+  //     link.href = imgData;
+  //     link.download = createFileName("png", "canvas_screenshot");
+  //     link.click();
+  //   } catch (error) {
+  //     console.error("Failed to take screenshot:", error);
+  //   } finally {
+  //     setIsDownloading(false);
+  //   }
+  // }, [scale]);
 
   const [, drop] = useDrop(
     () => ({
@@ -113,6 +162,7 @@ const Canvas: React.FC<CanvasProps> = ({ children, dimensions }) => {
       e.preventDefault();
       dispatch(setSelected(null));
       dispatch(setPendingFlowLinkSource(null));
+      dispatch(setSelectedComponent(null));
     },
     [dispatch]
   );
@@ -131,10 +181,23 @@ const Canvas: React.FC<CanvasProps> = ({ children, dimensions }) => {
 
   return (
     <div
+      id="canvas-wrapper"
       style={WRAPPER_STYLES}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
+      {/* <button
+        style={{
+          position: "absolute",
+          top: 100,
+          right: 10,
+          zIndex: 999,
+        }}
+        onClick={handleDownloadScreenshot}
+        disabled={isDownloading}
+      >
+        Download Canvas
+      </button> */}
       <div
         ref={(node) => {
           drop(node);

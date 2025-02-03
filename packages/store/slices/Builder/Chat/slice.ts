@@ -1,34 +1,67 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { ChatState, ChatUIConfig } from "./types";
+import {
+  ChatState,
+  ChatComponentStyles,
+  ChatBreakpoint,
+  ChatComponent,
+  StyleUpdate,
+} from "./types";
+import { defaultStyles } from "./deafult";
+import _ from "lodash";
 
 const initialState: ChatState = {
-  config: {
-    backgroundColor: "#ffffff",
-    textColor: "#000000",
-    fontSize: 14,
-    padding: 16,
-    borderRadius: 8,
-    messageSpacing: 12,
-    userMessageAlign: "right",
-    botMessageAlign: "left",
-    userMessageBgColor: "#e3f2fd",
-    botMessageBgColor: "#f5f5f5",
-    fontFamily: "Arial, sans-serif",
-  },
+  currentBreakpoint: "lg",
+  selectedComponent: null,
+  styles: defaultStyles,
+};
+
+const updateNestedStyle = (obj: any, path: string[], value: any): void => {
+  let current = obj;
+  for (let i = 0; i < path.length - 1; i++) {
+    if (!(path[i] in current)) {
+      current[path[i]] = {};
+    }
+    current = current[path[i]];
+  }
+  current[path[path.length - 1]] = value;
 };
 
 const chatSlice = createSlice({
   name: "builderChat",
   initialState,
   reducers: {
-    updateChatConfig: (state, action: PayloadAction<Partial<ChatUIConfig>>) => {
-      state.config = { ...state.config, ...action.payload };
+    updateComponentStyle: (
+      state,
+      action: PayloadAction<{
+        component: keyof ChatComponentStyles;
+        styleUpdate: StyleUpdate;
+      }>
+    ) => {
+      const { component, styleUpdate } = action.payload;
+      const componentStyle = _.get(state.styles, [
+        component,
+        state.currentBreakpoint,
+      ]);
+      updateNestedStyle(componentStyle, styleUpdate.path, styleUpdate.value);
     },
-    resetChatConfig: (state) => {
-      state.config = initialState.config;
+    resetChatStyles: (state) => {
+      state.styles = JSON.parse(JSON.stringify(defaultStyles));
+      state.currentBreakpoint = initialState.currentBreakpoint;
+      state.selectedComponent = initialState.selectedComponent;
+    },
+    updateBreakpoint: (state, action: PayloadAction<ChatBreakpoint>) => {
+      state.currentBreakpoint = action.payload;
+    },
+    setSelectedComponent: (state, action: PayloadAction<ChatComponent>) => {
+      state.selectedComponent = action.payload;
     },
   },
 });
 
-export const { updateChatConfig, resetChatConfig } = chatSlice.actions;
+export const {
+  updateComponentStyle,
+  resetChatStyles,
+  updateBreakpoint,
+  setSelectedComponent,
+} = chatSlice.actions;
 export const chatReducer = chatSlice.reducer;

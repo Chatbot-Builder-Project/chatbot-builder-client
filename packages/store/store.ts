@@ -2,16 +2,21 @@ import { configureStore } from "@reduxjs/toolkit";
 import { userReducer, builderReducer } from "./slices";
 import { authApi } from "./API/Auth";
 import { userInfoApi } from "./API/userInfo";
-
+import { workflowsApi } from "./API/workflows/workflows";
 const store = configureStore({
   reducer: {
     user: userReducer,
     builder: builderReducer,
     [authApi.reducerPath]: authApi.reducer,
     [userInfoApi.reducerPath]: userInfoApi.reducer,
+    [workflowsApi.reducerPath]: workflowsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(authApi.middleware, userInfoApi.middleware),
+    getDefaultMiddleware().concat(
+      authApi.middleware,
+      userInfoApi.middleware,
+      workflowsApi.middleware
+    ),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

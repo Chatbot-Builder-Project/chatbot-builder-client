@@ -35,11 +35,16 @@ const PendingArrow: React.FC<PendingArrowProps> = ({
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [scale, svgRef]);
 
-  if (!sourceNode?.visual || !sourceNode.visual.x || !sourceNode.visual.y)
+  if (
+    !sourceNode?.visual.data ||
+    !sourceNode.visual.data.x ||
+    !sourceNode.visual.data.y
+  )
     return null;
 
-  const startX = sourceNode.visual.x + (sourceNode.visual.width || 0);
-  const startY = sourceNode.visual.y + (sourceNode.visual.height || 0) / 2;
+  const startX = sourceNode.visual.data.x + (sourceNode.visual.data.width || 0);
+  const startY =
+    sourceNode.visual.data.y + (sourceNode.visual.data.height || 0) / 2;
   if (!mousePosition) return null;
   return (
     <path

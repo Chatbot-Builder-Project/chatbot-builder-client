@@ -42,7 +42,7 @@ const routes: AppRouteObject[] = [
     path: "/builder",
     element: <BuilderLayout />,
     children: [
-      { path: "/builder/flow", element: <FlowBuilder /> },
+      { path: "/builder/flow/:id", element: <FlowBuilder /> },
       { path: "/builder/chat", element: <ChatBuilder /> },
     ],
   },

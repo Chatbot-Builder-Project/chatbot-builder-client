@@ -1,4 +1,4 @@
-import { IconCircleArrowRight, IconPlus } from "@tabler/icons-react";
+import { IconCircleArrowRight } from "@tabler/icons-react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -16,11 +16,17 @@ import {
   selectPendingFlowLinkSourceId,
   setPendingFlowLinkSource,
   createFlowLink,
+  selectFlowLinksBySourceId,
+  removeFlowLink,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
+import { RootState } from "@chatbot-builder/store/store";
 
 const Node: React.FC<NodeProps> = ({ node }) => {
   const dispatch = useDispatch();
   const pendingSourceId = useSelector(selectPendingFlowLinkSourceId);
+  const existingFlowLinks = useSelector((state: RootState) =>
+    selectFlowLinksBySourceId(state, pendingSourceId || -1)
+  );
 
   const handleNextNode = (e: React.MouseEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -29,6 +35,9 @@ const Node: React.FC<NodeProps> = ({ node }) => {
     if (pendingSourceId === null) {
       dispatch(setPendingFlowLinkSource(node.info.id));
     } else if (pendingSourceId !== node.info.id) {
+      existingFlowLinks.forEach((link) => {
+        dispatch(removeFlowLink(link.info.id));
+      });
       dispatch(createFlowLink(node.info.id));
     }
   };
@@ -45,11 +54,7 @@ const Node: React.FC<NodeProps> = ({ node }) => {
           <IconCircleArrowRight color="#fff" size={12} />
         </PrevNode>
       )}
-      {!pendingSourceId && (
-        <NextNode onClick={handleNextNode}>
-          <IconPlus color="#fff" size={12} />
-        </NextNode>
-      )}
+      {!pendingSourceId && <NextNode onClick={handleNextNode} />}
     </NodeContainer>
   );
 };

@@ -12,7 +12,7 @@ export const SidebarNodeContainer = styled.div`
   width: 100%;
   color: ${(props) => props.theme.colors.lightText};
   text-weight: 800;
-
+  gap: 10px;
   &:hover {
     color: ${(props) => props.theme.colors.primary};
     background-color: ${(props) => props.theme.colors.nodeBackground};

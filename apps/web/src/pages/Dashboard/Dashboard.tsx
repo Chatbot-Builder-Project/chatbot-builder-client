@@ -1,17 +1,24 @@
+import { useFetchWorkflowsQuery } from "@chatbot-builder/store/API/workflows/workflows";
 import { DashboardContainer } from "./Dashboard.styles";
+import Card from "./Card";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  // const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const { data, isLoading } = useFetchWorkflowsQuery({});
+  const navigate = useNavigate();
+  if (isLoading || !data) return <div>Loading...</div>;
 
-  // const handleSettingsClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-  //   setAnchorEl(event.currentTarget);
-  // };
+  const handleCardClick = (id: string) => {
+    navigate(`/builder/flow/${id}`);
+  };
 
-  // const handleClose = () => {
-  //   setAnchorEl(null);
-  // };
-
-  return <DashboardContainer></DashboardContainer>;
+  return (
+    <DashboardContainer>
+      {data.page.items.map((chatbot) => (
+        <Card key={chatbot.id} chatbot={chatbot} onClick={handleCardClick} />
+      ))}
+    </DashboardContainer>
+  );
 };
 
 export default Dashboard;

@@ -2,7 +2,7 @@ import { Canvas } from "../../components/Builder/Canvas";
 import { CustomChatEditor } from "../../components/CustomChatEditor";
 
 const CHAT_DIMENSIONS = {
-  width: 4000,
+  width: 6000,
   height: 4000,
 };
 

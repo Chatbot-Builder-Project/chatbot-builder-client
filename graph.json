@@ -7,7 +7,7 @@
       {
         "Type": "Interaction",
         "info": { "id": 1, "name": "WelcomeInteraction" },
-        "visual": { "x": 0, "y": 0 },
+        "visual": { "data": { "x": 0, "y": 0 } },
         "textInputPort": {
           "info": { "id": 2, "name": "WelcomeInteractionInput" },
           "visual": { "x": 0, "y": 0 },

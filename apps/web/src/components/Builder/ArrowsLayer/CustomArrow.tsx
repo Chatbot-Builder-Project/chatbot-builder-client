@@ -36,33 +36,33 @@ const ArrowConnector: React.FC<ArrowConnectorProps> = ({
   const targetNode = useSelector((state: RootState) =>
     selectNodeById(state, parseInt(endId.replace("node-", "")))
   );
-  const points = flowLink?.visual?.points || [];
+  const points = flowLink?.visual?.data?.points || [];
 
   const selectedId = useSelector(selectElementId);
   const isSelected = selectedId === linkId;
 
   const nodePositions = useMemo(() => {
     if (
-      !sourceNode?.visual ||
-      !targetNode?.visual ||
-      !sourceNode.visual.x ||
-      !sourceNode.visual.y ||
-      !targetNode.visual.y ||
-      !targetNode.visual.x
+      !sourceNode?.visual.data ||
+      !targetNode?.visual.data ||
+      !sourceNode.visual.data.x ||
+      !sourceNode.visual.data.y ||
+      !targetNode.visual.data.y ||
+      !targetNode.visual.data.x
     )
       return null;
 
     return {
       start: {
-        x: sourceNode.visual.x + (sourceNode.visual.width || 0),
-        y: sourceNode.visual.y + (sourceNode.visual.height || 0) / 2,
+        x: sourceNode.visual.data.x + (sourceNode.visual.data.width || 0),
+        y: sourceNode.visual.data.y + (sourceNode.visual.data.height || 0) / 2,
       },
       end: {
-        x: targetNode.visual.x,
-        y: targetNode.visual.y + (targetNode.visual.height || 0) / 2,
+        x: targetNode.visual.data.x,
+        y: targetNode.visual.data.y + (targetNode.visual.data.height || 0) / 2,
       },
     };
-  }, [sourceNode?.visual, targetNode?.visual]);
+  }, [sourceNode?.visual.data, targetNode?.visual.data]);
 
   const updatePoints = (newPoints: ControlPoint[]) => {
     dispatch(updateFlowLinkPoints({ linkId, points: newPoints }));

@@ -1,169 +1,423 @@
 import {
   selectNodeById,
-  selectElementId, // Changed from selectSelectedNodeId
+  selectElementId,
   updateNode,
+  selectAllNodes,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import {
   Container,
   InputField,
   TextArea,
   SectionTitle,
-  OptionContainer,
-  OptionRow,
+  Select,
+  ArrayContainer,
+  ArrayItem,
+  IconButton,
+  SaveButton,
 } from "./ItemConfigSidebar.styles";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@chatbot-builder/store/store";
-import { useForm } from "react-hook-form";
-import { useEffect } from "react";
-import { NodeType } from "@chatbot-builder/store/slices/Builder/Nodes/types";
+import { useEffect, useState } from "react";
+import {
+  NodeData,
+  NodeType,
+  HttpMethod,
+} from "@chatbot-builder/store/slices/Builder/Nodes/types";
 import { cloneDeep } from "lodash";
+import { IconPlus, IconTrash } from "@tabler/icons-react";
+import { Autocomplete, TextField } from "@mui/material";
+import { styled as muiStyled } from "@mui/material/styles";
+
+interface UpdatePath {
+  path: string[];
+  value: unknown;
+}
+
+const StyledAutocomplete = muiStyled(Autocomplete)`
+  background: ${(props) => props.theme.palette.background.paper};
+  border-radius: 4px;
+  
+  & .MuiOutlinedInput-root {
+    color: white;
+  }
+  
+  & .MuiOutlinedInput-notchedOutline {
+    border-color: #373737;
+  }
+`;
 
 const ItemConfigSidebar = () => {
   const dispatch = useDispatch();
-  const selectedId = useSelector(selectElementId); // Changed from selectSelectedNodeId
-  const selectedNode = useSelector(
-    (state: RootState) =>
-      selectedId ? selectNodeById(state, selectedId) : null // Changed from selectedNodeId
+  const selectedId = useSelector(selectElementId);
+  const selectedNode = useSelector((state: RootState) =>
+    selectedId ? selectNodeById(state, selectedId) : null
   );
-
-  const { register, reset, watch } = useForm({
-    defaultValues: {
-      nodeName: selectedNode?.info.name || "",
-      template: selectedNode?.type === "Prompt" ? selectedNode.template : "",
-      staticText: selectedNode?.type === "Static" ? selectedNode.data.text : "",
-      options:
-        selectedNode?.type === "Interaction"
-          ? Object.entries(selectedNode.outputOptionMetas || {}).map(
-              ([key, value]) => ({
-                option: key,
-                description: value.Description,
-              })
-            )
-          : [],
-    },
-  });
+  const allNodes = useSelector(selectAllNodes);
+  const [localNode, setLocalNode] = useState<NodeData | null>(null);
 
   useEffect(() => {
-    reset({
-      nodeName: selectedNode?.info.name || "",
-      template: selectedNode?.type === "Prompt" ? selectedNode.template : "",
-      staticText: selectedNode?.type === "Static" ? selectedNode.data.text : "",
-      options:
-        selectedNode?.type === "Interaction"
-          ? Object.entries(selectedNode.outputOptionMetas || {}).map(
-              ([key, value]) => ({
-                option: key,
-                description: value.Description,
-              })
-            )
-          : [],
+    setLocalNode(selectedNode ? cloneDeep(selectedNode) : null);
+  }, [selectedNode]);
+
+  const updateLocalNode = (update: UpdatePath) => {
+    if (!localNode) return;
+    const updated = cloneDeep(localNode);
+    let target: Record<string, any> = updated;
+    const { path, value } = update;
+    const lastKey = path[path.length - 1];
+
+    path.slice(0, -1).forEach((key) => {
+      if (!target[key]) target[key] = {};
+      target = target[key];
     });
-  }, [reset, selectedNode]);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleNodeUpdate = (fieldName: string, value: any) => {
-    if (!selectedNode) return;
-
-    // eslint-disable-next-line prefer-const
-    let updatedNode = cloneDeep(selectedNode);
-
-    switch (selectedNode.type) {
-      case "Prompt":
-        if (fieldName === "template") {
-          (updatedNode as { template: string }).template = value;
-        }
-        break;
-      case "Static":
-        if (fieldName === "staticText") {
-          (updatedNode as { data: { text: string } }).data.text = value;
-        }
-        break;
-      case "Interaction":
-        if (fieldName === "options") {
-          const optionMetas: Record<string, { Description: string }> = {};
-          value.forEach((opt: { option: string; description: string }) => {
-            optionMetas[opt.option] = { Description: opt.description };
-          });
-          (
-            updatedNode as { outputOptionMetas: typeof optionMetas }
-          ).outputOptionMetas = optionMetas;
-        }
-        break;
-    }
-
-    if (fieldName === "nodeName") {
-      updatedNode.info.name = value;
-    }
-
-    dispatch(updateNode(updatedNode));
+    target[lastKey] = value;
+    setLocalNode(updated as NodeData);
   };
 
-  // if (!selectedNode) return null;
+  const renderNodeIdSelect = (
+    path: string[],
+    currentValue: number | undefined,
+    label: string
+  ) => (
+    <StyledAutocomplete
+      value={allNodes.find((node) => node.info.id === currentValue) || null}
+      onChange={(_, newValue) => {
+        updateLocalNode({
+          path,
+          value: newValue?.info.id,
+        });
+      }}
+      options={allNodes}
+      getOptionLabel={(option) => option.info.name}
+      renderInput={(params) => (
+        <TextField {...params} label={label} variant="outlined" size="small" />
+      )}
+    />
+  );
+
+  const renderPortIdSelect = (
+    path: string[],
+    currentValue: number | undefined,
+    sourceNodeId: number | undefined,
+    label: string
+  ) => {
+    const sourceNode = allNodes.find((n) => n.info.id === sourceNodeId);
+    const availablePorts = sourceNode?.inputPorts || [];
+
+    return (
+      <StyledAutocomplete
+        value={
+          availablePorts.find((port) => port.info.id === currentValue) || null
+        }
+        onChange={(_, newValue) => {
+          updateLocalNode({
+            path,
+            value: newValue?.info.id,
+          });
+        }}
+        options={availablePorts}
+        getOptionLabel={(option) => option.info.name}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={label}
+            variant="outlined"
+            size="small"
+          />
+        )}
+      />
+    );
+  };
+
+  const renderPromptNode = () => (
+    <>
+      <SectionTitle>Template</SectionTitle>
+      <TextArea
+        value={localNode?.template || ""}
+        onChange={(e) =>
+          updateLocalNode({ path: ["template"], value: e.target.value })
+        }
+      />
+      <SectionTitle>Input Ports</SectionTitle>
+      <ArrayContainer>
+        {localNode?.inputPorts?.map((port, index) => (
+          <ArrayItem key={index}>
+            <InputField
+              value={port.info.name}
+              onChange={(e) => {
+                const newPorts = [...localNode.inputPorts];
+                newPorts[index].info.name = e.target.value;
+                updateLocalNode({ path: ["inputPorts"], value: newPorts });
+              }}
+            />
+            <IconButton
+              onClick={() => {
+                const newPorts = localNode.inputPorts.filter(
+                  (_, i) => i !== index
+                );
+                updateLocalNode({ path: ["inputPorts"], value: newPorts });
+              }}
+            >
+              <IconTrash size={18} />
+            </IconButton>
+          </ArrayItem>
+        ))}
+        <IconButton
+          onClick={() => {
+            const newPort = {
+              info: { id: Date.now(), name: `Input_${Date.now()}` },
+              nodeId: localNode!.info.id,
+              dataType: "string",
+            };
+            updateLocalNode({
+              path: ["inputPorts"],
+              value: [...(localNode?.inputPorts || []), newPort],
+            });
+          }}
+        >
+          <IconPlus size={18} />
+        </IconButton>
+      </ArrayContainer>
+    </>
+  );
+
+  const renderStaticNode = () => (
+    <>
+      <SectionTitle>Static Text</SectionTitle>
+      <TextArea
+        value={localNode?.data?.text || ""}
+        onChange={(e) =>
+          updateLocalNode({ path: ["data", "text"], value: e.target.value })
+        }
+      />
+    </>
+  );
+
+  const renderInteractionNode = () => (
+    <>
+      <SectionTitle>Text Input Port</SectionTitle>
+      {renderPortIdSelect(
+        ["textInputPort"],
+        localNode?.textInputPort?.info.id,
+        localNode?.info.id,
+        "Select Input Port"
+      )}
+
+      <SectionTitle>Options</SectionTitle>
+      <ArrayContainer>
+        {Object.entries(localNode?.outputOptionMetas || {}).map(
+          ([key, value], index) => (
+            <ArrayItem key={index}>
+              <InputField
+                placeholder="Option"
+                value={key}
+                onChange={(e) => {
+                  const newMetas = { ...localNode?.outputOptionMetas };
+                  delete newMetas[key];
+                  newMetas[e.target.value] = value;
+                  updateLocalNode({
+                    path: ["outputOptionMetas"],
+                    value: newMetas,
+                  });
+                }}
+              />
+              <InputField
+                placeholder="Description"
+                value={value.Description}
+                onChange={(e) => {
+                  const newMetas = { ...localNode?.outputOptionMetas };
+                  newMetas[key] = { Description: e.target.value };
+                  updateLocalNode({
+                    path: ["outputOptionMetas"],
+                    value: newMetas,
+                  });
+                }}
+              />
+              <IconButton
+                onClick={() => {
+                  const newMetas = { ...localNode?.outputOptionMetas };
+                  delete newMetas[key];
+                  updateLocalNode({
+                    path: ["outputOptionMetas"],
+                    value: newMetas,
+                  });
+                }}
+              >
+                <IconTrash size={18} />
+              </IconButton>
+            </ArrayItem>
+          )
+        )}
+        <IconButton
+          onClick={() => {
+            const newMetas = { ...localNode?.outputOptionMetas };
+            newMetas[`Option_${Date.now()}`] = { Description: "" };
+            updateLocalNode({ path: ["outputOptionMetas"], value: newMetas });
+          }}
+        >
+          <IconPlus size={18} />
+        </IconButton>
+      </ArrayContainer>
+
+      <SectionTitle>Output Enum</SectionTitle>
+      {renderNodeIdSelect(
+        ["outputEnumId"],
+        localNode?.outputEnumId,
+        "Select Enum"
+      )}
+    </>
+  );
+
+  const renderApiActionNode = () => (
+    <>
+      <SectionTitle>HTTP Method</SectionTitle>
+      <Select
+        value={localNode?.httpMethod}
+        onChange={(e) =>
+          updateLocalNode({ path: ["httpMethod"], value: e.target.value })
+        }
+      >
+        {Object.values(HttpMethod).map((method) => (
+          <option key={method} value={method}>
+            {method}
+          </option>
+        ))}
+      </Select>
+
+      <SectionTitle>Headers</SectionTitle>
+      <ArrayContainer>
+        {Object.entries(localNode?.headers || {}).map(([key, value], index) => (
+          <ArrayItem key={index}>
+            <InputField
+              placeholder="Header Key"
+              value={key}
+              onChange={(e) => {
+                const newHeaders = { ...localNode?.headers };
+                delete newHeaders[key];
+                newHeaders[e.target.value] = value;
+                updateLocalNode({ path: ["headers"], value: newHeaders });
+              }}
+            />
+            <InputField
+              placeholder="Header Value"
+              value={value}
+              onChange={(e) => {
+                const newHeaders = { ...localNode?.headers };
+                newHeaders[key] = e.target.value;
+                updateLocalNode({ path: ["headers"], value: newHeaders });
+              }}
+            />
+            <IconButton
+              onClick={() => {
+                const newHeaders = { ...localNode?.headers };
+                delete newHeaders[key];
+                updateLocalNode({ path: ["headers"], value: newHeaders });
+              }}
+            >
+              <IconTrash size={18} />
+            </IconButton>
+          </ArrayItem>
+        ))}
+        <IconButton
+          onClick={() => {
+            const newHeaders = { ...localNode?.headers, "": "" };
+            updateLocalNode({ path: ["headers"], value: newHeaders });
+          }}
+        >
+          <IconPlus size={18} />
+        </IconButton>
+      </ArrayContainer>
+    </>
+  );
+
+  const renderGenerationNode = () => (
+    <>
+      <SectionTitle>Use Memory</SectionTitle>
+      <input
+        type="checkbox"
+        checked={localNode?.options?.useMemory || false}
+        onChange={(e) =>
+          updateLocalNode({
+            path: ["options", "useMemory"],
+            value: e.target.checked,
+          })
+        }
+      />
+
+      <SectionTitle>Response Schema</SectionTitle>
+      <TextArea
+        value={JSON.stringify(
+          localNode?.options?.responseSchema || {},
+          null,
+          2
+        )}
+        onChange={(e) => {
+          try {
+            const schema = JSON.parse(e.target.value);
+            updateLocalNode({
+              path: ["options", "responseSchema"],
+              value: schema,
+            });
+          } catch (err) {
+            // Handle invalid JSON
+          }
+        }}
+      />
+    </>
+  );
+
+  const handleSave = () => {
+    if (localNode) {
+      // Validate all required fields before dispatch
+      const isValid = validateNode(localNode);
+      if (isValid) {
+        dispatch(updateNode(localNode));
+      } else {
+        // Show error message
+        console.error("Invalid node configuration");
+      }
+    }
+  };
+
+  // Add validation function
+  const validateNode = (node: NodeData): boolean => {
+    switch (node.type) {
+      case NodeType.Interaction:
+        return (
+          !!node.outputEnumId &&
+          Object.keys(node.outputOptionMetas || {}).length > 0
+        );
+      case NodeType.Prompt:
+        return !!node.template && node.inputPorts.length > 0;
+      // Add other validations...
+      default:
+        return true;
+    }
+  };
+
+  if (!localNode) return null;
 
   return (
     <Container $isOpened={!!selectedNode}>
-      {selectedNode && (
-        <>
-          <SectionTitle>Node Type</SectionTitle>
-          <div>{selectedNode.type}</div>
+      <SectionTitle>Node Type</SectionTitle>
+      <div>{localNode.type}</div>
 
-          <SectionTitle>Node Name</SectionTitle>
-          <InputField
-            {...register("nodeName")}
-            onChange={(e) => handleNodeUpdate("nodeName", e.target.value)}
-          />
+      <SectionTitle>Node Name</SectionTitle>
+      <InputField
+        value={localNode.info.name}
+        onChange={(e) =>
+          updateLocalNode({ path: ["info", "name"], value: e.target.value })
+        }
+      />
 
-          {selectedNode.type === NodeType.Prompt && (
-            <>
-              <SectionTitle>Template</SectionTitle>
-              <TextArea
-                {...register("template")}
-                onChange={(e) => handleNodeUpdate("template", e.target.value)}
-              />
-            </>
-          )}
+      {localNode.type === NodeType.Prompt && renderPromptNode()}
+      {localNode.type === NodeType.Static && renderStaticNode()}
+      {localNode.type === NodeType.Interaction && renderInteractionNode()}
+      {localNode.type === NodeType.ApiAction && renderApiActionNode()}
+      {localNode.type === NodeType.Generation && renderGenerationNode()}
 
-          {selectedNode.type === NodeType.Static && (
-            <>
-              <SectionTitle>Static Text</SectionTitle>
-              <TextArea
-                {...register("staticText")}
-                onChange={(e) => handleNodeUpdate("staticText", e.target.value)}
-              />
-            </>
-          )}
-
-          {selectedNode.type === NodeType.Interaction && (
-            <>
-              <SectionTitle>Options</SectionTitle>
-              <OptionContainer>
-                {watch("options")?.map((_, index) => (
-                  <OptionRow key={index}>
-                    <InputField
-                      {...register(`options.${index}.option`)}
-                      placeholder="Option"
-                      onChange={(e) => {
-                        const options = [...watch("options")];
-                        options[index].option = e.target.value;
-                        handleNodeUpdate("options", options);
-                      }}
-                    />
-                    <InputField
-                      {...register(`options.${index}.description`)}
-                      placeholder="Description"
-                      onChange={(e) => {
-                        const options = [...watch("options")];
-                        options[index].description = e.target.value;
-                        handleNodeUpdate("options", options);
-                      }}
-                    />
-                  </OptionRow>
-                ))}
-              </OptionContainer>
-            </>
-          )}
-        </>
-      )}
+      <SaveButton onClick={handleSave}>Save Changes</SaveButton>
     </Container>
   );
 };

@@ -28,8 +28,10 @@ const NodesBar = () => {
       addNode({
         ...node,
         visual: {
-          x: 0,
-          y: 0,
+          data: {
+            x: 0,
+            y: 0,
+          },
         },
       })
     );

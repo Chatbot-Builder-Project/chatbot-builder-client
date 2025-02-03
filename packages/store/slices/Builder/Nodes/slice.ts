@@ -11,6 +11,7 @@ import {
   BuilderState,
   ControlPoint,
   NodeVisual,
+  Enum,
 } from "./types";
 
 const nodesAdapter = createEntityAdapter<NodeData>({
@@ -25,13 +26,19 @@ const flowLinksAdapter = createEntityAdapter<FlowLink>({
   selectId: (link) => link.info.id,
 });
 
+const enumsAdapter = createEntityAdapter<Enum>({
+  selectId: (enum_) => enum_.info.id,
+});
+
 const defaultNodes: NodeData[] = [];
+const defaultEnums: Enum[] = [];
 
 const initialState: BuilderState = {
   nodes: nodesAdapter.setAll(nodesAdapter.getInitialState(), defaultNodes),
+  enums: enumsAdapter.setAll(enumsAdapter.getInitialState(), defaultEnums),
   dataLinks: dataLinksAdapter.getInitialState(),
   flowLinks: flowLinksAdapter.getInitialState(),
-  selectedId: null, // Combined selection
+  selectedId: null,
   startNodeId: 1,
   nextNodeId: 1,
   pendingFlowLinkSourceId: null,
@@ -61,7 +68,7 @@ const builderSlice = createSlice({
       const { id, visual } = action.payload;
       const node = state.nodes.entities[id];
       if (node) {
-        node.visual = { ...node.visual, ...visual };
+        node.visual.data = { ...node.visual.data, ...visual };
       }
     },
     removeNode: (state, action: PayloadAction<number>) => {
@@ -125,7 +132,9 @@ const builderSlice = createSlice({
           sourceNodeId: state.pendingFlowLinkSourceId,
           targetNodeId: action.payload,
           visual: {
-            points: [],
+            data: {
+              points: [],
+            },
           },
         };
         flowLinksAdapter.addOne(state.flowLinks, newLink);
@@ -140,9 +149,41 @@ const builderSlice = createSlice({
       flowLinksAdapter.updateOne(state.flowLinks, {
         id: linkId,
         changes: {
-          visual: { points },
+          visual: { data: { points } },
         },
       });
+    },
+    addEnum: (state, action: PayloadAction<Enum>) => {
+      const newId = state.nextNodeId;
+      state.nextNodeId += 1;
+      const newEnum = {
+        ...action.payload,
+        info: {
+          ...action.payload.info,
+          name: `Enum_${newId}`,
+          id: newId,
+        },
+      };
+      enumsAdapter.addOne(state.enums, newEnum);
+    },
+    updateEnum: (state, action: PayloadAction<Enum>) => {
+      enumsAdapter.updateOne(state.enums, {
+        id: action.payload.info.id,
+        changes: action.payload,
+      });
+    },
+    removeEnum: (state, action: PayloadAction<number>) => {
+      enumsAdapter.removeOne(state.enums, action.payload);
+    },
+    updateEnumVisual: (
+      state,
+      action: PayloadAction<{ id: number; visual: NodeVisual }>
+    ) => {
+      const { id, visual } = action.payload;
+      const enum_ = state.enums.entities[id];
+      if (enum_) {
+        enum_.visual = { ...enum_.visual, ...visual };
+      }
     },
   },
 });
@@ -165,6 +206,15 @@ export const {
 } = flowLinksAdapter.getSelectors<RootState>(
   (state) => state.builder.nodes.flowLinks
 );
+
+export const {
+  selectAll: selectAllEnums,
+  selectById: selectEnumById,
+  selectIds: selectEnumIds,
+} = enumsAdapter.getSelectors<RootState>((state) => state.builder.nodes.enums);
+
+export const selectFlowLinksBySourceId = (state: RootState, sourceId: number) =>
+  selectAllFlowLinks(state).filter((link) => link.sourceNodeId === sourceId);
 
 export const selectElementId = (state: RootState) =>
   state.builder.nodes.selectedId;
@@ -189,6 +239,10 @@ export const {
   setPendingFlowLinkSource,
   createFlowLink,
   updateFlowLinkPoints,
+  addEnum,
+  updateEnum,
+  removeEnum,
+  updateEnumVisual,
 } = builderSlice.actions;
 
 export default builderSlice.reducer;
