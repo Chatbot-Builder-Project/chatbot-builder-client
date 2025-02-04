@@ -3,6 +3,7 @@ import { userReducer, builderReducer } from "./slices";
 import { authApi } from "./API/Auth";
 import { userInfoApi } from "./API/userInfo";
 import { workflowsApi } from "./API/workflows/workflows";
+import { imageUploaderApi } from "./API/imageUploader/imageUploader";
 const store = configureStore({
   reducer: {
     user: userReducer,
@@ -10,12 +11,14 @@ const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [userInfoApi.reducerPath]: userInfoApi.reducer,
     [workflowsApi.reducerPath]: workflowsApi.reducer,
+    [imageUploaderApi.reducerPath]: imageUploaderApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       authApi.middleware,
       userInfoApi.middleware,
-      workflowsApi.middleware
+      workflowsApi.middleware,
+      imageUploaderApi.middleware
     ),
 });
 

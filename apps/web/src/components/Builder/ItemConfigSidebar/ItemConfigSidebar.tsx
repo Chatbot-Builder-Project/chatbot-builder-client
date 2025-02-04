@@ -4,8 +4,6 @@ import {
   updateNode,
   selectAllNodes,
   selectAllDataLinks,
-  addDataLink,
-  removeDataLink,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import {
   Container,
@@ -22,148 +20,15 @@ import { RootState } from "@chatbot-builder/store/store";
 import {
   NodeType,
   HttpMethod,
-  NodeData,
-  Port,
-  BaseInfo,
 } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 import { cloneDeep } from "lodash";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
-import { Autocomplete, TextField, Switch, Divider } from "@mui/material";
-import { styled as muiStyled } from "@mui/material/styles";
+import { Divider } from "@mui/material";
 import Editor from "@monaco-editor/react";
-
-const StyledAutocomplete = muiStyled(Autocomplete)`
-  & .MuiOutlinedInput-root {
-    color: ${(props) => props.theme.palette.text.primary};
-    background: ${(props) => props.theme.palette.background.paper};
-    border-radius: 4px;
-
-    &:hover .MuiOutlinedInput-notchedOutline {
-      border-color: ${(props) => props.theme.palette.primary.main};
-    }
-
-    &.Mui-focused .MuiOutlinedInput-notchedOutline {
-      border-color: ${(props) => props.theme.palette.primary.main};
-    }
-  }
-
-  & .MuiOutlinedInput-notchedOutline {
-    border-color: ${(props) => props.theme.palette.divider};
-  }
-
-  & .MuiAutocomplete-tag {
-    background: ${(props) => props.theme.palette.primary.dark};
-    color: ${(props) => props.theme.palette.primary.contrastText};
-  }
-
-  & .MuiAutocomplete-clearIndicator,
-  & .MuiAutocomplete-popupIndicator {
-    color: ${(props) => props.theme.palette.text.secondary};
-  }
-
-  & .MuiAutocomplete-paper {
-    background: ${(props) => props.theme.palette.background.paper};
-    color: ${(props) => props.theme.palette.text.primary};
-  }
-
-  & .MuiAutocomplete-option {
-    &:hover {
-      background: ${(props) => props.theme.palette.action.hover};
-    }
-    &[aria-selected="true"] {
-      background: ${(props) => props.theme.palette.action.selected};
-    }
-  }
-`;
-
-const StyledSwitch = muiStyled(Switch)`
-  & .MuiSwitch-switchBase.Mui-checked {
-    color: #009bff;
-    &:hover {
-      background-color: rgba(0, 155, 255, 0.08);
-    }
-  }
-  & .MuiSwitch-switchBase {
-     background-color: #373737 ;
-  }
-  & .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
-    background-color: #009bff;
-  }
-`;
-
-function getInputPortsWithNodeInfo(
-  node: NodeData,
-  type: "text" | "image" | "option"
-): Array<{ inputPort: Port; nodeInfo: BaseInfo }> {
-  const list: Array<{ inputPort: Port; nodeInfo: BaseInfo }> = [];
-  if (type === "text") {
-    switch (node.type) {
-      case NodeType.Interaction:
-        if (node.textInputPort)
-          list.push({ inputPort: node.textInputPort, nodeInfo: node.info });
-        break;
-      case NodeType.Static:
-        if ("data" in node && node.data.type === "text" && node.outputPort)
-          list.push({ inputPort: node.outputPort, nodeInfo: node.info });
-        break;
-      case NodeType.SmartSwitch:
-        if (node.inputPort)
-          list.push({ inputPort: node.inputPort, nodeInfo: node.info });
-        break;
-      case NodeType.Prompt:
-        if (node.inputPorts)
-          list.push(
-            ...node.inputPorts.map((inputPort) => ({
-              inputPort,
-              nodeInfo: node.info,
-            }))
-          );
-        break;
-      case NodeType.ApiAction:
-        if (node.urlInputPort)
-          list.push({ inputPort: node.urlInputPort, nodeInfo: node.info });
-        if (node.bodyInputPort)
-          list.push({ inputPort: node.bodyInputPort, nodeInfo: node.info });
-        break;
-      case NodeType.Generation:
-        if (node.inputPort)
-          list.push({ inputPort: node.inputPort, nodeInfo: node.info });
-        break;
-    }
-  } else if (type === "image") {
-    switch (node.type) {
-      case NodeType.Interaction:
-        if (node.imageInputPorts)
-          list.push(
-            ...node.imageInputPorts.map((imageInputPort) => ({
-              inputPort: imageInputPort,
-              nodeInfo: node.info,
-            }))
-          );
-        break;
-      case NodeType.Static:
-        if ("data" in node && node.data.type === "image" && node.outputPort)
-          list.push({ inputPort: node.outputPort, nodeInfo: node.info });
-        break;
-    }
-  } else if (type === "option") {
-    switch (node.type) {
-      case NodeType.Interaction:
-        if (node.optionOutputPort)
-          list.push({ inputPort: node.optionOutputPort, nodeInfo: node.info });
-        break;
-      case NodeType.Static:
-        if ("data" in node && node.data.type === "option" && node.outputPort)
-          list.push({ inputPort: node.outputPort, nodeInfo: node.info });
-        break;
-      case NodeType.Switch:
-        if (node.inputPort)
-          list.push({ inputPort: node.inputPort, nodeInfo: node.info });
-        break;
-    }
-  }
-  return list;
-}
+import { InputPortsAutocomplete } from "./InputPortsAutocomplete";
+import { getInputPortsWithNodeInfo } from "./utils";
+import { ImageModalUploader } from "../../ImageModalUploader/ImageModalUploader";
+import { useState } from "react";
 
 const ItemConfigSidebar = () => {
   const dispatch = useDispatch();
@@ -171,84 +36,74 @@ const ItemConfigSidebar = () => {
   const selectedNode = useSelector((state: RootState) =>
     selectedId ? selectNodeById(state, selectedId) : null
   );
-
+  const [isUploadImageModalOpen, setIsUploadImageModalOpen] = useState(false);
   const allNodes = useSelector(selectAllNodes);
   const allDataLinks = useSelector(selectAllDataLinks);
-  const allTextInputPortsWithNodeInfo = allNodes
-    .map((node) => getInputPortsWithNodeInfo(node, "text"))
-    .flat();
 
-  const allImageInputPortsWithNodeInfo = allNodes
-    .map((node) => getInputPortsWithNodeInfo(node, "image"))
-    .flat();
-  const allOptionInputPortsWithNodeInfo = allNodes
-    .map((node) => getInputPortsWithNodeInfo(node, "option"))
-    .flat();
+  // const renderNodeIdSelect = (
+  //   path: string[],
+  //   currentValue: number | undefined,
+  //   label: string
+  // ) => (
+  //   <StyledAutocomplete
+  //     value={allNodes.find((node) => node.info.id === currentValue) || null}
+  //     onChange={(_, newValue) => {
+  //       if (!selectedNode) return;
+  //       const updated = cloneDeep(selectedNode);
+  //       let target = updated;
+  //       path.slice(0, -1).forEach((key) => {
+  //         if (!target[key]) target[key] = {};
+  //         target = target[key];
+  //       });
+  //       target[path[path.length - 1]] = newValue?.info.id;
+  //       dispatch(updateNode(updated));
+  //     }}
+  //     options={allNodes}
+  //     getOptionLabel={(option) => option.info.name}
+  //     renderInput={(params) => (
+  //       <TextField {...params} label={label} variant="outlined" size="small" />
+  //     )}
+  //   />
+  // );
 
-  const renderNodeIdSelect = (
-    path: string[],
-    currentValue: number | undefined,
-    label: string
-  ) => (
-    <StyledAutocomplete
-      value={allNodes.find((node) => node.info.id === currentValue) || null}
-      onChange={(_, newValue) => {
-        if (!selectedNode) return;
-        const updated = cloneDeep(selectedNode);
-        let target = updated;
-        path.slice(0, -1).forEach((key) => {
-          if (!target[key]) target[key] = {};
-          target = target[key];
-        });
-        target[path[path.length - 1]] = newValue?.info.id;
-        dispatch(updateNode(updated));
-      }}
-      options={allNodes}
-      getOptionLabel={(option) => option.info.name}
-      renderInput={(params) => (
-        <TextField {...params} label={label} variant="outlined" size="small" />
-      )}
-    />
-  );
+  // const renderPortIdSelect = (
+  //   path: string[],
+  //   currentValue: number | undefined,
+  //   sourceNodeId: number | undefined,
+  //   label: string
+  // ) => {
+  //   const sourceNode = allNodes.find((n) => n.info.id === sourceNodeId);
+  //   const availablePorts = sourceNode?.inputPorts || [];
 
-  const renderPortIdSelect = (
-    path: string[],
-    currentValue: number | undefined,
-    sourceNodeId: number | undefined,
-    label: string
-  ) => {
-    const sourceNode = allNodes.find((n) => n.info.id === sourceNodeId);
-    const availablePorts = sourceNode?.inputPorts || [];
-
-    return (
-      <StyledAutocomplete
-        value={
-          availablePorts.find((port) => port.info.id === currentValue) || null
-        }
-        onChange={(_, newValue) => {
-          if (!selectedNode) return;
-          const updated = cloneDeep(selectedNode);
-          let target = updated;
-          path.slice(0, -1).forEach((key) => {
-            if (!target[key]) target[key] = {};
-            target = target[key];
-          });
-          target[path[path.length - 1]] = newValue?.info.id;
-          dispatch(updateNode(updated));
-        }}
-        options={availablePorts}
-        getOptionLabel={(option) => option.info.name}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={label}
-            variant="outlined"
-            size="small"
-          />
-        )}
-      />
-    );
-  };
+  //   return (
+  //     <StyledAutocomplete
+  //       value={
+  //         availablePorts.find((port) => port.info.id === currentValue) || null
+  //       }
+  //       onChange={(_, newValue) => {
+  //         if (!selectedNode) return;
+  //         const updated = cloneDeep(selectedNode);
+  //         let target = updated;
+  //         path.slice(0, -1).forEach((key) => {
+  //           if (!target[key]) target[key] = {};
+  //           target = target[key];
+  //         });
+  //         target[path[path.length - 1]] = newValue?.info.id;
+  //         dispatch(updateNode(updated));
+  //       }}
+  //       options={availablePorts}
+  //       getOptionLabel={(option) => option.info.name}
+  //       renderInput={(params) => (
+  //         <TextField
+  //           {...params}
+  //           label={label}
+  //           variant="outlined"
+  //           size="small"
+  //         />
+  //       )}
+  //     />
+  //   );
+  // };
 
   const renderPromptNode = () =>
     selectedNode?.type === NodeType.Prompt ? (
@@ -311,6 +166,10 @@ const ItemConfigSidebar = () => {
   const renderStaticNode = () =>
     selectedNode?.type === NodeType.Static ? (
       <>
+        <ImageModalUploader
+          open={isUploadImageModalOpen}
+          onClose={() => setIsUploadImageModalOpen(false)}
+        />
         <SectionTitle>Static Text</SectionTitle>
         <TextArea
           value={selectedNode?.data?.text || ""}
@@ -320,6 +179,16 @@ const ItemConfigSidebar = () => {
             dispatch(updateNode(updated));
           }}
         />
+        <InputPortsAutocomplete
+          allDataInputPorts={allNodes
+            .map((node) =>
+              getInputPortsWithNodeInfo(node, selectedNode.data.type)
+            )
+            .flat()}
+          allDataLinks={allDataLinks}
+          selectedNodeId={selectedNode.info.id}
+          sourcePortId={selectedNode.outputPort.info.id}
+        />
       </>
     ) : null;
 
@@ -327,12 +196,12 @@ const ItemConfigSidebar = () => {
     selectedNode?.type === NodeType.Interaction ? (
       <>
         <SectionTitle>Text Input Port</SectionTitle>
-        {renderPortIdSelect(
+        {/* {renderPortIdSelect(
           ["textInputPort"],
           selectedNode?.textInputPort?.info.id,
           selectedNode?.info.id,
           "Select Input Port"
-        )}
+        )} */}
 
         <SectionTitle>Options</SectionTitle>
         <ArrayContainer>
@@ -390,11 +259,11 @@ const ItemConfigSidebar = () => {
         </ArrayContainer>
 
         <SectionTitle>Output Enum</SectionTitle>
-        {renderNodeIdSelect(
+        {/* {renderNodeIdSelect(
           ["outputEnumId"],
           selectedNode?.outputEnumId,
           "Select Enum"
-        )}
+        )} */}
       </>
     ) : null;
 
@@ -506,66 +375,13 @@ const ItemConfigSidebar = () => {
           sx={{ width: "100%", bgcolor: "white", marginY: 3, marginX: "auto" }}
         />
         <SectionTitle>Send Generated Text To Input Ports: </SectionTitle>
-        <StyledAutocomplete
-          multiple
-          options={allTextInputPortsWithNodeInfo.filter(
-            (item) => item.nodeInfo.id !== selectedNode.info.id
-          )}
-          value={allTextInputPortsWithNodeInfo.filter((item) =>
-            allDataLinks.some(
-              (link) =>
-                link.sourcePortId === selectedNode.outputPort.info.id &&
-                link.targetPortId === item.inputPort.info.id
-            )
-          )}
-          onChange={(_, newValue) => {
-            // Get existing links from this node's output
-            const existingLinks = allDataLinks.filter(
-              (link) => link.sourcePortId === selectedNode.outputPort.info.id
-            );
-
-            // Remove links that are no longer selected
-            existingLinks.forEach((link) => {
-              if (
-                !newValue.some(
-                  (item) => item.inputPort.info.id === link.targetPortId
-                )
-              ) {
-                dispatch(removeDataLink(link.info.id));
-              }
-            });
-            console.log(newValue);
-            // Add new links
-            newValue.forEach((item) => {
-              const linkExists = existingLinks.some(
-                (link) => link.targetPortId === item.inputPort.info.id
-              );
-
-              if (!linkExists) {
-                dispatch(
-                  addDataLink({
-                    info: { id: Date.now(), name: `DataLink_${Date.now()}` },
-                    sourcePortId: selectedNode.outputPort.info.id,
-                    targetPortId: item.inputPort.info.id,
-                  })
-                );
-              }
-            });
-          }}
-          getOptionLabel={(option) =>
-            `${option.nodeInfo.name} - ${option.inputPort.info.name}`
-          }
-          isOptionEqualToValue={(option, value) =>
-            option.inputPort.info.id === value.inputPort.info.id
-          }
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Select Input Ports"
-              variant="outlined"
-              size="small"
-            />
-          )}
+        <InputPortsAutocomplete
+          allDataInputPorts={allNodes
+            .map((node) => getInputPortsWithNodeInfo(node, "text"))
+            .flat()}
+          allDataLinks={allDataLinks}
+          selectedNodeId={selectedNode.info.id}
+          sourcePortId={selectedNode.outputPort.info.id}
         />
       </>
     ) : null;

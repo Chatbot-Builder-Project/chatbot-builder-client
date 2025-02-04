@@ -15,6 +15,7 @@ import {
   NodeType,
   Port,
 } from "./types";
+import { getAllInputPorts } from "../../../../../apps/web/src/components/Builder/ItemConfigSidebar/utils";
 
 const nodesAdapter = createEntityAdapter<NodeData>({
   selectId: (node) => node.info.id,
@@ -53,7 +54,6 @@ const builderSlice = createSlice({
     addNode: (state, action: PayloadAction<NodeData>) => {
       const nodeId = state.nextNodeId++;
 
-      // Helper function to create a unique port ID and increment the counter
       const createPortWithUniqueId = (
         port: Port | undefined
       ): Port | undefined => {
@@ -136,10 +136,15 @@ const builderSlice = createSlice({
     removeNode: (state, action: PayloadAction<number>) => {
       const nodeId = action.payload;
       const node = state.nodes.entities[nodeId];
+      const sourcePorts = getAllInputPorts(node);
+      const targetPorts = getAllInputPorts(node);
       const dataLinksToRemove = Object.values(state.dataLinks.entities)
-        .filter(
-          (link) =>
-            link?.sourcePortId === nodeId || link?.targetPortId === nodeId
+        .filter((link) =>
+          sourcePorts
+            .concat(targetPorts)
+            .some((port) =>
+              [link?.sourcePortId, link?.targetPortId].includes(port?.info.id)
+            )
         )
         .map((link) => link!.info.id);
       dataLinksAdapter.removeMany(state.dataLinks, dataLinksToRemove);

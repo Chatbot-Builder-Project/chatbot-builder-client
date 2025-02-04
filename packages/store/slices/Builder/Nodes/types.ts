@@ -61,7 +61,7 @@ export interface InteractionNode extends BaseNode {
 export interface StaticNode extends BaseNode {
   type: NodeType.Static;
   data: {
-    type: string;
+    type: "text" | "image" | "option";
     text?: string;
     url?: string;
     option?: string;
