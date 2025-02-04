@@ -18,12 +18,18 @@ import {
   createFlowLink,
   selectFlowLinksBySourceId,
   removeFlowLink,
+  selectNodeById,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { RootState } from "@chatbot-builder/store/store";
+import { NodeType } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 
 const Node: React.FC<NodeProps> = ({ node }) => {
   const dispatch = useDispatch();
   const pendingSourceId = useSelector(selectPendingFlowLinkSourceId);
+  const sourceNode = useSelector((state: RootState) =>
+    pendingSourceId ? selectNodeById(state, pendingSourceId) : null
+  );
+
   const existingFlowLinks = useSelector((state: RootState) =>
     selectFlowLinksBySourceId(state, pendingSourceId || -1)
   );
@@ -35,9 +41,15 @@ const Node: React.FC<NodeProps> = ({ node }) => {
     if (pendingSourceId === null) {
       dispatch(setPendingFlowLinkSource(node.info.id));
     } else if (pendingSourceId !== node.info.id) {
-      existingFlowLinks.forEach((link) => {
-        dispatch(removeFlowLink(link.info.id));
-      });
+      if (
+        sourceNode &&
+        sourceNode.type !== NodeType.SmartSwitch &&
+        sourceNode.type !== NodeType.Switch
+      ) {
+        existingFlowLinks.forEach((link) => {
+          dispatch(removeFlowLink(link.info.id));
+        });
+      }
       dispatch(createFlowLink(node.info.id));
     }
   };

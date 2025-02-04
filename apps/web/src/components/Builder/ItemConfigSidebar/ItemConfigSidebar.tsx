@@ -6,6 +6,7 @@ import {
   selectAllDataLinks,
   selectAllEnums,
   updateNodeVisual,
+  selectAllFlowLinks,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import {
   Container,
@@ -43,6 +44,7 @@ const ItemConfigSidebar = () => {
   const allNodes = useSelector(selectAllNodes);
   const allDataLinks = useSelector(selectAllDataLinks);
   const allEnums = useSelector(selectAllEnums);
+  const allFlowLinks = useSelector(selectAllFlowLinks);
 
   const renderPromptNode = () =>
     selectedNode?.type === NodeType.Prompt ? (
@@ -114,7 +116,7 @@ const ItemConfigSidebar = () => {
             .flat()}
           allDataLinks={allDataLinks}
           selectedNodeId={selectedNode.info.id}
-          sourcePortId={selectedNode.outputPort.info.id}
+          sourcePortId={selectedNode.outputPort?.info?.id}
         />
       </>
     ) : null;
@@ -240,7 +242,7 @@ const ItemConfigSidebar = () => {
             .flat()}
           allDataLinks={allDataLinks}
           selectedNodeId={selectedNode.info.id}
-          sourcePortId={selectedNode.outputPort.info.id}
+          sourcePortId={selectedNode.outputPort?.info?.id}
         />
       </>
     ) : null;
@@ -307,7 +309,7 @@ const ItemConfigSidebar = () => {
                   dataType: "text",
                 };
               } else if (updated.optionOutputPort) {
-                updated.textOutputPort = undefined;
+                updated.textOutputPort = null;
               }
               dispatch(updateNode(updated));
             }}
@@ -328,7 +330,7 @@ const ItemConfigSidebar = () => {
                   nodeId: selectedNode.info.id,
                   dataType: "option",
                 };
-              } else if (!!updated.textOutputPort) {
+              } else if (updated.textOutputPort) {
                 updated.optionOutputPort = null;
                 updated.outputEnumId = null;
                 updated.outputOptionMetas = null;
@@ -351,7 +353,7 @@ const ItemConfigSidebar = () => {
                 .flat()}
               allDataLinks={allDataLinks}
               selectedNodeId={selectedNode.info.id}
-              sourcePortId={selectedNode.textOutputPort.info.id}
+              sourcePortId={selectedNode.textOutputPort?.info?.id}
             />
           </>
         )}
@@ -364,7 +366,7 @@ const ItemConfigSidebar = () => {
                 .flat()}
               allDataLinks={allDataLinks}
               selectedNodeId={selectedNode.info.id}
-              sourcePortId={selectedNode.optionOutputPort.info.id}
+              sourcePortId={selectedNode.optionOutputPort?.info?.id}
             />
 
             <SectionTitle>Output Enum</SectionTitle>
@@ -522,7 +524,7 @@ const ItemConfigSidebar = () => {
             .flat()}
           allDataLinks={allDataLinks}
           selectedNodeId={selectedNode.info.id}
-          sourcePortId={selectedNode.responseOutputPort.info.id}
+          sourcePortId={selectedNode?.responseOutputPort?.info?.id}
         />
       </>
     ) : null;
@@ -566,8 +568,174 @@ const ItemConfigSidebar = () => {
             .flat()}
           allDataLinks={allDataLinks}
           selectedNodeId={selectedNode.info.id}
-          sourcePortId={selectedNode.outputPort.info.id}
+          sourcePortId={selectedNode.outputPort?.info?.id}
         />
+      </>
+    ) : null;
+
+  const renderSwitchNode = () =>
+    selectedNode?.type === NodeType.Switch ? (
+      <>
+        <SectionTitle>Select Enum</SectionTitle>
+        <Select
+          value={selectedNode?.enumId || ""}
+          onChange={(e) => {
+            const updated = cloneDeep(selectedNode);
+            updated.enumId = parseInt(e.target.value);
+            updated.optionFlowLinkIds = {}; // Reset flow links when enum changes
+            dispatch(updateNode(updated));
+          }}
+        >
+          <option value="">Select an enum</option>
+          {allEnums.map((enum_) => (
+            <option key={enum_.info.id} value={enum_.info.id}>
+              {enum_.info.name}
+            </option>
+          ))}
+        </Select>
+
+        {selectedNode?.enumId && (
+          <>
+            <SectionTitle>Configure Option Flow Links</SectionTitle>
+            <ArrayContainer>
+              {allEnums
+                .find((enum_) => enum_.info.id === selectedNode.enumId)
+                ?.options.map((opt, index) => (
+                  <ArrayItem key={`opt.option-${index}`}>
+                    <SwitchLabel style={{ minWidth: "120px" }}>
+                      {opt.option}
+                    </SwitchLabel>
+                    <Select
+                      value={selectedNode.optionFlowLinkIds[opt.option] || ""}
+                      onChange={(e) => {
+                        const updated = cloneDeep(selectedNode);
+                        const flowLinkId = parseInt(e.target.value);
+                        updated.optionFlowLinkIds = {
+                          ...updated.optionFlowLinkIds,
+                          [opt.option]: flowLinkId,
+                        };
+                        dispatch(updateNode(updated));
+                      }}
+                    >
+                      <option value="">Select flow link</option>
+                      {allFlowLinks // Use allFlowLinks here instead
+                        .filter(
+                          (link) => link.sourceNodeId === selectedNode.info.id
+                        )
+                        .map((link) => (
+                          <option key={link.info.id} value={link.info.id}>
+                            {
+                              allNodes.find(
+                                (nodeItem) =>
+                                  nodeItem.info.id === link.targetNodeId
+                              )?.info.name
+                            }
+                          </option>
+                        ))}
+                    </Select>
+                  </ArrayItem>
+                ))}
+            </ArrayContainer>
+          </>
+        )}
+      </>
+    ) : null;
+
+  const renderSmartSwitchNode = () =>
+    selectedNode?.type === NodeType.SmartSwitch ? (
+      <>
+        <SectionTitle>Select Enum</SectionTitle>
+        <Select
+          value={selectedNode?.enumId || ""}
+          onChange={(e) => {
+            const updated = cloneDeep(selectedNode);
+            updated.enumId = parseInt(e.target.value);
+            updated.optionFlowLinkIds = {}; // Reset flow links when enum changes
+            updated.fallbackFlowLinkId = null;
+            dispatch(updateNode(updated));
+          }}
+        >
+          <option value="">Select an enum</option>
+          {allEnums.map((enum_) => (
+            <option key={enum_.info.id} value={enum_.info.id}>
+              {enum_.info.name}
+            </option>
+          ))}
+        </Select>
+
+        {selectedNode?.enumId && (
+          <>
+            <SectionTitle>Configure Option Flow Links</SectionTitle>
+            <ArrayContainer>
+              {allEnums
+                .find((enum_) => enum_.info.id === selectedNode.enumId)
+                ?.options.map((opt, index) => (
+                  <ArrayItem key={`opt.option-${index}`}>
+                    <SwitchLabel style={{ minWidth: "120px" }}>
+                      {opt.option}
+                    </SwitchLabel>
+                    <Select
+                      value={selectedNode.optionFlowLinkIds[opt.option] || ""}
+                      onChange={(e) => {
+                        const updated = cloneDeep(selectedNode);
+                        const flowLinkId = parseInt(e.target.value);
+                        updated.optionFlowLinkIds = {
+                          ...updated.optionFlowLinkIds,
+                          [opt.option]: flowLinkId,
+                        };
+                        dispatch(updateNode(updated));
+                      }}
+                    >
+                      <option value="">Select flow link</option>
+                      {allFlowLinks
+                        .filter(
+                          (link) => link.sourceNodeId === selectedNode.info.id
+                        )
+                        .map((link) => (
+                          <option key={link.info.id} value={link.info.id}>
+                            {
+                              allNodes.find(
+                                (nodeItem) =>
+                                  nodeItem.info.id === link.targetNodeId
+                              )?.info.name
+                            }
+                          </option>
+                        ))}
+                    </Select>
+                  </ArrayItem>
+                ))}
+              <ArrayItem>
+                <SwitchLabel style={{ minWidth: "120px" }}>
+                  Fallback
+                </SwitchLabel>
+                <Select
+                  value={selectedNode.fallbackFlowLinkId || ""}
+                  onChange={(e) => {
+                    const updated = cloneDeep(selectedNode);
+                    const flowLinkId = parseInt(e.target.value);
+                    updated.fallbackFlowLinkId = flowLinkId;
+                    dispatch(updateNode(updated));
+                  }}
+                >
+                  <option value="">Select fallback flow link</option>
+                  {allFlowLinks
+                    .filter(
+                      (link) => link.sourceNodeId === selectedNode.info.id
+                    )
+                    .map((link) => (
+                      <option key={link.info.id} value={link.info.id}>
+                        {
+                          allNodes.find(
+                            (nodeItem) => nodeItem.info.id === link.targetNodeId
+                          )?.info.name
+                        }
+                      </option>
+                    ))}
+                </Select>
+              </ArrayItem>
+            </ArrayContainer>
+          </>
+        )}
       </>
     ) : null;
 
@@ -594,6 +762,9 @@ const ItemConfigSidebar = () => {
           {selectedNode.type === NodeType.Interaction &&
             renderInteractionNode()}
           {selectedNode.type === NodeType.ApiAction && renderApiActionNode()}
+          {selectedNode.type === NodeType.Switch && renderSwitchNode()}
+          {selectedNode.type === NodeType.SmartSwitch &&
+            renderSmartSwitchNode()}
         </>
       )}
     </Container>

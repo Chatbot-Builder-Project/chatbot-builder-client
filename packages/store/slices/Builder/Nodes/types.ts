@@ -25,6 +25,7 @@ export interface Port {
   info: BaseInfo;
   nodeId: number;
   dataType: string;
+  visual: { data: any };
 }
 
 export interface NodeVisual {
@@ -55,12 +56,12 @@ export type NodeTemplates = {
 // - This metadata will be retrieved and given to the caller when traversing the graph later.
 export interface InteractionNode extends BaseNode {
   type: NodeType.Interaction;
-  textInputPort?: Port; // text datatype
+  textInputPort: Port | null; // text datatype
   imageInputPorts: Port[]; // image datatypes
-  textOutputPort?: Port; // text datatype
-  outputEnumId?: number;
-  optionOutputPort?: Port; // option datatype
-  outputOptionMetas?: Record<string, { Description: string }>;
+  textOutputPort: Port | null; // text datatype
+  outputEnumId: number | null;
+  optionOutputPort: Port | null; // option datatype
+  outputOptionMetas: Record<string, { Description: string }> | null;
 }
 
 export interface StaticNode extends BaseNode {
@@ -76,7 +77,7 @@ export interface StaticNode extends BaseNode {
 
 export interface SwitchNode extends BaseNode {
   type: NodeType.Switch;
-  enumId: number;
+  enumId: number | null;
   inputPort: Port; // option datatype
   optionFlowLinkIds: Record<string, number>;
 }
@@ -111,13 +112,13 @@ export interface ApiActionNode extends BaseNode {
   urlInputPort: Port; // text datatype
   httpMethod: HttpMethod;
   headers?: Record<string, string>;
-  bodyInputPort?: Port; // text dattype
+  bodyInputPort: Port | null; // text dattype
   responseOutputPort: Port; // text dattype
 }
 export interface GenerationNode extends BaseNode {
   type: NodeType.Generation;
-  inputPort: Port; // text dattype
-  outputPort: Port; // text dattype
+  inputPort: Port; // text datatype
+  outputPort: Port; // text datatype
   options: {
     useMemory: boolean;
     responseSchema?: any;
@@ -137,6 +138,7 @@ export interface DataLink {
   info: BaseInfo;
   sourcePortId: number;
   targetPortId: number;
+  visual?: { data: {} };
 }
 
 export interface Point {

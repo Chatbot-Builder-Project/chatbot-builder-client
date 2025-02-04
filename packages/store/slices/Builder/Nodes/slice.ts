@@ -42,7 +42,7 @@ const initialState: BuilderState = {
   dataLinks: dataLinksAdapter.getInitialState(),
   flowLinks: flowLinksAdapter.getInitialState(),
   selectedId: null,
-  startNodeId: 1,
+  startNodeId: null,
   nextNodeId: 1,
   pendingFlowLinkSourceId: null,
 };
@@ -55,9 +55,16 @@ const builderSlice = createSlice({
       const nodeId = state.nextNodeId++;
 
       const createPortWithUniqueId = (
-        port: Port | undefined
-      ): Port | undefined => {
-        if (!port) return undefined;
+        port: Port | null,
+        type: string
+      ): Port | null => {
+        if (!port)
+          return {
+            info: { id: state.nextNodeId++, name: `Port_${state.nextNodeId}` },
+            visual: { data: {} },
+            nodeId,
+            dataType: type,
+          };
         return {
           ...port,
           nodeId,
@@ -78,46 +85,73 @@ const builderSlice = createSlice({
       switch (newNode.type) {
         case NodeType.Interaction:
           newNode.textInputPort = createPortWithUniqueId(
-            newNode.textInputPort
+            newNode.textInputPort,
+            "text"
           )!;
           newNode.textOutputPort = createPortWithUniqueId(
-            newNode.textOutputPort
+            newNode.textOutputPort,
+            "text"
           )!;
           newNode.optionOutputPort = createPortWithUniqueId(
-            newNode.optionOutputPort
+            newNode.optionOutputPort,
+            "option"
           )!;
           newNode.imageInputPorts =
             newNode.imageInputPorts?.map(
-              (port) => createPortWithUniqueId(port)!
+              (port) => createPortWithUniqueId(port, "image")!
             ) ?? [];
           break;
         case NodeType.Static:
-          newNode.outputPort = createPortWithUniqueId(newNode.outputPort)!;
+          newNode.outputPort = createPortWithUniqueId(
+            newNode.outputPort,
+            newNode.data.type
+          )!;
           break;
         case NodeType.Switch:
-          newNode.inputPort = createPortWithUniqueId(newNode.inputPort)!;
+          newNode.inputPort = createPortWithUniqueId(
+            newNode.inputPort,
+            "option"
+          )!;
           break;
         case NodeType.Prompt:
-          newNode.outputPort = createPortWithUniqueId(newNode.outputPort)!;
+          newNode.outputPort = createPortWithUniqueId(
+            newNode.outputPort,
+            "text"
+          )!;
           newNode.inputPorts =
-            newNode.inputPorts?.map((port) => createPortWithUniqueId(port)!) ??
-            [];
+            newNode.inputPorts?.map(
+              (port) => createPortWithUniqueId(port, "text")!
+            ) ?? [];
           break;
         case NodeType.SmartSwitch:
-          newNode.inputPort = createPortWithUniqueId(newNode.inputPort)!;
+          newNode.inputPort = createPortWithUniqueId(
+            newNode.inputPort,
+            "text"
+          )!;
           break;
         case NodeType.ApiAction:
-          newNode.urlInputPort = createPortWithUniqueId(newNode.urlInputPort)!;
+          newNode.urlInputPort = createPortWithUniqueId(
+            newNode.urlInputPort,
+            "text"
+          )!;
           newNode.bodyInputPort = createPortWithUniqueId(
-            newNode.bodyInputPort
+            newNode.bodyInputPort,
+            "text"
           )!;
           newNode.responseOutputPort = createPortWithUniqueId(
-            newNode.responseOutputPort
+            newNode.responseOutputPort,
+            "text"
           )!;
           break;
         case NodeType.Generation:
-          newNode.inputPort = createPortWithUniqueId(newNode.inputPort)!;
-          newNode.outputPort = createPortWithUniqueId(newNode.outputPort)!;
+          newNode.inputPort = createPortWithUniqueId(
+            newNode.inputPort,
+            "text"
+          )!;
+          newNode.outputPort = createPortWithUniqueId(
+            newNode.outputPort,
+            "text"
+          )!;
           break;
       }
 

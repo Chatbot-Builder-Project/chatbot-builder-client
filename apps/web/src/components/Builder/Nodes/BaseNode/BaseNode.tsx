@@ -9,11 +9,15 @@ import {
   updateNodeVisual,
   removeNode,
   setSelected,
+  setStartNode, // Add this import
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { RootState } from "@chatbot-builder/store/store";
 
 function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
   const node = useSelector((state: RootState) => selectNodeById(state, id));
+  const isStartNode = useSelector(
+    (state: RootState) => state.builder.nodes.startNodeId === id
+  );
   const nodeRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
@@ -88,7 +92,11 @@ function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
 
   const handleNodeClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch(setSelected(id));
+    if (e.shiftKey) {
+      dispatch(setStartNode(id));
+    } else {
+      dispatch(setSelected(id));
+    }
   };
   if (!node) return null;
 
@@ -100,6 +108,7 @@ function BaseNode({ id, render, onPositionChange, isSelected }: BaseNodeProps) {
         drag(node);
       }}
       $isSelected={isSelected}
+      $isStartNode={isStartNode}
       onClick={handleNodeClick}
       $x={node?.visual.data.x || 0}
       $y={node?.visual.data.y || 0}

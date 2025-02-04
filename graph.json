@@ -1,172 +1,393 @@
 {
-  "name": "Restaurant Worfklow",
-  "description": "A simple restaurant chatbot with Menu and CustomerSupport options",
+  "name": "Restaurant Workflow with Customer Support and Information",
+  "description": "A chatbot workflow with dynamic prompts and flows for menu, customer support, and restaurant information.",
+  "visual": { "data": {} },
   "graph": {
-    "startNodeId": 1,
+    "visual": { "data": {} },
+    "startNodeId": 1000,
     "nodes": [
       {
         "Type": "Interaction",
-        "info": { "id": 1, "name": "WelcomeInteraction" },
+        "info": { "id": 1000, "name": "WelcomeInteraction" },
         "visual": { "data": { "x": 0, "y": 0 } },
         "textInputPort": {
-          "info": { "id": 2, "name": "WelcomeInteractionInput" },
-          "visual": { "x": 0, "y": 0 },
-          "nodeId": 1,
+          "info": { "id": 1001, "name": "WelcomeInteractionInput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 1000,
           "dataType": "Text"
         },
-        "outputEnumId": 8,
+        "imageInputPorts": [],
+        "textOutputPort": null,
+        "outputEnumId": 24000000,
         "optionOutputPort": {
-          "info": { "id": 3, "name": "WelcomeInteractionOutput" },
-          "visual": { "x": 0, "y": 0 },
-          "nodeId": 1,
+          "info": { "id": 1002, "name": "WelcomeInteractionOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 1000,
           "dataType": "Option"
         },
         "outputOptionMetas": {
-          "Menu": { "Description": "Explore our diverse menu!" },
-          "CustomerSupport": { "Description": "Reach our customer support." }
+          "Menu": {
+            "Description": "Explore our menu!",
+            "ImageData": {
+              "Url": "https://img.freepik.com/free-psd/grill-house-menu-template_23-2148441841.jpg?t=st=1737217811~exp=1737221411~hmac=7d088c9c18d39dfa2ec2e0853eedd3ff1e4b374539d890c22e3970c776519906&w=740",
+              "dataType": "Image"
+            }
+          },
+          "CustomerSupport": {
+            "Description": "Get in touch with our customer support.",
+            "ImageData": {
+              "Url": "https://img.freepik.com/free-vector/flat-illustration-customer-support_23-2148893327.jpg?t=st=1737218040~exp=1737221640~hmac=959e5135bae4e7313f1406b16b8eb5b0af92235ca37a0583406679ca277b52eb&w=740",
+              "dataType": "Image"
+            }
+          },
+          "RestaurantInfo": {
+            "Description": "Ask us a question.",
+            "ImageData": {
+              "Url": "https://img.freepik.com/premium-vector/restaurant-staff-team-director-chef-waiter-manager-sommelier_369750-595.jpg?w=996",
+              "dataType": "Image"
+            }
+          }
         }
       },
       {
         "Type": "Static",
-        "info": { "id": 4, "name": "WelcomeText" },
-        "visual": { "x": 0, "y": 0 },
+        "info": { "id": 10000, "name": "WelcomeMessage" },
+        "visual": { "data": { "x": 0, "y": 0 } },
         "data": {
           "type": "Text",
-          "text": "Welcome to our restaurant!\nPlease choose one of the options."
+          "text": "Welcome to our restaurant. Would you like to see the menu ? Or perharps ask us a question ? Or get support about a topic ?"
         },
         "outputPort": {
-          "info": { "id": 5, "name": "WelcomeTextOutput" },
-          "visual": { "x": 0, "y": 0 },
-          "nodeId": 4,
+          "info": { "id": 10001, "name": "WelcomeMessageOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 10000,
           "dataType": "Text"
         }
       },
       {
         "Type": "Switch",
-        "info": { "id": 9, "name": "WelcomeSwitch" },
-        "visual": { "x": 0, "y": 0 },
-        "enumId": 8,
+        "info": { "id": 2000, "name": "IntentSwitch" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "enumId": 24000000,
         "inputPort": {
-          "info": { "id": 10, "name": "WelcomeSwitchInput" },
-          "visual": { "x": 0, "y": 0 },
-          "nodeId": 9,
+          "info": { "id": 2001, "name": "IntentSwitchInput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 2000,
           "dataType": "Option"
         },
-        "optionFlowLinkIds": { "Menu": 12, "CustomerSupport": 13 }
+        "optionFlowLinkIds": {
+          "Menu": 14000000,
+          "CustomerSupport": 15000000,
+          "RestaurantInfo": 16000000
+        }
       },
       {
         "Type": "Prompt",
-        "info": { "id": 14, "name": "MenuPrompt" },
-        "visual": { "x": 0, "y": 0 },
-        "template": "# The Gourmet Spot\n\n## Starters\n- **Garlic Bread (4 pcs)** - $5.99  \n- **Tomato Basil Soup** - $6.49  \n- **Crispy Calamari with Lemon Aioli** - $9.99  \n\n## Salads\n- **Caesar Salad** - $8.99  \n- **Greek Salad** - $9.99  \n- **Avocado Quinoa Bowl** - $12.99  \n\n## Mains\n- **Grilled Salmon with Herb Butter** - $18.99  \n- **Chicken Alfredo Pasta** - $15.99  \n- **Vegan Mushroom Risotto** - $14.99  \n\n## Sides\n- **Truffle Fries** - $4.99  \n- **Steamed Vegetables** - $3.99  \n\n## Desserts\n- **Chocolate Lava Cake** - $7.99  \n- **New York Cheesecake** - $6.99  \n- **Fresh Fruit Platter** - $5.99  \n\n## Drinks\n- **Soft Drinks (Coke, Sprite, etc.)** - $2.50  \n- **House Lemonade** - $3.50  \n- **Craft Beer (ask for selection)** - $5.99  ",
+        "info": { "id": 3000, "name": "MenuPrompt" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "template": "Here is our menu. Select an item to explore further:\n\n## Starters\n1. Garlic Bread\n2. Tomato Soup\n\n## Mains\n3. Grilled Salmon\n4. Vegan Risotto",
+        "inputPorts": [],
         "outputPort": {
-          "info": { "id": 16, "name": "MenuPromptOutput" },
-          "visual": { "x": 0, "y": 0 },
-          "nodeId": 14,
+          "info": { "id": 3001, "name": "MenuPromptOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 3000,
+          "dataType": "Text"
+        }
+      },
+      {
+        "Type": "Static",
+        "info": { "id": 11000, "name": "CustomerSupportInstructions" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "data": {
+          "type": "Text",
+          "text": "What issue do you need help with? Please provide some details."
+        },
+        "outputPort": {
+          "info": { "id": 11001, "name": "CustomerSupportInstructionsOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 11000,
+          "dataType": "Text"
+        }
+      },
+      {
+        "Type": "Interaction",
+        "info": { "id": 4000, "name": "CustomerSupportInteraction" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "textInputPort": {
+          "info": { "id": 4001, "name": "CustomerSupportInput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 4000,
           "dataType": "Text"
         },
-        "inputPorts": []
+        "imageInputPorts": [],
+        "textOutputPort": {
+          "info": { "id": 4002, "name": "CustomerSupportOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 4000,
+          "dataType": "Text"
+        },
+        "outputEnumId": null,
+        "optionOutputPort": null,
+        "outputOptionMetas": null
       },
       {
         "Type": "Prompt",
-        "info": { "id": 15, "name": "CustomerSupportPrompt" },
-        "visual": { "x": 0, "y": 0 },
-        "template": "If you have any questions, concerns, or feedback, feel free to reach out to us!\n\n### Contact Us\n- **Phone:** (555) 123-4567  \n- **Email:** support@gourmetspot.com  \n- **Hours:** Monday to Sunday, 9:00 AM - 9:00 PM  \n\n### Visit Us\n**Address:**  \n123 Foodie Lane, Gourmet City, GC 56789  \n\nWe value your feedback and look forward to assisting you!",
+        "info": { "id": 6000, "name": "CustomerSupportPrompt" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "template": "Customer asked a question:\n{{6001}}.\nGive them a friendly funny response.",
+        "inputPorts": [
+          {
+            "info": { "id": 6001, "name": "CustomerSupportPromptInput" },
+            "visual": { "data": { "x": 0, "y": 0 } },
+            "nodeId": 6000,
+            "dataType": "Text"
+          }
+        ],
         "outputPort": {
-          "info": { "id": 17, "name": "CustomerSupportPrompt" },
-          "visual": { "x": 0, "y": 0 },
-          "nodeId": 15,
+          "info": { "id": 6002, "name": "CustomerSupportPromptOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 6000,
+          "dataType": "Text"
+        }
+      },
+      {
+        "Type": "Generation",
+        "info": { "id": 8000, "name": "CustomerSupportGeneration" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "inputPort": {
+          "info": { "id": 8001, "name": "CustomerSupportGenerationInput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 8000,
           "dataType": "Text"
         },
-        "inputPorts": []
+        "outputPort": {
+          "info": { "id": 8002, "name": "CustomerSupportGenerationOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 8000,
+          "dataType": "Text"
+        },
+        "options": { "useMemory": false, "responseSchema": null }
+      },
+      {
+        "Type": "Static",
+        "info": { "id": 12000, "name": "RestaurantInfoInstructions" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "data": {
+          "type": "Text",
+          "text": "What would you like to know about our restaurant? History, staff, or something else?"
+        },
+        "outputPort": {
+          "info": { "id": 12001, "name": "RestaurantInfoInstructionsOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 12000,
+          "dataType": "Text"
+        }
+      },
+      {
+        "Type": "Interaction",
+        "info": { "id": 5000, "name": "RestaurantInfoInteraction" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "textInputPort": {
+          "info": { "id": 5001, "name": "RestaurantInfoInput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 5000,
+          "dataType": "Text"
+        },
+        "imageInputPorts": [],
+        "textOutputPort": {
+          "info": { "id": 5002, "name": "RestaurantInfoOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 5000,
+          "dataType": "Text"
+        },
+        "outputEnumId": null,
+        "optionOutputPort": null,
+        "outputOptionMetas": null
+      },
+      {
+        "Type": "Prompt",
+        "info": { "id": 7000, "name": "RestaurantInfoPrompt" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "template": "The customer wants to know about:\n{{7001}}\nMake some information up and be creative.",
+        "inputPorts": [
+          {
+            "info": { "id": 7001, "name": "RestaurantInfoPromptInput" },
+            "visual": { "data": { "x": 0, "y": 0 } },
+            "nodeId": 7000,
+            "dataType": "Text"
+          }
+        ],
+        "outputPort": {
+          "info": { "id": 7002, "name": "RestaurantInfoPromptOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 7000,
+          "dataType": "Text"
+        }
+      },
+      {
+        "Type": "Generation",
+        "info": { "id": 9000, "name": "RestaurantInfoGeneration" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "inputPort": {
+          "info": { "id": 9001, "name": "RestaurantInfoGenerationInput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 9000,
+          "dataType": "Text"
+        },
+        "outputPort": {
+          "info": { "id": 9002, "name": "RestaurantInfoGenerationOutput" },
+          "visual": { "data": { "x": 0, "y": 0 } },
+          "nodeId": 9000,
+          "dataType": "Text"
+        },
+        "options": { "useMemory": false, "responseSchema": null }
       }
     ],
     "dataLinks": [
       {
-        "info": {
-          "id": 6,
-          "name": "WelcomeTextOutput_WelcomeInteractionInput_DataLink"
-        },
-        "visual": { "x": 0, "y": 0 },
-        "sourcePortId": 5,
-        "targetPortId": 2
+        "info": { "id": 1000000, "name": "DataLink1" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 10001,
+        "targetPortId": 1001
       },
       {
-        "info": {
-          "id": 11,
-          "name": "WelcomeInteractionOutput_WelcomeSwitchInput_DataLink"
-        },
-        "visual": { "x": 0, "y": 0 },
-        "sourcePortId": 3,
-        "targetPortId": 10
+        "info": { "id": 2000000, "name": "DataLink2" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 1002,
+        "targetPortId": 2001
       },
       {
-        "info": {
-          "id": 18,
-          "name": "MenuPromptOutput_WelcomeInteractionInput_DataLink"
-        },
-        "visual": { "x": 0, "y": 0 },
-        "sourcePortId": 16,
-        "targetPortId": 2
+        "info": { "id": 3000000, "name": "DataLink3" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 3001,
+        "targetPortId": 1001
       },
       {
-        "info": {
-          "id": 19,
-          "name": "CustomerSupportOutput_WelcomeInteractionInput_DataLink"
-        },
-        "visual": { "x": 0, "y": 0 },
-        "sourcePortId": 17,
-        "targetPortId": 2
+        "info": { "id": 4000000, "name": "DataLink4" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 11001,
+        "targetPortId": 4001
+      },
+      {
+        "info": { "id": 5000000, "name": "DataLink5" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 4002,
+        "targetPortId": 6001
+      },
+      {
+        "info": { "id": 6000000, "name": "DataLink6" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 6002,
+        "targetPortId": 8001
+      },
+      {
+        "info": { "id": 7000000, "name": "DataLink7" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 8002,
+        "targetPortId": 4001
+      },
+      {
+        "info": { "id": 8000000, "name": "DataLink8" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 12001,
+        "targetPortId": 5001
+      },
+      {
+        "info": { "id": 9000000, "name": "DataLink9" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 5002,
+        "targetPortId": 7001
+      },
+      {
+        "info": { "id": 10000000, "name": "DataLink10" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 7002,
+        "targetPortId": 9001
+      },
+      {
+        "info": { "id": 11000000, "name": "DataLink11" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourcePortId": 9002,
+        "targetPortId": 5001
       }
     ],
     "flowLinks": [
       {
-        "info": {
-          "id": 7,
-          "name": "WelcomeInteraction_WelcomeSwitch_FlowLink"
-        },
-        "visual": { "x": 0, "y": 0 },
-        "sourceNodeId": 1,
-        "targetNodeId": 9
+        "info": { "id": 13000000, "name": "FlowLink1" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 1000,
+        "targetNodeId": 2000
       },
       {
-        "info": { "id": 12, "name": "WelcomeSwitch_MenuPrompt_FlowLink" },
-        "visual": { "x": 0, "y": 0 },
-        "sourceNodeId": 9,
-        "targetNodeId": 14
+        "info": { "id": 14000000, "name": "FlowLink2" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 2000,
+        "targetNodeId": 3000
       },
       {
-        "info": {
-          "id": 13,
-          "name": "WelcomeSwitch_CustomerSupportPrompt_FlowLink"
-        },
-        "visual": { "x": 0, "y": 0 },
-        "sourceNodeId": 9,
-        "targetNodeId": 15
+        "info": { "id": 15000000, "name": "FlowLink3" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 2000,
+        "targetNodeId": 4000
       },
       {
-        "info": { "id": 20, "name": "MenuPrompt_WelcomeInteraction_FlowLink" },
-        "visual": { "x": 0, "y": 0 },
-        "sourceNodeId": 14,
-        "targetNodeId": 1
+        "info": { "id": 16000000, "name": "FlowLink4" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 2000,
+        "targetNodeId": 5000
       },
       {
-        "info": {
-          "id": 21,
-          "name": "CustomerSupportPrompt_WelcomeInteraction_FlowLink"
-        },
-        "visual": { "x": 0, "y": 0 },
-        "sourceNodeId": 15,
-        "targetNodeId": 1
+        "info": { "id": 17000000, "name": "FlowLink5" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 3000,
+        "targetNodeId": 1000
+      },
+      {
+        "info": { "id": 18000000, "name": "FlowLink6" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 4000,
+        "targetNodeId": 6000
+      },
+      {
+        "info": { "id": 19000000, "name": "FlowLink7" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 6000,
+        "targetNodeId": 8000
+      },
+      {
+        "info": { "id": 20000000, "name": "FlowLink8" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 8000,
+        "targetNodeId": 4000
+      },
+      {
+        "info": { "id": 21000000, "name": "FlowLink9" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 5000,
+        "targetNodeId": 7000
+      },
+      {
+        "info": { "id": 22000000, "name": "FlowLink10" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 7000,
+        "targetNodeId": 9000
+      },
+      {
+        "info": { "id": 23000000, "name": "FlowLink11" },
+        "visual": { "data": { "x": 0, "y": 0 } },
+        "sourceNodeId": 9000,
+        "targetNodeId": 5000
       }
     ],
     "enums": [
       {
-        "info": { "id": 8, "name": "WelcomeEnum" },
+        "info": { "id": 24000000, "name": "IntentEnum" },
         "options": [
           { "type": "Option", "option": "Menu" },
-          { "type": "Option", "option": "CustomerSupport" }
-        ]
+          { "type": "Option", "option": "CustomerSupport" },
+          { "type": "Option", "option": "RestaurantInfo" }
+        ],
+        "visual": { "data": {} }
       }
     ]
   }

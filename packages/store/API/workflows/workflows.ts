@@ -23,13 +23,13 @@ export const workflowsApi = createApi({
         if (args.search) params.set("Search", args.search);
         if (args.includeOnlyPersonal !== undefined) {
           params.set("IncludeOnlyPersonal", String(args.includeOnlyPersonal));
-          }
+        }
         if (args.includeOnlyLatest !== undefined) {
           params.set("IncludeOnlyLatest", String(args.includeOnlyLatest));
         }
         if (args.workflowId) params.set("WorkflowId", args.workflowId);
         return {
-          url: `/chatbots${params ? "?" + params.toString() : ""}`,
+          url: `/workflows${params ? "?" + params.toString() : ""}`,
           method: "GET",
         };
       },

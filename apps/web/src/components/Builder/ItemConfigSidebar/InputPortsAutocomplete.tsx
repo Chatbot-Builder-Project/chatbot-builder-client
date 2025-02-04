@@ -118,6 +118,7 @@ export const InputPortsAutocomplete = ({
             info: { id: Date.now(), name: `DataLink_${Date.now()}` },
             sourcePortId: sourcePortId,
             targetPortId: item.inputPort.info.id,
+            visual: { data: {} },
           })
         );
       }
