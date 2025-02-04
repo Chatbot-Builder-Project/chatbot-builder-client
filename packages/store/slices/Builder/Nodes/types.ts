@@ -10,12 +10,18 @@ export enum NodeType {
   Generation = "Generation",
 }
 
-interface BaseInfo {
+export interface BaseInfo {
   id: number;
   name: string;
 }
 
-interface Port {
+// dataType can be: "text", "image", "option"
+// Data objects are one of these:
+// {"type": "image", "url", "..."}
+// {"type": "text", "text": "..."}
+// {"type": "option", "option": "..."}
+
+export interface Port {
   info: BaseInfo;
   nodeId: number;
   dataType: string;
@@ -44,11 +50,11 @@ export type NodeTemplates = {
 
 export interface InteractionNode extends BaseNode {
   type: NodeType.Interaction;
-  textInputPort?: Port;
-  imageInputPorts: Port[];
-  textOutputPort?: Port;
+  textInputPort?: Port; // text datatype
+  imageInputPorts: Port[]; // image datatypes
+  textOutputPort?: Port; // text datatype
   outputEnumId?: number;
-  optionOutputPort?: Port;
+  optionOutputPort?: Port; // option datatype
   outputOptionMetas?: Record<string, { Description: string }>;
 }
 
@@ -60,27 +66,27 @@ export interface StaticNode extends BaseNode {
     url?: string;
     option?: string;
   };
-  outputPort: Port;
+  outputPort: Port; // datatype matches data.type
 }
 
 export interface SwitchNode extends BaseNode {
   type: NodeType.Switch;
   enumId: number;
-  inputPort: Port;
+  inputPort: Port; // option datatype
   optionFlowLinkIds: Record<string, number>;
 }
 
 export interface PromptNode extends BaseNode {
   type: NodeType.Prompt;
   template: string;
-  outputPort: Port;
-  inputPorts: Port[];
+  outputPort: Port; // text datatype
+  inputPorts: Port[]; // text datatypes
 }
 
 export interface SmartSwitchNode extends BaseNode {
   type: NodeType.SmartSwitch;
   enumId: number;
-  inputPort: Port;
+  inputPort: Port; // text dattype
   optionFlowLinkIds: Record<string, number>;
   fallbackFlowLinkId: number | null;
 }
@@ -97,16 +103,16 @@ export enum HttpMethod {
 
 export interface ApiActionNode extends BaseNode {
   type: NodeType.ApiAction;
-  urlInputPort: Port;
+  urlInputPort: Port; // text datatype
   httpMethod: HttpMethod;
   headers?: Record<string, string>;
-  bodyInputPort?: Port;
-  responseOutputPort: Port;
+  bodyInputPort?: Port; // text dattype
+  responseOutputPort: Port; // text dattype
 }
 export interface GenerationNode extends BaseNode {
   type: NodeType.Generation;
-  inputPort: Port;
-  outputPort: Port;
+  inputPort: Port; // text dattype
+  outputPort: Port; // text dattype
   options: {
     useMemory: boolean;
     responseSchema?: any;
@@ -153,6 +159,7 @@ export interface Enum {
   info: BaseInfo;
   visual: { data: NodeVisual };
   options: {
+    // option data objects
     type: string;
     option: string;
   }[];

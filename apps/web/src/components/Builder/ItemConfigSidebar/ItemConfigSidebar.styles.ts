@@ -40,7 +40,7 @@ export const TextArea = styled.textarea`
 export const SectionTitle = styled.h3`
   margin: 16px 0 8px;
   font-size: 14px;
-  color: #666;
+  color: ${(props) => props.theme.colors.lightText};
 `;
 
 export const OptionContainer = styled.div`
