@@ -32,6 +32,7 @@ export interface NodeVisual {
   y?: number;
   width?: number;
   height?: number;
+  enumId?: number;
 }
 
 interface BaseNode {
@@ -48,6 +49,10 @@ export type NodeTemplates = {
   [K in NodeType]: NodeTemplate<Extract<NodeData, { type: K }>>;
 };
 
+// - At least one output port should exist, and at least one input port should exist.
+// - More than one output port can exist but is optional, same for input ports.
+// - If the port is an option, you can give each option some metadata to help the user.
+// - This metadata will be retrieved and given to the caller when traversing the graph later.
 export interface InteractionNode extends BaseNode {
   type: NodeType.Interaction;
   textInputPort?: Port; // text datatype

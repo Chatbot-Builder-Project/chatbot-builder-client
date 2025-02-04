@@ -150,3 +150,20 @@ export function getInputPortsWithNodeInfo(
     nodeInfo: node.info,
   }));
 }
+
+export const highlightTemplate = (template: string, inputPorts: Port[]) => {
+  let highlightedTemplate = template;
+  const matches = template.match(/{{(\d+)}}/g) || [];
+  
+  matches.forEach(match => {
+    const portId = parseInt(match.replace('{{', '').replace('}}', ''));
+    const portExists = inputPorts.some(port => port.info.id === portId);
+    const color = portExists ? '#4CAF50' : '#f44336';
+    highlightedTemplate = highlightedTemplate.replace(
+      match,
+      `<span style="color: ${color}; font-weight: bold">${match}</span>`
+    );
+  });
+  
+  return highlightedTemplate;
+};

@@ -19,7 +19,47 @@ interface ImageModalUploaderProps {
   onSelect?: (imageUrl: string) => void;
 }
 
-export const ImageModalUploader: React.FC<ImageModalUploaderProps> = ({
+interface ImageSelectorButtonProps {
+  onImageSelect: (imageUrl: string) => void;
+  buttonText?: string;
+}
+
+export const ImageSelectorButton: React.FC<ImageSelectorButtonProps> = ({
+  onImageSelect,
+  buttonText = "Select Image",
+}) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+
+  return (
+    <>
+      <Button
+        onClick={handleOpenModal}
+        startIcon={<IconPhotoPlus size={20} />}
+        variant="contained"
+        sx={{
+          backgroundColor: "#009bff",
+          "&:hover": {
+            backgroundColor: "#0081d5",
+          },
+          fontFamily: "Montserrat, sans-serif",
+        }}
+      >
+        {buttonText}
+      </Button>
+
+      <ImageModalUploader
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        onSelect={onImageSelect}
+      />
+    </>
+  );
+};
+
+const ImageModalUploader: React.FC<ImageModalUploaderProps> = ({
   open,
   onClose,
   onSelect,

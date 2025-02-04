@@ -4,6 +4,8 @@ import {
   updateNode,
   selectAllNodes,
   selectAllDataLinks,
+  selectAllEnums,
+  updateNodeVisual,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import {
   Container,
@@ -14,6 +16,8 @@ import {
   ArrayContainer,
   ArrayItem,
   IconButton,
+  OutputTypeSwitch,
+  SwitchLabel,
 } from "./ItemConfigSidebar.styles";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@chatbot-builder/store/store";
@@ -24,11 +28,11 @@ import {
 import { cloneDeep } from "lodash";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { Divider } from "@mui/material";
+import Switch from "@mui/material/Switch";
 import Editor from "@monaco-editor/react";
 import { InputPortsAutocomplete } from "./InputPortsAutocomplete";
 import { getInputPortsWithNodeInfo } from "./utils";
-import { ImageModalUploader } from "../../ImageModalUploader/ImageModalUploader";
-import { useState } from "react";
+import { ImageSelectorButton } from "../../ImageModalUploader/ImageModalUploader";
 
 const ItemConfigSidebar = () => {
   const dispatch = useDispatch();
@@ -36,9 +40,9 @@ const ItemConfigSidebar = () => {
   const selectedNode = useSelector((state: RootState) =>
     selectedId ? selectNodeById(state, selectedId) : null
   );
-  const [isUploadImageModalOpen, setIsUploadImageModalOpen] = useState(false);
   const allNodes = useSelector(selectAllNodes);
   const allDataLinks = useSelector(selectAllDataLinks);
+  const allEnums = useSelector(selectAllEnums);
 
   // const renderNodeIdSelect = (
   //   path: string[],
@@ -166,19 +170,116 @@ const ItemConfigSidebar = () => {
   const renderStaticNode = () =>
     selectedNode?.type === NodeType.Static ? (
       <>
-        <ImageModalUploader
-          open={isUploadImageModalOpen}
-          onClose={() => setIsUploadImageModalOpen(false)}
-        />
-        <SectionTitle>Static Text</SectionTitle>
-        <TextArea
-          value={selectedNode?.data?.text || ""}
+        <SectionTitle>Content Type</SectionTitle>
+        <Select
+          value={selectedNode?.data?.type || "text"}
           onChange={(e) => {
             const updated = cloneDeep(selectedNode);
-            updated.data.text = e.target.value;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            updated.data = { type: e.target.value as any };
             dispatch(updateNode(updated));
           }}
-        />
+        >
+          <option value="text">Text</option>
+          <option value="image">Image</option>
+          <option value="option">Option</option>
+        </Select>
+
+        {selectedNode?.data?.type === "text" && (
+          <>
+            <SectionTitle>Static Text</SectionTitle>
+            <TextArea
+              value={selectedNode?.data?.text || ""}
+              onChange={(e) => {
+                const updated = cloneDeep(selectedNode);
+                updated.data.text = e.target.value;
+                dispatch(updateNode(updated));
+              }}
+              style={{ minHeight: "100px" }}
+            />
+          </>
+        )}
+
+        {selectedNode?.data?.type === "image" && (
+          <>
+            <SectionTitle>Image</SectionTitle>
+            <ImageSelectorButton
+              onImageSelect={(url) => {
+                const updated = cloneDeep(selectedNode);
+                updated.data.url = url;
+                dispatch(updateNode(updated));
+              }}
+            />
+            {selectedNode.data.url && (
+              <img
+                src={selectedNode.data.url}
+                alt="Selected"
+                style={{
+                  width: "100%",
+                  height: "100px",
+                  objectFit: "contain",
+                  borderRadius: "4px",
+                  marginTop: "8px",
+                  backgroundColor: "#2a2a2a",
+                }}
+              />
+            )}
+          </>
+        )}
+
+        {selectedNode?.data?.type === "option" && (
+          <>
+            <SectionTitle>Select Enum</SectionTitle>
+            <Select
+              value={selectedNode?.visual?.data?.enumId || ""}
+              onChange={(e) => {
+                dispatch(
+                  updateNodeVisual({
+                    id: selectedNode.info.id,
+                    visual: {
+                      enumId: parseInt(e.target.value),
+                    },
+                  })
+                );
+              }}
+              style={{ marginBottom: "12px" }}
+            >
+              <option value="">Select an enum</option>
+              {allEnums.map((enum_) => (
+                <option key={enum_.info.id} value={enum_.info.id}>
+                  {enum_.info.name}
+                </option>
+              ))}
+            </Select>
+
+            {selectedNode?.visual?.data?.enumId && (
+              <>
+                <SectionTitle>Select Option</SectionTitle>
+                <Select
+                  value={selectedNode?.data?.option || ""}
+                  onChange={(e) => {
+                    const updated = cloneDeep(selectedNode);
+                    updated.data.option = e.target.value;
+                    dispatch(updateNode(updated));
+                  }}
+                >
+                  <option value="">Select an option</option>
+                  {allEnums
+                    .find(
+                      (enum_) =>
+                        enum_.info.id === selectedNode?.visual?.data?.enumId
+                    )
+                    ?.options.map((opt) => (
+                      <option key={opt.option} value={opt.option}>
+                        {opt.option}
+                      </option>
+                    ))}
+                </Select>
+              </>
+            )}
+          </>
+        )}
+
         <InputPortsAutocomplete
           allDataInputPorts={allNodes
             .map((node) =>
@@ -195,75 +296,193 @@ const ItemConfigSidebar = () => {
   const renderInteractionNode = () =>
     selectedNode?.type === NodeType.Interaction ? (
       <>
-        <SectionTitle>Text Input Port</SectionTitle>
-        {/* {renderPortIdSelect(
-          ["textInputPort"],
-          selectedNode?.textInputPort?.info.id,
-          selectedNode?.info.id,
-          "Select Input Port"
-        )} */}
-
-        <SectionTitle>Options</SectionTitle>
+        <SectionTitle>Image Input Ports</SectionTitle>
         <ArrayContainer>
-          {Object.entries(selectedNode?.outputOptionMetas || {}).map(
-            ([key, value], index) => (
-              <ArrayItem key={index}>
-                <InputField
-                  placeholder="Option"
-                  value={key}
-                  onChange={(e) => {
-                    const updated = cloneDeep(selectedNode);
-                    const newMetas = { ...selectedNode?.outputOptionMetas };
-                    delete newMetas[key];
-                    newMetas[e.target.value] = value;
-                    updated.outputOptionMetas = newMetas;
-                    dispatch(updateNode(updated));
-                  }}
-                />
-                <InputField
-                  placeholder="Description"
-                  value={value.Description}
-                  onChange={(e) => {
-                    const updated = cloneDeep(selectedNode);
-                    const newMetas = { ...selectedNode?.outputOptionMetas };
-                    newMetas[key] = { Description: e.target.value };
-                    updated.outputOptionMetas = newMetas;
-                    dispatch(updateNode(updated));
-                  }}
-                />
-                <IconButton
-                  onClick={() => {
-                    const updated = cloneDeep(selectedNode);
-                    const newMetas = { ...selectedNode?.outputOptionMetas };
-                    delete newMetas[key];
-                    updated.outputOptionMetas = newMetas;
-                    dispatch(updateNode(updated));
-                  }}
-                >
-                  <IconTrash size={18} />
-                </IconButton>
-              </ArrayItem>
-            )
-          )}
+          {selectedNode?.imageInputPorts?.map((port, index) => (
+            <ArrayItem key={index}>
+              <InputField
+                value={port.info.name}
+                onChange={(e) => {
+                  const updated = cloneDeep(selectedNode);
+                  updated.imageInputPorts[index].info.name = e.target.value;
+                  dispatch(updateNode(updated));
+                }}
+              />
+              <IconButton
+                onClick={() => {
+                  const updated = cloneDeep(selectedNode);
+                  updated.imageInputPorts = updated.imageInputPorts.filter(
+                    (_, i) => i !== index
+                  );
+                  dispatch(updateNode(updated));
+                }}
+              >
+                <IconTrash size={18} />
+              </IconButton>
+            </ArrayItem>
+          ))}
           <IconButton
             onClick={() => {
               const updated = cloneDeep(selectedNode);
-              const newMetas = { ...selectedNode?.outputOptionMetas };
-              newMetas[`Option_${Date.now()}`] = { Description: "" };
-              updated.outputOptionMetas = newMetas;
+              const newPort = {
+                info: { id: Date.now(), name: `Image_Input_${Date.now()}` },
+                nodeId: selectedNode.info.id,
+                dataType: "image",
+              };
+              updated.imageInputPorts = [
+                ...(updated.imageInputPorts || []),
+                newPort,
+              ];
               dispatch(updateNode(updated));
             }}
           >
             <IconPlus size={18} />
           </IconButton>
         </ArrayContainer>
+        <Divider
+          sx={{ width: "100%", bgcolor: "white", marginY: 3, marginX: "auto" }}
+        />
+        <SectionTitle>Output Configuration</SectionTitle>
+        <OutputTypeSwitch>
+          <Switch
+            checked={!!selectedNode?.textOutputPort}
+            onChange={(_, checked) => {
+              const updated = cloneDeep(selectedNode);
+              if (checked) {
+                updated.textOutputPort = {
+                  info: { id: Date.now(), name: `Text_Output_${Date.now()}` },
+                  nodeId: selectedNode.info.id,
+                  dataType: "text",
+                };
+              } else if (!!updated.optionOutputPort) {
+                updated.textOutputPort = undefined;
+              }
+              dispatch(updateNode(updated));
+            }}
+            disabled={
+              !selectedNode?.textOutputPort && !selectedNode?.optionOutputPort
+            }
+          />
+          <SwitchLabel>Text Output</SwitchLabel>
+        </OutputTypeSwitch>
+        <OutputTypeSwitch>
+          <Switch
+            checked={!!selectedNode?.optionOutputPort}
+            onChange={(_, checked) => {
+              const updated = cloneDeep(selectedNode);
+              if (checked) {
+                updated.optionOutputPort = {
+                  info: { id: Date.now(), name: `Option_Output_${Date.now()}` },
+                  nodeId: selectedNode.info.id,
+                  dataType: "option",
+                };
+              } else if (!!updated.textOutputPort) {
+                updated.optionOutputPort = null;
+                updated.outputEnumId = null;
+                updated.outputOptionMetas = null;
+              }
+              dispatch(updateNode(updated));
+            }}
+            disabled={
+              !selectedNode?.textOutputPort && !selectedNode?.optionOutputPort
+            }
+          />
+          <SwitchLabel>Option Output</SwitchLabel>
+        </OutputTypeSwitch>
 
-        <SectionTitle>Output Enum</SectionTitle>
-        {/* {renderNodeIdSelect(
-          ["outputEnumId"],
-          selectedNode?.outputEnumId,
-          "Select Enum"
-        )} */}
+        {selectedNode.textOutputPort && (
+          <>
+            <SectionTitle>Text Output Configuration</SectionTitle>
+            <InputPortsAutocomplete
+              allDataInputPorts={allNodes
+                .map((node) => getInputPortsWithNodeInfo(node, "text"))
+                .flat()}
+              allDataLinks={allDataLinks}
+              selectedNodeId={selectedNode.info.id}
+              sourcePortId={selectedNode.textOutputPort.info.id}
+            />
+          </>
+        )}
+        {selectedNode.optionOutputPort && (
+          <>
+            <SectionTitle>Option Output Configuration</SectionTitle>
+            <InputPortsAutocomplete
+              allDataInputPorts={allNodes
+                .map((node) => getInputPortsWithNodeInfo(node, "option"))
+                .flat()}
+              allDataLinks={allDataLinks}
+              selectedNodeId={selectedNode.info.id}
+              sourcePortId={selectedNode.optionOutputPort.info.id}
+            />
+
+            <SectionTitle>Output Enum</SectionTitle>
+            <Select
+              value={selectedNode?.outputEnumId || ""}
+              onChange={(e) => {
+                const updated = cloneDeep(selectedNode);
+                const enumId = parseInt(e.target.value);
+                updated.outputEnumId = enumId;
+
+                // Reset and initialize metadata for all enum options
+                const selectedEnum = allEnums.find(
+                  (enum_) => enum_.info.id === enumId
+                );
+                if (selectedEnum) {
+                  updated.outputOptionMetas = {};
+                  selectedEnum.options.forEach((opt) => {
+                    updated.outputOptionMetas![opt.option] = {
+                      Description: "",
+                    };
+                  });
+                }
+
+                dispatch(updateNode(updated));
+              }}
+            >
+              <option value="">Select an enum</option>
+              {allEnums.map((enum_) => (
+                <option key={enum_.info.id} value={enum_.info.id}>
+                  {enum_.info.name}
+                </option>
+              ))}
+            </Select>
+
+            {selectedNode.outputEnumId && (
+              <>
+                <SectionTitle>Option Descriptions</SectionTitle>
+                <ArrayContainer>
+                  {allEnums
+                    .find(
+                      (enum_) => enum_.info.id === selectedNode.outputEnumId
+                    )
+                    ?.options.map((opt) => (
+                      <ArrayItem key={opt.option}>
+                        <SwitchLabel style={{ minWidth: "120px" }}>
+                          {opt.option}
+                        </SwitchLabel>
+                        <InputField
+                          placeholder="Description"
+                          value={
+                            selectedNode.outputOptionMetas?.[opt.option]
+                              ?.Description || ""
+                          }
+                          onChange={(e) => {
+                            const updated = cloneDeep(selectedNode);
+                            if (!updated.outputOptionMetas)
+                              updated.outputOptionMetas = {};
+                            updated.outputOptionMetas[opt.option] = {
+                              Description: e.target.value,
+                            };
+                            dispatch(updateNode(updated));
+                          }}
+                        />
+                      </ArrayItem>
+                    ))}
+                </ArrayContainer>
+              </>
+            )}
+          </>
+        )}
       </>
     ) : null;
 
@@ -339,6 +558,20 @@ const ItemConfigSidebar = () => {
             <IconPlus size={18} />
           </IconButton>
         </ArrayContainer>
+
+        <Divider
+          sx={{ width: "100%", bgcolor: "white", marginY: 3, marginX: "auto" }}
+        />
+
+        <SectionTitle>Send Response To Input Ports</SectionTitle>
+        <InputPortsAutocomplete
+          allDataInputPorts={allNodes
+            .map((node) => getInputPortsWithNodeInfo(node, "text"))
+            .flat()}
+          allDataLinks={allDataLinks}
+          selectedNodeId={selectedNode.info.id}
+          sourcePortId={selectedNode.responseOutputPort.info.id}
+        />
       </>
     ) : null;
 

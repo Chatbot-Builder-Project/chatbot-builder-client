@@ -42,7 +42,7 @@ export const NODES: NodeTemplates = {
     info: { id: 0, name: "New Static" },
     visual: { data: { x: 0, y: 0, width: 180, height: 100 } },
     data: {
-      type: "Text",
+      type: "text",
       text: "Enter text here",
     },
     outputPort: {

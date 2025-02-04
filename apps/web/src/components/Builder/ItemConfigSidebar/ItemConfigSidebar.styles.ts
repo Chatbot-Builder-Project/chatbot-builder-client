@@ -14,6 +14,27 @@ export const Container = styled.div<{ $isOpened: boolean }>`
   border: 2px solid #252525;
   padding: 20px;
   transition: right 0.3s ease-in-out;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #373737 #111111;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #111111;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #373737;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #454545;
+  }
 `;
 
 export const Title = styled.h2``;
@@ -28,13 +49,26 @@ export const InputField = styled.input`
   border-radius: 4px;
 `;
 
-export const TextArea = styled.textarea`
+export const TextArea = styled.div`
   width: 100%;
   padding: 8px;
   margin: 8px 0;
-  border: 1px solid #ddd;
+  border: 1px solid #373737;
   border-radius: 4px;
   min-height: 100px;
+  background-color: #1d1d1d;
+  color: #fff;
+  font-family: 'Montserrat', sans-serif;
+  white-space: pre-wrap;
+  
+  &:focus {
+    outline: none;
+    border-color: #2196F3;
+  }
+  
+  span {
+    display: inline;
+  }
 `;
 
 export const SectionTitle = styled.h3`
@@ -123,4 +157,63 @@ export const ValidationError = styled.div`
   color: ${(props) => props.theme.colors.error};
   font-size: 12px;
   margin-top: 4px;
+`;
+
+export const OutputTypeSwitch = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-family: 'Montserrat', sans-serif;
+`;
+
+export const SwitchLabel = styled.span`
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: #ffffff;
+`;
+
+export const Switch = styled.label`
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  span {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+  }
+
+  input:checked + span {
+    background-color: #2196F3;
+  }
+
+  input:checked + span:before {
+    transform: translateX(26px);
+  }
 `;
