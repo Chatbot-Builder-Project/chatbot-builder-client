@@ -10,6 +10,7 @@ import { BuilderLayout } from "../components/Builder/Layout";
 import { AuthLayout } from "../components/Auth/Layout";
 import { AppLayout } from "../components/AppLayout";
 import { DashboardLayout } from "../pages/Dashboard/Layout.tsx";
+import { EndUserChat } from "../pages/EnduUerChat/EndUserChat.tsx";
 
 type AppRouteObject = RouteObject & {
   children?: AppRouteObject[];
@@ -45,6 +46,10 @@ const routes: AppRouteObject[] = [
       { path: "/builder/flow/:id", element: <FlowBuilder /> },
       { path: "/builder/chat/:id", element: <ChatBuilder /> },
     ],
+  },
+  {
+    path: "/chat/:id",
+    element: <EndUserChat />,
   },
 ];
 

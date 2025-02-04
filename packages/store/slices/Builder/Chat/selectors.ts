@@ -10,4 +10,4 @@ export const selectComponentStyle =
   (component: keyof ChatComponentStyles) => (state: RootState) => {
     return state.builder.chat.styles[component];
   };
-export const selectChatContent = (state: RootState) => state.builder.chat.content;
+

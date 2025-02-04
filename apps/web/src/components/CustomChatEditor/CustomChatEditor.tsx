@@ -8,11 +8,11 @@ import {
 } from "@chatbot-builder/store/slices/Builder/Chat";
 import SendButton from "./SendButton";
 import {
-  selectChatContent,
   selectChatStyles,
   selectCurrentBreakpoint,
   selectSelectedComponent,
 } from "@chatbot-builder/store/slices/Builder/Chat/selectors";
+import { RootState } from "@chatbot-builder/store/store";
 
 const ChatContainerSX = {
   position: "absolute",
@@ -110,7 +110,7 @@ const CustomChatEditor: React.FC = () => {
   const { width, height } = ChatDimensionsBreakpoints[currentBreakpoint];
   const [hoveredSection, setHoveredSection] = useState<string[]>([]);
   const selectedComponent = useSelector(selectSelectedComponent);
-  const content = useSelector(selectChatContent);
+  const content = useSelector((state: RootState) => state.builder.chat.content);
   const handleMouseEnter = (section: string) =>
     setHoveredSection((prev) => [...prev, section]);
 
