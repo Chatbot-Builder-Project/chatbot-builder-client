@@ -49,7 +49,7 @@ const ItemConfigSidebar = () => {
   const renderPromptNode = () =>
     selectedNode?.type === NodeType.Prompt ? (
       <>
-        <SectionTitle>Template</SectionTitle>
+        <SectionTitle>Text Template: (Placeholders include port id, placed in curly brackets)</SectionTitle>
         <TextArea
           value={selectedNode?.template || ""}
           onChange={(e) => {
@@ -60,7 +60,7 @@ const ItemConfigSidebar = () => {
           placeholder="Enter your template here..."
         />
 
-        <SectionTitle>Text Input Ports</SectionTitle>
+        <SectionTitle>Placeholders Ports:</SectionTitle>
         <ArrayContainer>
           {selectedNode?.inputPorts?.map((port, index) => (
             <ArrayItem key={index}>
@@ -109,7 +109,7 @@ const ItemConfigSidebar = () => {
           sx={{ width: "100%", bgcolor: "white", marginY: 3, marginX: "auto" }}
         />
 
-        <SectionTitle>Output Configuration</SectionTitle>
+        <SectionTitle>Send Output To:</SectionTitle>
         <InputPortsAutocomplete
           allDataInputPorts={allNodes
             .map((node) => getInputPortsWithNodeInfo(node, "text"))
@@ -141,7 +141,7 @@ const ItemConfigSidebar = () => {
 
         {selectedNode?.data?.type === "text" && (
           <>
-            <SectionTitle>Static Text</SectionTitle>
+            <SectionTitle>Text</SectionTitle>
             <TextArea
               value={selectedNode?.data?.text || ""}
               onChange={(e) => {
@@ -233,7 +233,10 @@ const ItemConfigSidebar = () => {
             )}
           </>
         )}
-
+        <Divider
+          sx={{ width: "100%", bgcolor: "white", marginY: 3, marginX: "auto" }}
+        />
+          <SectionTitle>Send Data To:</SectionTitle>
         <InputPortsAutocomplete
           allDataInputPorts={allNodes
             .map((node) =>
@@ -250,7 +253,7 @@ const ItemConfigSidebar = () => {
   const renderInteractionNode = () =>
     selectedNode?.type === NodeType.Interaction ? (
       <>
-        <SectionTitle>Image Input Ports</SectionTitle>
+        <SectionTitle>Image Input Ports (Displayed to the User)</SectionTitle>
         <ArrayContainer>
           {selectedNode?.imageInputPorts?.map((port, index) => (
             <ArrayItem key={index}>
@@ -296,7 +299,7 @@ const ItemConfigSidebar = () => {
         <Divider
           sx={{ width: "100%", bgcolor: "white", marginY: 3, marginX: "auto" }}
         />
-        <SectionTitle>Output Configuration</SectionTitle>
+        <SectionTitle>What should the User input look like?</SectionTitle>
         <OutputTypeSwitch>
           <Switch
             checked={!!selectedNode?.textOutputPort}
@@ -317,7 +320,7 @@ const ItemConfigSidebar = () => {
               !selectedNode?.textOutputPort && !selectedNode?.optionOutputPort
             }
           />
-          <SwitchLabel>Text Output</SwitchLabel>
+          <SwitchLabel>Text: User types a message</SwitchLabel>
         </OutputTypeSwitch>
         <OutputTypeSwitch>
           <Switch
@@ -341,12 +344,12 @@ const ItemConfigSidebar = () => {
               !selectedNode?.textOutputPort && !selectedNode?.optionOutputPort
             }
           />
-          <SwitchLabel>Option Output</SwitchLabel>
+          <SwitchLabel>Option: User makes a decision</SwitchLabel>
         </OutputTypeSwitch>
 
         {selectedNode.textOutputPort && (
           <>
-            <SectionTitle>Text Output Configuration</SectionTitle>
+            <SectionTitle>Send Text Data To:</SectionTitle>
             <InputPortsAutocomplete
               allDataInputPorts={allNodes
                 .map((node) => getInputPortsWithNodeInfo(node, "text"))
@@ -359,7 +362,7 @@ const ItemConfigSidebar = () => {
         )}
         {selectedNode.optionOutputPort && (
           <>
-            <SectionTitle>Option Output Configuration</SectionTitle>
+            <SectionTitle>Send Option Data To:</SectionTitle>
             <InputPortsAutocomplete
               allDataInputPorts={allNodes
                 .map((node) => getInputPortsWithNodeInfo(node, "option"))
@@ -369,7 +372,7 @@ const ItemConfigSidebar = () => {
               sourcePortId={selectedNode.optionOutputPort?.info?.id}
             />
 
-            <SectionTitle>Output Enum</SectionTitle>
+            <SectionTitle>Options Enum Type:</SectionTitle>
             <Select
               value={selectedNode?.outputEnumId || ""}
               onChange={(e) => {
@@ -517,7 +520,7 @@ const ItemConfigSidebar = () => {
           sx={{ width: "100%", bgcolor: "white", marginY: 3, marginX: "auto" }}
         />
 
-        <SectionTitle>Send Response To Input Ports</SectionTitle>
+        <SectionTitle>Send Response To:</SectionTitle>
         <InputPortsAutocomplete
           allDataInputPorts={allNodes
             .map((node) => getInputPortsWithNodeInfo(node, "text"))
@@ -532,7 +535,7 @@ const ItemConfigSidebar = () => {
   const renderGenerationNode = () =>
     selectedNode?.type === NodeType.Generation ? (
       <>
-        <SectionTitle>Response Schema</SectionTitle>
+        <SectionTitle>Response Schema: (AI will strict the response to follow this schema)</SectionTitle>
         <Editor
           height="200px"
           defaultLanguage="json"
@@ -561,7 +564,7 @@ const ItemConfigSidebar = () => {
         <Divider
           sx={{ width: "100%", bgcolor: "white", marginY: 3, marginX: "auto" }}
         />
-        <SectionTitle>Send Generated Text To Input Ports: </SectionTitle>
+        <SectionTitle>Send Generated Text To: </SectionTitle>
         <InputPortsAutocomplete
           allDataInputPorts={allNodes
             .map((node) => getInputPortsWithNodeInfo(node, "text"))
@@ -596,7 +599,7 @@ const ItemConfigSidebar = () => {
 
         {selectedNode?.enumId && (
           <>
-            <SectionTitle>Configure Option Flow Links</SectionTitle>
+            <SectionTitle>What Flow Link should each Option route to ?</SectionTitle>
             <ArrayContainer>
               {allEnums
                 .find((enum_) => enum_.info.id === selectedNode.enumId)
@@ -665,7 +668,7 @@ const ItemConfigSidebar = () => {
 
         {selectedNode?.enumId && (
           <>
-            <SectionTitle>Configure Option Flow Links</SectionTitle>
+            <SectionTitle>What Flow Link should each Option route to ?</SectionTitle>
             <ArrayContainer>
               {allEnums
                 .find((enum_) => enum_.info.id === selectedNode.enumId)
@@ -717,7 +720,7 @@ const ItemConfigSidebar = () => {
                     dispatch(updateNode(updated));
                   }}
                 >
-                  <option value="">Select fallback flow link</option>
+                  <option value="">Select flow link to fallback in case of error</option>
                   {allFlowLinks
                     .filter(
                       (link) => link.sourceNodeId === selectedNode.info.id
