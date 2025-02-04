@@ -14,6 +14,7 @@ import {
   Enum,
   NodeType,
   Port,
+  WorkflowVisual,
 } from "./types";
 import { getAllInputPorts } from "../../../../../apps/web/src/components/Builder/ItemConfigSidebar/utils";
 import { WorkflowResponse } from "../../../API/builder/types";

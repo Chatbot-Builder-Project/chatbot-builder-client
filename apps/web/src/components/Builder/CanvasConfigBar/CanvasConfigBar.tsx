@@ -13,7 +13,11 @@ import {
   ConfigContainer,
   LogoContainer,
 } from "./CanvasConfigBar.styles";
-import { IconFocus2 } from "@tabler/icons-react";
+import {
+  IconFocus2,
+  IconFileExport,
+  IconFileImport,
+} from "@tabler/icons-react";
 import {
   selectStartNodeId,
   selectAllNodes,
@@ -22,6 +26,7 @@ import {
   selectAllEnums,
   selectWorkflowVisual,
   selectWorkflowMetadata,
+  initWorkflow,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import _ from "lodash";
 import { selectCurrentBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat/selectors";
@@ -85,6 +90,59 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
     dispatch(updateBreakpoint(breakpoint));
   };
 
+  const handleExport = () => {
+    const graphData = {
+      name,
+      description,
+      visual: workflowVisual,
+      startNodeId: selectStartNodeId(state),
+      nodes: selectAllNodes(state),
+      dataLinks: selectAllDataLinks(state),
+      flowLinks: selectAllFlowLinks(state),
+      enums: selectAllEnums(state),
+    };
+
+    const blob = new Blob([JSON.stringify(graphData, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${name || "workflow"}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const content = JSON.parse(e.target?.result as string);
+            dispatch(
+              initWorkflow({
+                ...content,
+                id: id || "temp",
+                visual: content.visual,
+              })
+            );
+          } catch (error) {
+            console.error("Failed to parse workflow file:", error);
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
   return (
     <CanvasConfigContainerBar>
       <LogoContainer>
@@ -124,6 +182,12 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
       <ConfigContainer>
         <SaveButton onClick={handleSave}>Save</SaveButton>
         <PublishButton onClick={handlePublish}>Publish</PublishButton>
+        <CenterButton onClick={handleExport}>
+          <IconFileExport size={18} />
+        </CenterButton>
+        <CenterButton onClick={handleImport}>
+          <IconFileImport size={18} />
+        </CenterButton>
         <CenterButton onClick={resetPosition}>
           <IconFocus2 size={18} />
         </CenterButton>

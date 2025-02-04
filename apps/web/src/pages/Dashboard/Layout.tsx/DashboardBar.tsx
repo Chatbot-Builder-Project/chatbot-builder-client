@@ -34,8 +34,8 @@ const DashboardBar = () => {
   const handleCreateWorkflow = async (name: string, description: string) => {
     try {
       const response = await createWorkflow({
-        name: "My Workflow",
-        description: "Workflow description",
+        name: name,
+        description: description,
         visual: {
           data: {},
         },
@@ -308,7 +308,7 @@ const DashboardBar = () => {
             onChange={(e) => setSearchText(e.target.value)}
           />
         </SearchBarContainer>
-        <NewButton onClick={() => setIsModalOpen(true)}>Nsssew</NewButton>
+        <NewButton onClick={() => setIsModalOpen(true)}>New</NewButton>
       </DashboardBarContent>
       <CreateWorkflowModal
         open={isModalOpen}
