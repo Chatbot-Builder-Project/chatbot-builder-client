@@ -8,7 +8,7 @@ import type {
 import { QueryError } from "./types";
 
 const baseUrl =
-  "http://chatbot-builder-production-dns.israelcentral.cloudapp.azure.com:8080/api/v1";
+  "http://localhost:8080/api/v1";
 
 export const fetchBaseQueryWithAuthHandling: BaseQueryFn<
   string | FetchArgs,
@@ -19,6 +19,7 @@ export const fetchBaseQueryWithAuthHandling: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const baseQuery = fetchBaseQuery({
     baseUrl,
+    timeout: 100000,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
       if (token) {

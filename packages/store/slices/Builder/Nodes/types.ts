@@ -172,6 +172,14 @@ export interface Enum {
   }[];
 }
 
+export interface WorkflowVisual {
+  zoom: number;
+  position: {
+    x: number;
+    y: number;
+  };
+}
+
 export interface BuilderState {
   nodes: EntityState<NodeData>;
   enums: EntityState<Enum>;
@@ -181,4 +189,8 @@ export interface BuilderState {
   startNodeId: number | null;
   nextNodeId: number;
   pendingFlowLinkSourceId: number | null;
+  workflowId: string | null;
+  workflowVisual: WorkflowVisual;
+  workflowName: string;
+  workflowDescription: string;
 }

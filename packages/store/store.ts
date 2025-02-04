@@ -4,7 +4,7 @@ import { authApi } from "./API/Auth";
 import { userInfoApi } from "./API/userInfo";
 import { workflowsApi } from "./API/workflows/workflows";
 import { imageUploaderApi } from "./API/imageUploader/imageUploader";
-import { saveBuilderApi } from "./API/SaveBuilder/SaveBuilder";
+import { builderApi } from "./API/builder/builder";
 
 const store = configureStore({
   reducer: {
@@ -14,7 +14,7 @@ const store = configureStore({
     [userInfoApi.reducerPath]: userInfoApi.reducer,
     [workflowsApi.reducerPath]: workflowsApi.reducer,
     [imageUploaderApi.reducerPath]: imageUploaderApi.reducer,
-    [saveBuilderApi.reducerPath]: saveBuilderApi.reducer,
+    [builderApi.reducerPath]: builderApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -22,7 +22,7 @@ const store = configureStore({
       userInfoApi.middleware,
       workflowsApi.middleware,
       imageUploaderApi.middleware,
-      saveBuilderApi.middleware
+      builderApi.middleware
     ),
 });
 

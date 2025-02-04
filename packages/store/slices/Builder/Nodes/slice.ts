@@ -16,6 +16,7 @@ import {
   Port,
 } from "./types";
 import { getAllInputPorts } from "../../../../../apps/web/src/components/Builder/ItemConfigSidebar/utils";
+import { WorkflowResponse } from "../../../API/builder/types";
 
 const nodesAdapter = createEntityAdapter<NodeData>({
   selectId: (node) => node.info.id,
@@ -45,6 +46,13 @@ const initialState: BuilderState = {
   startNodeId: null,
   nextNodeId: 1,
   pendingFlowLinkSourceId: null,
+  workflowId: null,
+  workflowVisual: {
+    zoom: 1,
+    position: { x: 0, y: 0 },
+  },
+  workflowName: "",
+  workflowDescription: "",
 };
 
 const builderSlice = createSlice({
@@ -296,6 +304,51 @@ const builderSlice = createSlice({
         enum_.visual = { ...enum_.visual, ...visual };
       }
     },
+    setWorkflowId: (state, action: PayloadAction<string | null>) => {
+      state.workflowId = action.payload;
+    },
+    initWorkflow: (state, action: PayloadAction<WorkflowResponse["graph"]>) => {
+      const { nodes, enums, dataLinks, flowLinks, startNodeId, id, visual, name, description } =
+        action.payload;
+
+      // Reset all adapters
+      nodesAdapter.setAll(state.nodes, nodes);
+      enumsAdapter.setAll(state.enums, enums);
+      dataLinksAdapter.setAll(state.dataLinks, dataLinks);
+      flowLinksAdapter.setAll(state.flowLinks, flowLinks);
+
+      // Set workflow metadata
+      state.startNodeId = startNodeId;
+      state.workflowId = id;
+
+      // Set workflow visual
+      if (visual) {
+        state.workflowVisual = visual;
+      }
+
+      // Calculate next node ID
+      const maxId = Math.max(
+        ...nodes.map((n) => n.info.id),
+        ...enums.map((e) => e.info.id),
+        ...dataLinks.map((l) => l.info.id),
+        ...flowLinks.map((l) => l.info.id)
+      );
+      state.nextNodeId = maxId + 1;
+
+      // Set workflow metadata
+      state.workflowName = name || "";
+      state.workflowDescription = description || "";
+    },
+    updateWorkflowMetadata: (
+      state,
+      action: PayloadAction<{ name: string; description: string }>
+    ) => {
+      state.workflowName = action.payload.name;
+      state.workflowDescription = action.payload.description;
+    },
+    updateWorkflowVisual: (state, action: PayloadAction<Partial<WorkflowVisual>>) => {
+      state.workflowVisual = { ...state.workflowVisual, ...action.payload };
+    },
   },
 });
 
@@ -336,6 +389,17 @@ export const selectStartNodeId = (state: RootState) =>
 export const selectPendingFlowLinkSourceId = (state: RootState) =>
   state.builder.nodes.pendingFlowLinkSourceId;
 
+export const selectWorkflowId = (state: RootState) =>
+  state.builder.nodes.workflowId;
+
+export const selectWorkflowVisual = (state: RootState) =>
+  state.builder.nodes.workflowVisual;
+
+export const selectWorkflowMetadata = (state: RootState) => ({
+  name: state.builder.nodes.workflowName,
+  description: state.builder.nodes.workflowDescription,
+});
+
 export const {
   addNode,
   updateNodeVisual,
@@ -354,6 +418,10 @@ export const {
   updateEnum,
   removeEnum,
   updateEnumVisual,
+  setWorkflowId,
+  initWorkflow,
+  updateWorkflowMetadata,
+  updateWorkflowVisual,
 } = builderSlice.actions;
 
 export default builderSlice.reducer;

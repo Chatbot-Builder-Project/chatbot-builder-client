@@ -103,9 +103,10 @@ const PopoverItem = styled.div`
 interface CardProps {
   workflow: Workflow;
   onClick?: (id: string) => void;
+  onDelete?: (id: string) => void;
 }
 
-const Card: React.FC<CardProps> = ({ workflow, onClick }) => {
+const Card: React.FC<CardProps> = ({ workflow, onClick, onDelete }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const gradientId = `grad-${workflow.id}`; // Create unique gradient ID
@@ -117,6 +118,12 @@ const Card: React.FC<CardProps> = ({ workflow, onClick }) => {
 
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setAnchorEl(null);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete?.(workflow.id);
     setAnchorEl(null);
   };
 
@@ -154,7 +161,10 @@ const Card: React.FC<CardProps> = ({ workflow, onClick }) => {
               <IconEdit stroke={1.5} />
               Edit
             </PopoverItem>
-            <PopoverItem style={{ color: theme.colors.error }}>
+            <PopoverItem
+              style={{ color: theme.colors.error }}
+              onClick={handleDelete}
+            >
               <IconTrash stroke={1.5} />
               Delete
             </PopoverItem>

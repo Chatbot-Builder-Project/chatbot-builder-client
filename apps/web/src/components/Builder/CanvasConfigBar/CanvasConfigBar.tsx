@@ -1,7 +1,7 @@
 import { useCanvas } from "../../../contexts/CanvasContext";
 import AppLogo from "../../AppLogo";
 import { useDispatch, useSelector } from "react-redux";
-import { useSaveWorkflowMutation } from "@chatbot-builder/store/API/SaveBuilder/SaveBuilder";
+import { useUpdateWorkflowMutation } from "@chatbot-builder/store/API/builder/builder";
 import { ButtonGroup, Button } from "@mui/material";
 import { updateBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat";
 import { ChatBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat/types";
@@ -20,53 +20,56 @@ import {
   selectAllDataLinks,
   selectAllFlowLinks,
   selectAllEnums,
+  selectWorkflowVisual,
+  selectWorkflowMetadata,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import _ from "lodash";
 import { selectCurrentBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat/selectors";
+import { RootState } from "@chatbot-builder/store/store";
+import { traverseAndAddVisualData } from "./utils";
+import { useParams } from "react-router-dom";
 
 interface CanvasConfigBarProps {
   mode: "flow" | "chat";
 }
 
-const traverseAndAddVisualData = (obj: any) => {
-  if (obj && typeof obj === "object") {
-    Object.keys(obj).forEach((key) => {
-      if (key.endsWith("Port") && !obj[key]?.visual?.data && obj[key]) {
-        obj[key].visual = { data: {} };
-      }
-      if (Array.isArray(obj[key])) {
-        obj[key].forEach((item: any) => traverseAndAddVisualData(item));
-      } else if (typeof obj[key] === "object") {
-        traverseAndAddVisualData(obj[key]);
-      }
-    });
-  }
-};
-
 const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
   const { resetPosition } = useCanvas();
   const dispatch = useDispatch();
   const currentBreakpoint = useSelector(selectCurrentBreakpoint);
-  const [saveWorkflow] = useSaveWorkflowMutation();
-  const state = useSelector((state) => state);
+  const [updateWorkflow] = useUpdateWorkflowMutation();
+  const state = useSelector((state: RootState) => state);
+  const { id } = useParams<{ id: string }>();
+  const workflowVisual = useSelector(selectWorkflowVisual);
+  const { name, description } = useSelector(selectWorkflowMetadata);
+
   const handleSave = async () => {
     try {
       const body = _.cloneDeep({
-        name: "My Workflow",
-        description: "Workflow description",
+        name,
+        description,
         visual: { data: {} },
         graph: {
-          visual: { data: {} },
+          visual: workflowVisual,
           startNodeId: selectStartNodeId(state),
           nodes: selectAllNodes(state),
           dataLinks: selectAllDataLinks(state),
           flowLinks: selectAllFlowLinks(state),
           enums: selectAllEnums(state),
+          name,
+          description,
         },
       });
       traverseAndAddVisualData(body);
 
-      await saveWorkflow(body);
+      if (id) {
+        console.log("asdasdsdasasd");
+
+        await updateWorkflow({
+          id,
+          body,
+        });
+      }
       // You can add a success notification here
     } catch (error) {
       // You can add error handling here

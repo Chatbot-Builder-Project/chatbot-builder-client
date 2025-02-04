@@ -40,7 +40,7 @@ const Node: React.FC<NodeProps> = ({ node }) => {
 
     if (pendingSourceId === null) {
       dispatch(setPendingFlowLinkSource(node.info.id));
-    } else if (pendingSourceId !== node.info.id) {
+    } else {
       if (
         sourceNode &&
         sourceNode.type !== NodeType.SmartSwitch &&
@@ -61,7 +61,7 @@ const Node: React.FC<NodeProps> = ({ node }) => {
         <NodeTitle>{node.info.name}</NodeTitle>
         <NodeTypeText>{node.type}</NodeTypeText>
       </Wrapper>
-      {pendingSourceId && pendingSourceId !== node.info.id && (
+      {pendingSourceId && (
         <PrevNode onClick={handleNextNode}>
           <IconCircleArrowRight color="#fff" size={12} />
         </PrevNode>
