@@ -49,7 +49,7 @@ export const InputField = styled.input`
   border-radius: 4px;
 `;
 
-export const TextArea = styled.div`
+export const TextArea = styled.textarea`
   width: 100%;
   padding: 8px;
   margin: 8px 0;
@@ -58,14 +58,39 @@ export const TextArea = styled.div`
   min-height: 100px;
   background-color: #1d1d1d;
   color: #fff;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   white-space: pre-wrap;
-  
+
   &:focus {
     outline: none;
-    border-color: #2196F3;
+    border-color: #2196f3;
   }
-  
+
+  span {
+    display: inline;
+  }
+`;
+
+export const TemplateEditor = styled.div`
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+  border: 1px solid #373737;
+  border-radius: 4px;
+  min-height: 100px;
+  background-color: #1d1d1d;
+  color: #fff;
+  font-family: "Montserrat", sans-serif;
+  white-space: pre-wrap;
+  cursor: text;
+  overflow-y: auto;
+  max-height: 300px;
+
+  &:focus {
+    outline: none;
+    border-color: #2196f3;
+  }
+
   span {
     display: inline;
   }
@@ -164,11 +189,11 @@ export const OutputTypeSwitch = styled.div`
   align-items: center;
   gap: 16px;
   margin-bottom: 16px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 `;
 
 export const SwitchLabel = styled.span`
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
   font-size: 14px;
   color: #ffffff;
 `;
@@ -193,7 +218,7 @@ export const Switch = styled.label`
     right: 0;
     bottom: 0;
     background-color: #ccc;
-    transition: .4s;
+    transition: 0.4s;
     border-radius: 34px;
 
     &:before {
@@ -204,13 +229,13 @@ export const Switch = styled.label`
       left: 4px;
       bottom: 4px;
       background-color: white;
-      transition: .4s;
+      transition: 0.4s;
       border-radius: 50%;
     }
   }
 
   input:checked + span {
-    background-color: #2196F3;
+    background-color: #2196f3;
   }
 
   input:checked + span:before {

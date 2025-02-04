@@ -33,7 +33,7 @@ import Editor from "@monaco-editor/react";
 import { InputPortsAutocomplete } from "./InputPortsAutocomplete";
 import { getInputPortsWithNodeInfo } from "./utils";
 import { ImageSelectorButton } from "../../ImageModalUploader/ImageModalUploader";
-
+let idCounter = 1;
 const ItemConfigSidebar = () => {
   const dispatch = useDispatch();
   const selectedId = useSelector(selectElementId);
@@ -43,71 +43,6 @@ const ItemConfigSidebar = () => {
   const allNodes = useSelector(selectAllNodes);
   const allDataLinks = useSelector(selectAllDataLinks);
   const allEnums = useSelector(selectAllEnums);
-
-  // const renderNodeIdSelect = (
-  //   path: string[],
-  //   currentValue: number | undefined,
-  //   label: string
-  // ) => (
-  //   <StyledAutocomplete
-  //     value={allNodes.find((node) => node.info.id === currentValue) || null}
-  //     onChange={(_, newValue) => {
-  //       if (!selectedNode) return;
-  //       const updated = cloneDeep(selectedNode);
-  //       let target = updated;
-  //       path.slice(0, -1).forEach((key) => {
-  //         if (!target[key]) target[key] = {};
-  //         target = target[key];
-  //       });
-  //       target[path[path.length - 1]] = newValue?.info.id;
-  //       dispatch(updateNode(updated));
-  //     }}
-  //     options={allNodes}
-  //     getOptionLabel={(option) => option.info.name}
-  //     renderInput={(params) => (
-  //       <TextField {...params} label={label} variant="outlined" size="small" />
-  //     )}
-  //   />
-  // );
-
-  // const renderPortIdSelect = (
-  //   path: string[],
-  //   currentValue: number | undefined,
-  //   sourceNodeId: number | undefined,
-  //   label: string
-  // ) => {
-  //   const sourceNode = allNodes.find((n) => n.info.id === sourceNodeId);
-  //   const availablePorts = sourceNode?.inputPorts || [];
-
-  //   return (
-  //     <StyledAutocomplete
-  //       value={
-  //         availablePorts.find((port) => port.info.id === currentValue) || null
-  //       }
-  //       onChange={(_, newValue) => {
-  //         if (!selectedNode) return;
-  //         const updated = cloneDeep(selectedNode);
-  //         let target = updated;
-  //         path.slice(0, -1).forEach((key) => {
-  //           if (!target[key]) target[key] = {};
-  //           target = target[key];
-  //         });
-  //         target[path[path.length - 1]] = newValue?.info.id;
-  //         dispatch(updateNode(updated));
-  //       }}
-  //       options={availablePorts}
-  //       getOptionLabel={(option) => option.info.name}
-  //       renderInput={(params) => (
-  //         <TextField
-  //           {...params}
-  //           label={label}
-  //           variant="outlined"
-  //           size="small"
-  //         />
-  //       )}
-  //     />
-  //   );
-  // };
 
   const renderPromptNode = () =>
     selectedNode?.type === NodeType.Prompt ? (
@@ -120,8 +55,10 @@ const ItemConfigSidebar = () => {
             updated.template = e.target.value;
             dispatch(updateNode(updated));
           }}
+          placeholder="Enter your template here..."
         />
-        <SectionTitle>Input Ports</SectionTitle>
+
+        <SectionTitle>Text Input Ports</SectionTitle>
         <ArrayContainer>
           {selectedNode?.inputPorts?.map((port, index) => (
             <ArrayItem key={index}>
@@ -133,6 +70,9 @@ const ItemConfigSidebar = () => {
                   dispatch(updateNode(updated));
                 }}
               />
+              <SwitchLabel style={{ minWidth: "120px" }}>
+                id: {`${port.info.id}`}
+              </SwitchLabel>
               <IconButton
                 onClick={() => {
                   const updated = cloneDeep(selectedNode);
@@ -150,20 +90,32 @@ const ItemConfigSidebar = () => {
             onClick={() => {
               const updated = cloneDeep(selectedNode);
               const newPort = {
-                info: { id: Date.now(), name: `Input_${Date.now()}` },
-                nodeId: selectedNode!.info.id,
-                dataType: "string",
+                info: { id: idCounter, name: `Input_${idCounter}` },
+                nodeId: selectedNode.info.id,
+                dataType: "text",
               };
-              updated.inputPorts = [
-                ...(selectedNode?.inputPorts || []),
-                newPort,
-              ];
+              idCounter++;
+              updated.inputPorts = [...(updated.inputPorts || []), newPort];
               dispatch(updateNode(updated));
             }}
           >
             <IconPlus size={18} />
           </IconButton>
         </ArrayContainer>
+
+        <Divider
+          sx={{ width: "100%", bgcolor: "white", marginY: 3, marginX: "auto" }}
+        />
+
+        <SectionTitle>Output Configuration</SectionTitle>
+        <InputPortsAutocomplete
+          allDataInputPorts={allNodes
+            .map((node) => getInputPortsWithNodeInfo(node, "text"))
+            .flat()}
+          allDataLinks={allDataLinks}
+          selectedNodeId={selectedNode.info.id}
+          sourcePortId={selectedNode.outputPort.info.id}
+        />
       </>
     ) : null;
 
@@ -354,7 +306,7 @@ const ItemConfigSidebar = () => {
                   nodeId: selectedNode.info.id,
                   dataType: "text",
                 };
-              } else if (!!updated.optionOutputPort) {
+              } else if (updated.optionOutputPort) {
                 updated.textOutputPort = undefined;
               }
               dispatch(updateNode(updated));
