@@ -12,7 +12,7 @@ import PendingArrow from "./PendingArrow";
 const ArrowsLayer =() => {
   const flowLinksIds = useSelector(selectFlowLinkIds, shallowEqual);
   const pendingSourceId = useSelector(selectPendingFlowLinkSourceId);
-  console.log("flowLinksIds", flowLinksIds);
+
   return (
     <View
       style={{

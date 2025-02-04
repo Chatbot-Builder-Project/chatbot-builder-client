@@ -57,7 +57,6 @@ const SidebarNode: React.FC<SidebarNodeProps> = ({ nodeType, nodeDetails }) => {
             },
           },
         };
-        console.log("AasdasdSAD", newNode);
         dispatch(addNode(newNode));
       }
     },

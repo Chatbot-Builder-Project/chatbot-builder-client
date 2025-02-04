@@ -12,6 +12,8 @@ import {
   ControlPoint,
   NodeVisual,
   Enum,
+  NodeType,
+  Port,
 } from "./types";
 
 const nodesAdapter = createEntityAdapter<NodeData>({
@@ -49,16 +51,76 @@ const builderSlice = createSlice({
   initialState,
   reducers: {
     addNode: (state, action: PayloadAction<NodeData>) => {
-      const newId = state.nextNodeId;
-      state.nextNodeId += 1;
+      const nodeId = state.nextNodeId++;
+
+      // Helper function to create a unique port ID and increment the counter
+      const createPortWithUniqueId = (
+        port: Port | undefined
+      ): Port | undefined => {
+        if (!port) return undefined;
+        return {
+          ...port,
+          nodeId,
+          info: { ...port.info, id: state.nextNodeId++ },
+        };
+      };
+
       const newNode = {
         ...action.payload,
         info: {
           ...action.payload.info,
-          name: `${action.payload.type}_Node_${newId}`,
-          id: newId,
+          name: `${action.payload.type}_Node_${nodeId}`,
+          id: nodeId,
         },
       };
+
+      // Assign unique IDs to all ports
+      switch (newNode.type) {
+        case NodeType.Interaction:
+          newNode.textInputPort = createPortWithUniqueId(
+            newNode.textInputPort
+          )!;
+          newNode.textOutputPort = createPortWithUniqueId(
+            newNode.textOutputPort
+          )!;
+          newNode.optionOutputPort = createPortWithUniqueId(
+            newNode.optionOutputPort
+          )!;
+          newNode.imageInputPorts =
+            newNode.imageInputPorts?.map(
+              (port) => createPortWithUniqueId(port)!
+            ) ?? [];
+          break;
+        case NodeType.Static:
+          newNode.outputPort = createPortWithUniqueId(newNode.outputPort)!;
+          break;
+        case NodeType.Switch:
+          newNode.inputPort = createPortWithUniqueId(newNode.inputPort)!;
+          break;
+        case NodeType.Prompt:
+          newNode.outputPort = createPortWithUniqueId(newNode.outputPort)!;
+          newNode.inputPorts =
+            newNode.inputPorts?.map((port) => createPortWithUniqueId(port)!) ??
+            [];
+          break;
+        case NodeType.SmartSwitch:
+          newNode.inputPort = createPortWithUniqueId(newNode.inputPort)!;
+          break;
+        case NodeType.ApiAction:
+          newNode.urlInputPort = createPortWithUniqueId(newNode.urlInputPort)!;
+          newNode.bodyInputPort = createPortWithUniqueId(
+            newNode.bodyInputPort
+          )!;
+          newNode.responseOutputPort = createPortWithUniqueId(
+            newNode.responseOutputPort
+          )!;
+          break;
+        case NodeType.Generation:
+          newNode.inputPort = createPortWithUniqueId(newNode.inputPort)!;
+          newNode.outputPort = createPortWithUniqueId(newNode.outputPort)!;
+          break;
+      }
+
       nodesAdapter.addOne(state.nodes, newNode);
     },
     updateNodeVisual: (
@@ -73,7 +135,7 @@ const builderSlice = createSlice({
     },
     removeNode: (state, action: PayloadAction<number>) => {
       const nodeId = action.payload;
-
+      const node = state.nodes.entities[nodeId];
       const dataLinksToRemove = Object.values(state.dataLinks.entities)
         .filter(
           (link) =>
@@ -95,7 +157,16 @@ const builderSlice = createSlice({
       state.selectedId = action.payload;
     },
     addDataLink: (state, action: PayloadAction<DataLink>) => {
-      dataLinksAdapter.addOne(state.dataLinks, action.payload);
+      const newLink = {
+        ...action.payload,
+        info: {
+          ...action.payload.info,
+          id: state.nextNodeId,
+          name: `DataLink_${state.nextNodeId}`,
+        },
+      };
+      state.nextNodeId++;
+      dataLinksAdapter.addOne(state.dataLinks, newLink);
     },
     removeDataLink: (state, action: PayloadAction<number>) => {
       dataLinksAdapter.removeOne(state.dataLinks, action.payload);
@@ -124,10 +195,11 @@ const builderSlice = createSlice({
     },
     createFlowLink: (state, action: PayloadAction<number>) => {
       if (state.pendingFlowLinkSourceId) {
+        const linkId = state.nextNodeId++;
         const newLink: FlowLink = {
           info: {
-            id: state.nextNodeId++,
-            name: `FlowLink_${state.nextNodeId}`,
+            id: linkId,
+            name: `FlowLink_${linkId}`,
           },
           sourceNodeId: state.pendingFlowLinkSourceId,
           targetNodeId: action.payload,

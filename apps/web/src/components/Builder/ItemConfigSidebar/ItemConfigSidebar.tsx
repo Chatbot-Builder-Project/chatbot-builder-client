@@ -91,7 +91,7 @@ const StyledSwitch = muiStyled(Switch)`
   }
 `;
 
-export function getInputPortsWithNodeInfo(
+function getInputPortsWithNodeInfo(
   node: NodeData,
   type: "text" | "image" | "option"
 ): Array<{ inputPort: Port; nodeInfo: BaseInfo }> {
@@ -185,10 +185,6 @@ const ItemConfigSidebar = () => {
     .map((node) => getInputPortsWithNodeInfo(node, "option"))
     .flat();
 
-  console.log("asdasddsdasdasdASD", {
-    allTextInputPortsWithNodeInfo,
-    selectedNode,
-  });
   const renderNodeIdSelect = (
     path: string[],
     currentValue: number | undefined,
@@ -476,18 +472,7 @@ const ItemConfigSidebar = () => {
         </ArrayContainer>
       </>
     ) : null;
-  console.log(
-    "asdfhjklasdfjkhl;azsdfhjklasdfkhjlasdfhjklafds",
-    allTextInputPortsWithNodeInfo.filter(
-      (item) =>
-        item.nodeInfo.id !== selectedNode?.info.id &&
-        allDataLinks.some(
-          (link) =>
-            link.sourcePortId === selectedNode?.outputPort.info.id &&
-            link.targetPortId === item.inputPort.info.id
-        )
-    )
-  );
+
   const renderGenerationNode = () =>
     selectedNode?.type === NodeType.Generation ? (
       <>
@@ -524,7 +509,7 @@ const ItemConfigSidebar = () => {
         <StyledAutocomplete
           multiple
           options={allTextInputPortsWithNodeInfo.filter(
-            (item) => item.inputPort.nodeId !== selectedNode.info.id
+            (item) => item.nodeInfo.id !== selectedNode.info.id
           )}
           value={allTextInputPortsWithNodeInfo.filter((item) =>
             allDataLinks.some(
@@ -534,30 +519,44 @@ const ItemConfigSidebar = () => {
             )
           )}
           onChange={(_, newValue) => {
-            // Remove existing links from this output port
-            const linksToRemove = allDataLinks.filter(
+            // Get existing links from this node's output
+            const existingLinks = allDataLinks.filter(
               (link) => link.sourcePortId === selectedNode.outputPort.info.id
             );
-            linksToRemove.forEach((link) => {
-              dispatch(removeDataLink(link.info.id));
-            });
 
-            // Create new links for selected ports
+            // Remove links that are no longer selected
+            existingLinks.forEach((link) => {
+              if (
+                !newValue.some(
+                  (item) => item.inputPort.info.id === link.targetPortId
+                )
+              ) {
+                dispatch(removeDataLink(link.info.id));
+              }
+            });
+            console.log(newValue);
+            // Add new links
             newValue.forEach((item) => {
-              dispatch(
-                addDataLink({
-                  info: {
-                    id: Date.now() + Math.random(),
-                    name: `DataLink_${Date.now()}`,
-                  },
-                  sourcePortId: selectedNode.outputPort.info.id,
-                  targetPortId: item.inputPort.info.id,
-                })
+              const linkExists = existingLinks.some(
+                (link) => link.targetPortId === item.inputPort.info.id
               );
+
+              if (!linkExists) {
+                dispatch(
+                  addDataLink({
+                    info: { id: Date.now(), name: `DataLink_${Date.now()}` },
+                    sourcePortId: selectedNode.outputPort.info.id,
+                    targetPortId: item.inputPort.info.id,
+                  })
+                );
+              }
             });
           }}
           getOptionLabel={(option) =>
             `${option.nodeInfo.name} - ${option.inputPort.info.name}`
+          }
+          isOptionEqualToValue={(option, value) =>
+            option.inputPort.info.id === value.inputPort.info.id
           }
           renderInput={(params) => (
             <TextField
