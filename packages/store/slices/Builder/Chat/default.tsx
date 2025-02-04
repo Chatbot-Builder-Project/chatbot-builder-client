@@ -200,8 +200,10 @@ export const defaultStyles: ChatComponentStyles = {
   } as SxProps<Theme>,
   messageInput: {
     xs: {
+      flex: 1,
       "& .MuiOutlinedInput-root": {
-        borderRadius: { xs: 2, sm: 2 },
+        borderRadius: "8px",
+        backgroundColor: "#ffffff",
       },
     },
     sm: {
@@ -223,6 +225,95 @@ export const defaultStyles: ChatComponentStyles = {
       "& .MuiOutlinedInput-root": {
         borderRadius: { xs: 2, sm: 2 },
       },
+    },
+  } as SxProps<Theme>,
+  headerContent: {
+    xs: {
+      fontSize: "1.25rem",
+      fontWeight: 500,
+      color: "#1a1a1a",
+    },
+    sm: {
+      fontSize: "1.25rem",
+      fontWeight: 500,
+      color: "#1a1a1a",
+    },
+    md: {
+      fontSize: "1.25rem",
+      fontWeight: 500,
+      color: "#1a1a1a",
+    },
+    lg: {
+      fontSize: "1.25rem",
+      fontWeight: 500,
+      color: "#1a1a1a",
+    },
+    xl: {
+      fontSize: "1.25rem",
+      fontWeight: 500,
+      color: "#1a1a1a",
+    },
+  } as SxProps<Theme>,
+  sendButton: {
+    xs: {
+      minWidth: "40px",
+      height: "40px",
+      marginLeft: 1,
+      borderRadius: "8px",
+      backgroundColor: "#2196f3",
+      color: "#ffffff",
+      "&:hover": {
+        backgroundColor: "#1976d2",
+      },
+      icon: "IconSend", // Add this line
+    },
+    sm: {
+      minWidth: "40px",
+      height: "40px",
+      marginLeft: 1,
+      borderRadius: "8px",
+      backgroundColor: "#2196f3",
+      color: "#ffffff",
+      "&:hover": {
+        backgroundColor: "#1976d2",
+      },
+      icon: "IconSend",
+    },
+    md: {
+      minWidth: "40px",
+      height: "40px",
+      marginLeft: 1,
+      borderRadius: "8px",
+      backgroundColor: "#2196f3",
+      color: "#ffffff",
+      "&:hover": {
+        backgroundColor: "#1976d2",
+      },
+      icon: "IconSend",
+    },
+    lg: {
+      minWidth: "40px",
+      height: "40px",
+      marginLeft: 1,
+      borderRadius: "8px",
+      backgroundColor: "#2196f3",
+      color: "#ffffff",
+      "&:hover": {
+        backgroundColor: "#1976d2",
+      },
+      icon: "IconSend",
+    },
+    xl: {
+      minWidth: "40px",
+      height: "40px",
+      marginLeft: 1,
+      borderRadius: "8px",
+      backgroundColor: "#2196f3",
+      color: "#ffffff",
+      "&:hover": {
+        backgroundColor: "#1976d2",
+      },
+      icon: "IconSend",
     },
   } as SxProps<Theme>,
 } as ChatComponentStyles;

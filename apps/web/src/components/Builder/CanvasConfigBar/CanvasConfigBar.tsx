@@ -3,10 +3,7 @@ import AppLogo from "../../AppLogo";
 import { useDispatch, useSelector } from "react-redux";
 import { useSaveWorkflowMutation } from "@chatbot-builder/store/API/SaveBuilder/SaveBuilder";
 import { ButtonGroup, Button } from "@mui/material";
-import {
-  updateBreakpoint,
-  selectCurrentBreakpoint,
-} from "@chatbot-builder/store/slices/Builder/Chat";
+import { updateBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat";
 import { ChatBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat/types";
 import {
   CanvasConfigContainerBar,
@@ -25,6 +22,7 @@ import {
   selectAllEnums,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import _ from "lodash";
+import { selectCurrentBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat/selectors";
 
 interface CanvasConfigBarProps {
   mode: "flow" | "chat";

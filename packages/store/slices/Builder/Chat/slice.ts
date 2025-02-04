@@ -6,13 +6,19 @@ import {
   ChatComponent,
   StyleUpdate,
 } from "./types";
-import { defaultStyles } from "./deafult";
+import { defaultStyles } from "./default";
 import _ from "lodash";
 
 const initialState: ChatState = {
   currentBreakpoint: "lg",
   selectedComponent: null,
   styles: defaultStyles,
+  content: {
+    headerText: "Chat with Bot",
+    botMessageText: "Hello! How can I help you today?",
+    senderMessageText: "Hi there!",
+    inputPlaceholder: "Type a message...",
+  },
 };
 
 const updateNestedStyle = (obj: any, path: string[], value: any): void => {

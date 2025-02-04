@@ -14,8 +14,8 @@ const Dashboard = () => {
 
   return (
     <DashboardContainer>
-      {data.page.items.map((chatbot) => (
-        <Card key={chatbot.id} chatbot={chatbot} onClick={handleCardClick} />
+      {data.page.items.map((workflow) => (
+        <Card key={workflow.id} workflow={workflow} onClick={handleCardClick} />
       ))}
     </DashboardContainer>
   );

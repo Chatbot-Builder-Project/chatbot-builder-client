@@ -1,13 +1,14 @@
 import { Box, Typography, TextField, SxProps, Theme } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import _ from "lodash";
+import { updateComponentStyle } from "@chatbot-builder/store/slices/Builder/Chat";
+import { isChatComponent } from "@chatbot-builder/store/slices/Builder/Chat/types";
+import IconSelect from "../../CustomChatEditor/IconSelect";
 import {
   selectSelectedComponent,
-  updateComponentStyle,
   selectCurrentBreakpoint,
   selectChatStyles,
-} from "@chatbot-builder/store/slices/Builder/Chat";
-import { isChatComponent } from "@chatbot-builder/store/slices/Builder/Chat/types";
+} from "@chatbot-builder/store/slices/Builder/Chat/selectors";
 
 const RightSidebar = () => {
   const dispatch = useDispatch();
@@ -66,33 +67,99 @@ const RightSidebar = () => {
     );
   };
 
-  if (!componentStyle) return null;
+  const renderField = (path: string[], value: string | number) => {
+    if (path[path.length - 1] === "icon") {
+      return (
+        <IconSelect
+          value={value as string}
+          onChange={(newValue) => handleStyleChange(path, newValue)}
+        />
+      );
+    }
+
+    return (
+      <TextField
+        fullWidth
+        value={value?.toString() ?? ""}
+        onChange={(e) => handleStyleChange(path, e.target.value)}
+        size="small"
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            backgroundColor: "#2b2b2b",
+            height: "28px",
+            fontSize: "0.75rem",
+            transition: "all 0.2s ease",
+            "&:hover": {
+              backgroundColor: "#363636",
+            },
+            "& input": {
+              color: "white",
+              fontFamily: "Montserrat",
+              padding: "2px 8px",
+            },
+            "& fieldset": {
+              borderColor: "#ffffff20",
+              transition: "all 0.2s ease",
+            },
+            "&:hover fieldset": {
+              borderColor: "#ffffff40",
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: "#2196f3",
+            },
+          },
+        }}
+      />
+    );
+  };
+
   return (
     <Box
-      p={2}
+      p={1.5}
       style={{
         position: "absolute",
         right: 0,
-        top: 120,
-        width: "300px",
+        top: 60,
+        height: "calc(100vh - 60px)",
+        width: "240px",
       }}
-      bgcolor={"#f9f9f9"}
+      bgcolor={"#111111"}
     >
-      <Typography variant="h6" gutterBottom>
-        {selectedComponent} Styles
-      </Typography>
-      {componentStyle &&
-        flattenStyles(componentStyle).map(([path, value]) => (
-          <TextField
-            key={path.join(".")}
-            fullWidth
-            label={path.join(".")}
-            value={value?.toString() ?? ""}
-            onChange={(e) => handleStyleChange(path, e.target.value)}
-            margin="normal"
-            size="small"
-          />
-        ))}
+      {componentStyle && (
+        <>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              fontFamily: "Montserrat",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+              mb: 1.5,
+              color: "#ffffff80",
+            }}
+          >
+            {selectedComponent} Styles
+          </Typography>
+          {componentStyle &&
+            flattenStyles(componentStyle).map(([path, value]) => (
+              <Box key={path.join(".")} sx={{ mb: 0.75 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    fontFamily: "Montserrat",
+                    color: "#ffffff80",
+                    mb: 0.25,
+                    display: "block",
+                    fontSize: "0.65rem",
+                    fontWeight: 500,
+                  }}
+                >
+                  {path.join(".")}
+                </Typography>
+                {renderField(path, value)}
+              </Box>
+            ))}
+        </>
+      )}
     </Box>
   );
 };

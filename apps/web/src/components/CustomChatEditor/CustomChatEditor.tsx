@@ -1,13 +1,18 @@
 import React, { useState } from "react";
-import {
-  selectCurrentBreakpoint,
-  selectChatStyles,
-  ChatComponent,
-  selectSelectedComponent,
-} from "@chatbot-builder/store/slices/Builder/Chat";
+
 import { Box, TextField, Typography } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
-import { setSelectedComponent } from "@chatbot-builder/store/slices/Builder/Chat";
+import {
+  ChatComponent,
+  setSelectedComponent,
+} from "@chatbot-builder/store/slices/Builder/Chat";
+import SendButton from "./SendButton";
+import {
+  selectChatContent,
+  selectChatStyles,
+  selectCurrentBreakpoint,
+  selectSelectedComponent,
+} from "@chatbot-builder/store/slices/Builder/Chat/selectors";
 
 const ChatContainerSX = {
   position: "absolute",
@@ -15,9 +20,11 @@ const ChatContainerSX = {
   flexDirection: "column",
   top: "50%",
   left: "50%",
-  transform: " translate(-50%, -50%)",
+  transform: "translate(-50%, -50%)",
   overflow: "visible",
   backgroundColor: "#ffffff",
+  borderRadius: "8px",
+  boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
 };
 
 const ChatDimensionsBreakpoints = {
@@ -66,6 +73,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({
       sx={{
         ...styles,
         position: "relative",
+        transition: "all 0.2s ease",
         "&::after": {
           content: '""',
           position: "absolute",
@@ -76,11 +84,12 @@ const ChatSection: React.FC<ChatSectionProps> = ({
           pointerEvents: "none",
           borderRadius: styles?.borderRadius || 0,
           zIndex: 9999,
-          outline:
-            isSelected ||
-            hoveredSection[hoveredSection.length - 1] === sectionName
-              ? "3px solid #2196f3"
-              : "none",
+          transition: "all 0.2s ease",
+          outline: isSelected
+            ? "2px solid #2196f3"
+            : hoveredSection[hoveredSection.length - 1] === sectionName
+            ? "1px solid rgba(33, 150, 243, 0.5)"
+            : "none",
         },
       }}
       onMouseEnter={handleMouseEnter}
@@ -101,6 +110,7 @@ const CustomChatEditor: React.FC = () => {
   const { width, height } = ChatDimensionsBreakpoints[currentBreakpoint];
   const [hoveredSection, setHoveredSection] = useState<string[]>([]);
   const selectedComponent = useSelector(selectSelectedComponent);
+  const content = useSelector(selectChatContent);
   const handleMouseEnter = (section: string) =>
     setHoveredSection((prev) => [...prev, section]);
 
@@ -116,7 +126,17 @@ const CustomChatEditor: React.FC = () => {
         onLeave={handleMouseLeave}
         isSelected={selectedComponent === "header"}
       >
-        <Typography variant="h6">Chat Header</Typography>
+        <ChatSection
+          sectionName="headerContent"
+          styles={styles.headerContent[currentBreakpoint]}
+          hoveredSection={hoveredSection}
+          onHover={handleMouseEnter}
+          onLeave={handleMouseLeave}
+          stopPropagation
+          isSelected={selectedComponent === "headerContent"}
+        >
+          <Typography>{content.headerText}</Typography>
+        </ChatSection>
       </ChatSection>
 
       <ChatSection
@@ -136,7 +156,7 @@ const CustomChatEditor: React.FC = () => {
           stopPropagation
           isSelected={selectedComponent === "botMessage"}
         >
-          <Typography>Hello! How can I help you today</Typography>
+          <Typography>{content.botMessageText}</Typography>
         </ChatSection>
 
         <ChatSection
@@ -148,24 +168,52 @@ const CustomChatEditor: React.FC = () => {
           stopPropagation
           isSelected={selectedComponent === "senderMessage"}
         >
-          <Typography>Hi! I have a question.</Typography>
+          <Typography>{content.senderMessageText}</Typography>
         </ChatSection>
       </ChatSection>
 
       <ChatSection
         sectionName="messageInputSection"
-        styles={styles.messageInputSection[currentBreakpoint]}
+        styles={{
+          ...styles.messageInputSection[currentBreakpoint],
+          display: "flex",
+          alignItems: "center",
+        }}
         hoveredSection={hoveredSection}
         onHover={handleMouseEnter}
         onLeave={handleMouseLeave}
         isSelected={selectedComponent === "messageInputSection"}
       >
-        <TextField
-          fullWidth
-          placeholder="Type a message..."
-          variant="outlined"
-          sx={styles.messageInput[currentBreakpoint]}
-        />
+        <ChatSection
+          sectionName="messageInput"
+          styles={styles.messageInput[currentBreakpoint]}
+          hoveredSection={hoveredSection}
+          onHover={handleMouseEnter}
+          onLeave={handleMouseLeave}
+          stopPropagation
+          isSelected={selectedComponent === "messageInput"}
+        >
+          <TextField
+            fullWidth
+            placeholder={content.inputPlaceholder}
+            variant="outlined"
+            size="small"
+            disabled
+            sx={{ pointerEvents: "none" }}
+          />
+        </ChatSection>
+
+        <ChatSection
+          sectionName="sendButton"
+          styles={styles.sendButton[currentBreakpoint]}
+          hoveredSection={hoveredSection}
+          onHover={handleMouseEnter}
+          onLeave={handleMouseLeave}
+          stopPropagation
+          isSelected={selectedComponent === "sendButton"}
+        >
+          <SendButton styles={styles.sendButton[currentBreakpoint] as any} />
+        </ChatSection>
       </ChatSection>
     </Box>
   );

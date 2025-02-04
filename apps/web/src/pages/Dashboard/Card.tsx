@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { IconDots, IconEdit, IconTrash } from "@tabler/icons-react";
 import { Popover, IconButton } from "@mui/material";
-import { Chatbot } from "@chatbot-builder/store/API/workflows/types";
-import { theme } from "@chatbot-builder/client/theme/palette";
+import { Workflow } from "@chatbot-builder/store/API/workflows/types";
+import { theme } from "@chatbot-builder/client";
 
 const ImgContainer = styled.div`
   width: 100%;
@@ -18,20 +18,17 @@ const ImgContainer = styled.div`
   &:hover {
     transform: translateY(-5px);
   }
-
-  &:hover .stop1 {
-    stop-color: #8a2be2; /* Change start color on hover */
-  }
-
-  &:hover .stop2 {
-    stop-color: #ff00ff; /* Change end color on hover */
-  }
 `;
 
-const StyledSVG = styled.svg`
+interface LogoSVGProps {
+  isHovered: boolean;
+  gradientId: string;
+}
+
+const StyledSVG = styled.svg<LogoSVGProps>`
   width: 120px;
   height: 120px;
-  fill: url(#grad1);
+  fill: url(#${(props) => props.gradientId});
 `;
 
 const CardContainer = styled.div`
@@ -104,12 +101,14 @@ const PopoverItem = styled.div`
 `;
 
 interface CardProps {
-  chatbot: Chatbot;
+  workflow: Workflow;
   onClick?: (id: string) => void;
 }
 
-const Card: React.FC<CardProps> = ({ chatbot, onClick }) => {
+const Card: React.FC<CardProps> = ({ workflow, onClick }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const gradientId = `grad-${workflow.id}`; // Create unique gradient ID
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -124,12 +123,16 @@ const Card: React.FC<CardProps> = ({ chatbot, onClick }) => {
   const open = Boolean(anchorEl);
 
   return (
-    <CardContainer onClick={() => onClick?.(chatbot.id)}>
+    <CardContainer
+      onClick={() => onClick?.(workflow.id)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <ImgContainer>
-        <LogoSVG />
+        <LogoSVG isHovered={isHovered} gradientId={gradientId} />
       </ImgContainer>
       <CardInfo>
-        <CardName>{chatbot.name}</CardName>
+        <CardName>{workflow.name}</CardName>
         <MenuButton size="small" onClick={handleClick}>
           <IconDots size={20} />
         </MenuButton>
@@ -162,29 +165,27 @@ const Card: React.FC<CardProps> = ({ chatbot, onClick }) => {
   );
 };
 
-export default Card;
-
-const LogoSVG: React.FC = () => (
+const LogoSVG: React.FC<LogoSVGProps> = ({ isHovered, gradientId }) => (
   <>
     <svg width="0" height="0">
       <defs>
-        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop
-            className="stop1"
             offset="0%"
-            stopColor="#808080"
+            stopColor={isHovered ? "#8a2be2" : "#808080"}
             style={{ transition: "stop-color 0.3s ease" }}
           />
           <stop
-            className="stop2"
             offset="100%"
-            stopColor="#808080"
+            stopColor={isHovered ? "#ff00ff" : "#808080"}
             style={{ transition: "stop-color 0.3s ease" }}
           />
         </linearGradient>
       </defs>
     </svg>
     <StyledSVG
+      isHovered={isHovered}
+      gradientId={gradientId}
       version="1.0"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 512 512"
@@ -217,3 +218,5 @@ const LogoSVG: React.FC = () => (
     </StyledSVG>
   </>
 );
+
+export default Card;

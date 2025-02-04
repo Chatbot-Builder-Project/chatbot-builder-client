@@ -1,4 +1,4 @@
-export interface Chatbot {
+export interface Workflow {
   id: string;
   ownerId: string;
   createdAt: string;
@@ -15,6 +15,6 @@ export interface Chatbot {
 export interface ChatbotsPage {
   page: {
     totalCount: number;
-    items: Chatbot[];
+    items: Workflow[];
   };
 }
