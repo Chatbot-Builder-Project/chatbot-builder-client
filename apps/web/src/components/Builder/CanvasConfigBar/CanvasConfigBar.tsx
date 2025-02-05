@@ -58,7 +58,7 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const workflowVisual = useSelector(selectWorkflowVisual);
-  const { name, description } = useSelector(selectWorkflowMetadata);
+  const { name } = useSelector(selectWorkflowMetadata);
   const { handleDownloadScreenshot } = useCanvas();
   const chatStyles = useSelector(
     (state: RootState) => state.builder.chat.styles

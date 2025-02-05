@@ -27,7 +27,7 @@ const navigationLinks: NavigationLink[] = [
 ];
 
 const AppLayout: React.FC = () => {
-  const { user } = useUser();
+  const { user, logout } = useUser();
   const location = useLocation();
 
   const shouldShowLink = ({ isLoggedIn }: NavigationLink) =>
@@ -51,9 +51,14 @@ const AppLayout: React.FC = () => {
           </NavLinks>
           <UserSection>
             {user.isAuthenticated ? (
-              <Link to="/profile">
-                <IconUserFilled size={24} color="white" />
-              </Link>
+              <>
+                <Link to="/profile">
+                  <IconUserFilled size={24} color="white" />
+                </Link>
+                <AuthButton to="/" onClick={logout}>
+                  Logout
+                </AuthButton>
+              </>
             ) : (
               <>
                 <AuthButton to="/auth/login">Login</AuthButton>
