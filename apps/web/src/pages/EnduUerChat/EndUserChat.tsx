@@ -6,7 +6,6 @@ import { useBreakpoint } from "../../hooks/useBreakpoint";
 import {
   useCreateConversationMutation,
   useGetConversationMessagesQuery,
-  useSendMessageMutation,
 } from "@chatbot-builder/store/API/builder/builder";
 import { useParams } from "react-router-dom";
 
@@ -29,7 +28,7 @@ export const EndUserChat = () => {
   const { styles, content } = { ...mockChatState };
 
   const [createConversation] = useCreateConversationMutation();
-  const [sendMessage] = useSendMessageMutation();
+  // const [sendMessage] = useSendMessageMutation();
   const { data: messages = [] } = useGetConversationMessagesQuery(
     conversationId ?? "",
     { skip: !conversationId }
@@ -38,7 +37,10 @@ export const EndUserChat = () => {
   useEffect(() => {
     const initConversation = async () => {
       try {
-        const result = await createConversation({ chatbotId }).unwrap();
+        const result = await createConversation({
+          chatbotId,
+          name: "test",
+        }).unwrap();
         setConversationId(result.conversationId);
       } catch (error) {
         console.error("Failed to create conversation:", error);
@@ -51,10 +53,10 @@ export const EndUserChat = () => {
   const handleSend = async () => {
     if (message.trim() && conversationId) {
       try {
-        await sendMessage({
-          conversationId,
-          message: message.trim(),
-        }).unwrap();
+        // await sendMessage({
+        //   conversationId,
+        //   message: message.trim(),
+        // }).unwrap();
         setMessage("");
       } catch (error) {
         console.error("Failed to send message:", error);
@@ -91,7 +93,7 @@ export const EndUserChat = () => {
           ...styles.background[currentBreakpoint],
         }}
       >
-        {messages.map((msg, index) => (
+        {messages?.map((msg, index) => (
           <Box
             key={index}
             sx={
