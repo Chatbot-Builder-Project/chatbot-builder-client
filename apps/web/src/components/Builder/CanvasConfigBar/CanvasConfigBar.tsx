@@ -12,12 +12,9 @@ import {
   CenterButton,
   ConfigContainer,
   LogoContainer,
-  CenterButton,
 } from "./CanvasConfigBar.styles";
 import {
   IconFocus2,
-  IconFileExport,
-  IconFileImport,
   IconEye,
   IconArrowLeft,
   IconTool,
