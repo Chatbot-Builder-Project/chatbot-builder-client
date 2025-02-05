@@ -12,6 +12,7 @@ import {
   CenterButton,
   ConfigContainer,
   LogoContainer,
+  CenterButton,
 } from "./CanvasConfigBar.styles";
 import {
   IconFocus2,
@@ -20,6 +21,7 @@ import {
   IconEye,
   IconArrowLeft,
   IconTool,
+  IconDownload,
 } from "@tabler/icons-react";
 import {
   selectStartNodeId,
@@ -165,12 +167,12 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
   return (
     <CanvasConfigContainerBar>
       <LogoContainer>
-        {mode === "chat" && (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <AppLogo />
           <CenterButton onClick={handleBackToDashboard}>
             <IconArrowLeft size={18} />
           </CenterButton>
-        )}
-        <AppLogo />
+        </div>
         {mode === "chat" && (
           <>
             <ButtonGroup variant="outlined" size="small" sx={{ mr: 2 }}>
@@ -211,10 +213,10 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
 
       <ConfigContainer>
         <CenterButton onClick={handleExport}>
-          <IconFileExport size={18} />
+          <IconUpload size={18} />
         </CenterButton>
         <CenterButton onClick={handleImport}>
-          <IconFileImport size={18} />
+          <IconDownload size={18} />
         </CenterButton>
         <CenterButton onClick={resetPosition}>
           <IconFocus2 size={18} />
