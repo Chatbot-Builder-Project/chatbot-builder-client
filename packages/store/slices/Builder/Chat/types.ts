@@ -37,6 +37,10 @@ export interface ChatContent {
   botMessageText: string;
   senderMessageText: string;
   inputPlaceholder: string;
+  profilePicture?: {
+    url: string;
+    id: string;
+  };
 }
 
 export interface ChatState {

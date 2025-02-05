@@ -90,6 +90,7 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: 2,
       padding: { xs: 1, sm: 2 },
       marginBottom: 2,
+      fontFamily: 'Montserrat',
     },
     sm: {
       maxWidth: "70%",
@@ -98,6 +99,7 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: 2,
       padding: { xs: 1, sm: 2 },
       marginBottom: 2,
+      fontFamily: 'Montserrat',
     },
     md: {
       maxWidth: "70%",
@@ -106,6 +108,7 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: 2,
       padding: { xs: 1, sm: 2 },
       marginBottom: 2,
+      fontFamily: 'Montserrat',
     },
     lg: {
       maxWidth: "70%",
@@ -114,6 +117,7 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: 2,
       padding: { xs: 1, sm: 2 },
       marginBottom: 2,
+      fontFamily: 'Montserrat',
     },
     xl: {
       maxWidth: "70%",
@@ -122,6 +126,7 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: 2,
       padding: { xs: 1, sm: 2 },
       marginBottom: 2,
+      fontFamily: 'Montserrat',
     },
   } as SxProps<Theme>,
   senderMessage: {
@@ -133,6 +138,7 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: 2,
       padding: { xs: 1, sm: 2 },
       marginBottom: 2,
+      fontFamily: 'Montserrat',
     },
     sm: {
       maxWidth: "70%",
@@ -142,6 +148,7 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: 2,
       padding: { xs: 1, sm: 2 },
       marginBottom: 2,
+      fontFamily: 'Montserrat',
     },
     md: {
       maxWidth: "70%",
@@ -151,6 +158,7 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: 2,
       padding: { xs: 1, sm: 2 },
       marginBottom: 2,
+      fontFamily: 'Montserrat',
     },
     lg: {
       maxWidth: "70%",
@@ -160,6 +168,7 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: 2,
       padding: { xs: 1, sm: 2 },
       marginBottom: 2,
+      fontFamily: 'Montserrat',
     },
     xl: {
       maxWidth: "70%",
@@ -169,6 +178,7 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: 2,
       padding: { xs: 1, sm: 2 },
       marginBottom: 2,
+      fontFamily: 'Montserrat',
     },
   } as SxProps<Theme>,
   messageInputSection: {
@@ -176,26 +186,31 @@ export const defaultStyles: ChatComponentStyles = {
       padding: { xs: 1, sm: 2 },
       borderTop: `1px solid ${theme.colors.nodeBackground}`,
       backgroundColor: theme.colors.background,
+      fontFamily: 'Montserrat',
     },
     sm: {
       padding: { xs: 1, sm: 2 },
       borderTop: `1px solid ${theme.colors.nodeBackground}`,
       backgroundColor: theme.colors.background,
+      fontFamily: 'Montserrat',
     },
     md: {
       padding: { xs: 1, sm: 2 },
       borderTop: `1px solid ${theme.colors.nodeBackground}`,
       backgroundColor: theme.colors.background,
+      fontFamily: 'Montserrat',
     },
     lg: {
       padding: { xs: 1, sm: 2 },
       borderTop: `1px solid ${theme.colors.nodeBackground}`,
       backgroundColor: theme.colors.background,
+      fontFamily: 'Montserrat',
     },
     xl: {
       padding: { xs: 1, sm: 2 },
       borderTop: `1px solid ${theme.colors.nodeBackground}`,
       backgroundColor: theme.colors.background,
+      fontFamily: 'Montserrat',
     },
   } as SxProps<Theme>,
   messageInput: {
@@ -205,35 +220,143 @@ export const defaultStyles: ChatComponentStyles = {
         borderRadius: "8px",
         backgroundColor: theme.colors.secondaryBackground,
         color: theme.colors.lightText,
+        transition: "all 0.2s ease-in-out",
         "& fieldset": {
           borderColor: theme.colors.nodeBackground,
+          transition: "all 0.2s ease-in-out",
         },
         "&:hover fieldset": {
           borderColor: theme.colors.primary,
         },
         "&.Mui-focused fieldset": {
           borderColor: theme.colors.primary,
+          borderWidth: "2px",
+        },
+        "& input": {
+          padding: "12px 14px",
+          fontSize: "0.875rem",
+          fontFamily: "Montserrat",
+        },
+        "&::placeholder": {
+          color: `${theme.colors.lightText}80`,
+          opacity: 1,
         },
       },
     },
     sm: {
+      flex: 1,
       "& .MuiOutlinedInput-root": {
-        borderRadius: { xs: 2, sm: 2 },
+        borderRadius: "8px",
+        backgroundColor: theme.colors.secondaryBackground,
+        color: theme.colors.lightText,
+        transition: "all 0.2s ease-in-out",
+        "& fieldset": {
+          borderColor: theme.colors.nodeBackground,
+          transition: "all 0.2s ease-in-out",
+        },
+        "&:hover fieldset": {
+          borderColor: theme.colors.primary,
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: theme.colors.primary,
+          borderWidth: "2px",
+        },
+        "& input": {
+          padding: "12px 14px",
+          fontSize: "0.875rem",
+          fontFamily: "Montserrat",
+        },
+        "&::placeholder": {
+          color: `${theme.colors.lightText}80`,
+          opacity: 1,
+        },
       },
     },
     md: {
+      flex: 1,
       "& .MuiOutlinedInput-root": {
-        borderRadius: { xs: 2, sm: 2 },
+        borderRadius: "8px",
+        backgroundColor: theme.colors.secondaryBackground,
+        color: theme.colors.lightText,
+        transition: "all 0.2s ease-in-out",
+        "& fieldset": {
+          borderColor: theme.colors.nodeBackground,
+          transition: "all 0.2s ease-in-out",
+        },
+        "&:hover fieldset": {
+          borderColor: theme.colors.primary,
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: theme.colors.primary,
+          borderWidth: "2px",
+        },
+        "& input": {
+          padding: "12px 14px",
+          fontSize: "0.875rem",
+          fontFamily: "Montserrat",
+        },
+        "&::placeholder": {
+          color: `${theme.colors.lightText}80`,
+          opacity: 1,
+        },
       },
     },
     lg: {
+      flex: 1,
       "& .MuiOutlinedInput-root": {
-        borderRadius: { xs: 2, sm: 2 },
+        borderRadius: "8px",
+        backgroundColor: theme.colors.secondaryBackground,
+        color: theme.colors.lightText,
+        transition: "all 0.2s ease-in-out",
+        "& fieldset": {
+          borderColor: theme.colors.nodeBackground,
+          transition: "all 0.2s ease-in-out",
+        },
+        "&:hover fieldset": {
+          borderColor: theme.colors.primary,
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: theme.colors.primary,
+          borderWidth: "2px",
+        },
+        "& input": {
+          padding: "12px 14px",
+          fontSize: "0.875rem",
+          fontFamily: "Montserrat",
+        },
+        "&::placeholder": {
+          color: `${theme.colors.lightText}80`,
+          opacity: 1,
+        },
       },
     },
     xl: {
+      flex: 1,
       "& .MuiOutlinedInput-root": {
-        borderRadius: { xs: 2, sm: 2 },
+        borderRadius: "8px",
+        backgroundColor: theme.colors.secondaryBackground,
+        color: theme.colors.lightText,
+        transition: "all 0.2s ease-in-out",
+        "& fieldset": {
+          borderColor: theme.colors.nodeBackground,
+          transition: "all 0.2s ease-in-out",
+        },
+        "&:hover fieldset": {
+          borderColor: theme.colors.primary,
+        },
+        "&.Mui-focused fieldset": {
+          borderColor: theme.colors.primary,
+          borderWidth: "2px",
+        },
+        "& input": {
+          padding: "12px 14px",
+          fontSize: "0.875rem",
+          fontFamily: "Montserrat",
+        },
+        "&::placeholder": {
+          color: `${theme.colors.lightText}80`,
+          opacity: 1,
+        },
       },
     },
   } as SxProps<Theme>,
@@ -242,26 +365,31 @@ export const defaultStyles: ChatComponentStyles = {
       fontSize: "1.25rem",
       fontWeight: 500,
       color: theme.colors.lightText,
+      fontFamily: 'Montserrat',
     },
     sm: {
       fontSize: "1.25rem",
       fontWeight: 500,
       color: theme.colors.lightText,
+      fontFamily: 'Montserrat',
     },
     md: {
       fontSize: "1.25rem",
       fontWeight: 500,
       color: theme.colors.lightText,
+      fontFamily: 'Montserrat',
     },
     lg: {
       fontSize: "1.25rem",
       fontWeight: 500,
       color: theme.colors.lightText,
+      fontFamily: 'Montserrat',
     },
     xl: {
       fontSize: "1.25rem",
       fontWeight: 500,
       color: theme.colors.lightText,
+      fontFamily: 'Montserrat',
     },
   } as SxProps<Theme>,
   sendButton: {
@@ -272,10 +400,20 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: "8px",
       backgroundColor: theme.colors.primary,
       color: theme.colors.lightText,
+      transition: "all 0.2s ease-in-out",
       "&:hover": {
         backgroundColor: theme.colors.purple,
+        transform: "scale(1.05)",
+      },
+      "&:active": {
+        transform: "scale(0.95)",
+      },
+      "&.Mui-disabled": {
+        backgroundColor: `${theme.colors.primary}60`,
+        color: `${theme.colors.lightText}60`,
       },
       icon: "IconSend",
+      fontFamily: "Montserrat",
     },
     sm: {
       minWidth: "40px",
@@ -284,10 +422,20 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: "8px",
       backgroundColor: theme.colors.primary,
       color: theme.colors.lightText,
+      transition: "all 0.2s ease-in-out",
       "&:hover": {
         backgroundColor: theme.colors.purple,
+        transform: "scale(1.05)",
+      },
+      "&:active": {
+        transform: "scale(0.95)",
+      },
+      "&.Mui-disabled": {
+        backgroundColor: `${theme.colors.primary}60`,
+        color: `${theme.colors.lightText}60`,
       },
       icon: "IconSend",
+      fontFamily: "Montserrat",
     },
     md: {
       minWidth: "40px",
@@ -296,10 +444,20 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: "8px",
       backgroundColor: theme.colors.primary,
       color: theme.colors.lightText,
+      transition: "all 0.2s ease-in-out",
       "&:hover": {
         backgroundColor: theme.colors.purple,
+        transform: "scale(1.05)",
+      },
+      "&:active": {
+        transform: "scale(0.95)",
+      },
+      "&.Mui-disabled": {
+        backgroundColor: `${theme.colors.primary}60`,
+        color: `${theme.colors.lightText}60`,
       },
       icon: "IconSend",
+      fontFamily: "Montserrat",
     },
     lg: {
       minWidth: "40px",
@@ -308,10 +466,20 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: "8px",
       backgroundColor: theme.colors.primary,
       color: theme.colors.lightText,
+      transition: "all 0.2s ease-in-out",
       "&:hover": {
         backgroundColor: theme.colors.purple,
+        transform: "scale(1.05)",
+      },
+      "&:active": {
+        transform: "scale(0.95)",
+      },
+      "&.Mui-disabled": {
+        backgroundColor: `${theme.colors.primary}60`,
+        color: `${theme.colors.lightText}60`,
       },
       icon: "IconSend",
+      fontFamily: "Montserrat",
     },
     xl: {
       minWidth: "40px",
@@ -320,10 +488,20 @@ export const defaultStyles: ChatComponentStyles = {
       borderRadius: "8px",
       backgroundColor: theme.colors.primary,
       color: theme.colors.lightText,
+      transition: "all 0.2s ease-in-out",
       "&:hover": {
         backgroundColor: theme.colors.purple,
+        transform: "scale(1.05)",
+      },
+      "&:active": {
+        transform: "scale(0.95)",
+      },
+      "&.Mui-disabled": {
+        backgroundColor: `${theme.colors.primary}60`,
+        color: `${theme.colors.lightText}60`,
       },
       icon: "IconSend",
+      fontFamily: "Montserrat",
     },
   } as SxProps<Theme>,
 } as ChatComponentStyles;

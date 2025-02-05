@@ -6,8 +6,10 @@ export const selectCurrentBreakpoint = (state: RootState) =>
 export const selectSelectedComponent = (state: RootState) =>
   state.builder.chat.selectedComponent;
 export const selectChatStyles = (state: RootState) => state.builder.chat.styles;
+export const selectChatContent = (state: RootState) =>
+  state.builder.chat.content;
+
 export const selectComponentStyle =
   (component: keyof ChatComponentStyles) => (state: RootState) => {
     return state.builder.chat.styles[component];
   };
-

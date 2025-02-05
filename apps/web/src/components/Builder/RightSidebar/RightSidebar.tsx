@@ -1,20 +1,70 @@
-import { Box, Typography, TextField, SxProps, Theme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  TextField,
+  Tabs,
+  Tab,
+  Button,
+  SxProps,
+  Theme,
+} from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
+import { MuiColorInput } from "mui-color-input";
+import {
+  updateComponentStyle,
+  updateContent,
+} from "@chatbot-builder/store/slices/Builder/Chat";
+import { useUploadComponent } from "@chatbot-builder/store/API/imageUploader/useUploadComponent";
 import _ from "lodash";
-import { updateComponentStyle } from "@chatbot-builder/store/slices/Builder/Chat";
-import { isChatComponent } from "@chatbot-builder/store/slices/Builder/Chat/types";
+import {
+  ChatContent,
+  isChatComponent,
+} from "@chatbot-builder/store/slices/Builder/Chat/types";
 import IconSelect from "../../CustomChatEditor/IconSelect";
 import {
   selectSelectedComponent,
   selectCurrentBreakpoint,
   selectChatStyles,
+  selectChatContent,
 } from "@chatbot-builder/store/slices/Builder/Chat/selectors";
+import { useState } from "react";
+
+const textFieldStyle = {
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "#2b2b2b",
+    height: "32px",
+    fontSize: "0.75rem",
+    fontFamily: "Montserrat",
+    transition: "all 0.2s ease",
+    "&:hover": {
+      backgroundColor: "#363636",
+    },
+    "& input": {
+      color: "white",
+      fontFamily: "Montserrat",
+      padding: "2px 8px",
+    },
+    "& fieldset": {
+      borderColor: "#ffffff20",
+      transition: "all 0.2s ease",
+    },
+    "&:hover fieldset": {
+      borderColor: "#ffffff40",
+    },
+    "&.Mui-focused fieldset": {
+      borderColor: "#2196f3",
+    },
+  },
+};
 
 const RightSidebar = () => {
   const dispatch = useDispatch();
+  const [tab, setTab] = useState(0);
+  const { uploadAndGetImage } = useUploadComponent();
   const selectedComponent = useSelector(selectSelectedComponent);
   const currentBreakpoint = useSelector(selectCurrentBreakpoint);
   const styles = useSelector(selectChatStyles);
+  const content = useSelector(selectChatContent);
 
   const componentStyle =
     selectedComponent && styles[selectedComponent]?.[currentBreakpoint];
@@ -31,6 +81,42 @@ const RightSidebar = () => {
         },
       })
     );
+  };
+
+  const handleColorChange = (path: string[], color: string) => {
+    if (!selectedComponent || !isChatComponent(selectedComponent)) return;
+    dispatch(
+      updateComponentStyle({
+        component: selectedComponent,
+        styleUpdate: {
+          path,
+          value: color,
+        },
+      })
+    );
+  };
+
+  const handleContentChange = (field: keyof ChatContent, value: string) => {
+    dispatch(updateContent({ [field]: value }));
+  };
+
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const result = await uploadAndGetImage({ file, isProfilePicture: true });
+      if (result) {
+        dispatch(
+          updateContent({
+            profilePicture: {
+              url: result.url,
+              id: result.id,
+            },
+          })
+        );
+      }
+    }
   };
 
   const flattenStyles = (
@@ -67,7 +153,20 @@ const RightSidebar = () => {
     );
   };
 
-  const renderField = (path: string[], value: string | number) => {
+  const renderStyleField = (path: string[], value: string | number) => {
+    if (
+      typeof value === "string" &&
+      (value.startsWith("#") || value.startsWith("rgb"))
+    ) {
+      return (
+        <MuiColorInput
+          value={value}
+          onChange={(color) => handleColorChange(path, color)}
+          format="hex"
+        />
+      );
+    }
+
     if (path[path.length - 1] === "icon") {
       return (
         <IconSelect
@@ -125,7 +224,12 @@ const RightSidebar = () => {
       }}
       bgcolor={"#111111"}
     >
-      {componentStyle && (
+      <Tabs value={tab} onChange={(_, newValue) => setTab(newValue)}>
+        <Tab label="Styles" />
+        <Tab label="Content" />
+      </Tabs>
+
+      {tab === 0 && componentStyle && (
         <>
           <Typography
             variant="subtitle2"
@@ -155,10 +259,154 @@ const RightSidebar = () => {
                 >
                   {path.join(".")}
                 </Typography>
-                {renderField(path, value)}
+                {renderStyleField(path, value)}
               </Box>
             ))}
         </>
+      )}
+
+      {tab === 1 && (
+        <Box sx={{ mt: 2 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              mb: 1.5,
+              fontFamily: "Montserrat",
+              color: "#ffffff80",
+              fontSize: "0.85rem",
+              fontWeight: 600,
+            }}
+          >
+            Content Settings
+          </Typography>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontFamily: "Montserrat",
+                color: "#ffffff80",
+                display: "block",
+                fontSize: "0.65rem",
+                fontWeight: 500,
+                mb: 0.5,
+              }}
+            >
+              Header Text
+            </Typography>
+            <TextField
+              fullWidth
+              value={content.headerText}
+              onChange={(e) =>
+                handleContentChange("headerText", e.target.value)
+              }
+              size="small"
+              sx={textFieldStyle}
+            />
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontFamily: "Montserrat",
+                color: "#ffffff80",
+                display: "block",
+                fontSize: "0.65rem",
+                fontWeight: 500,
+                mb: 0.5,
+              }}
+            >
+              Bot Message
+            </Typography>
+            <TextField
+              fullWidth
+              value={content.botMessageText}
+              onChange={(e) =>
+                handleContentChange("botMessageText", e.target.value)
+              }
+              size="small"
+              sx={textFieldStyle}
+            />
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontFamily: "Montserrat",
+                color: "#ffffff80",
+                display: "block",
+                fontSize: "0.65rem",
+                fontWeight: 500,
+                mb: 0.5,
+              }}
+            >
+              Input Placeholder
+            </Typography>
+            <TextField
+              fullWidth
+              value={content.inputPlaceholder}
+              onChange={(e) =>
+                handleContentChange("inputPlaceholder", e.target.value)
+              }
+              size="small"
+              sx={textFieldStyle}
+            />
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontFamily: "Montserrat",
+                color: "#ffffff80",
+                display: "block",
+                fontSize: "0.65rem",
+                fontWeight: 500,
+                mb: 0.5,
+              }}
+            >
+              Profile Picture
+            </Typography>
+            <input
+              accept="image/*"
+              type="file"
+              onChange={handleImageUpload}
+              style={{ display: "none" }}
+              id="profile-picture-upload"
+            />
+            <label htmlFor="profile-picture-upload">
+              <Button
+                variant="outlined"
+                component="span"
+                fullWidth
+                sx={{
+                  mt: 1,
+                  fontFamily: "Montserrat",
+                  textTransform: "none",
+                  borderColor: "#ffffff20",
+                  color: "#fff",
+                  "&:hover": {
+                    borderColor: "#ffffff40",
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                  },
+                }}
+              >
+                Upload Image
+              </Button>
+            </label>
+            {content.profilePicture && (
+              <Box sx={{ mt: 1 }}>
+                <img
+                  src={content.profilePicture.url}
+                  alt="Profile"
+                  style={{ width: "100%", borderRadius: "4px" }}
+                />
+              </Box>
+            )}
+          </Box>
+        </Box>
       )}
     </Box>
   );

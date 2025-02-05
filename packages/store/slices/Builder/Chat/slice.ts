@@ -5,6 +5,7 @@ import {
   ChatBreakpoint,
   ChatComponent,
   StyleUpdate,
+  ChatContent,
 } from "./types";
 import { defaultStyles } from "./default";
 import _ from "lodash";
@@ -64,6 +65,9 @@ const chatSlice = createSlice({
     setChatStyles: (state, action: PayloadAction<ChatComponentStyles>) => {
       state.styles = action.payload;
     },
+    updateContent: (state, action: PayloadAction<Partial<ChatContent>>) => {
+      state.content = { ...state.content, ...action.payload };
+    },
   },
 });
 
@@ -73,5 +77,6 @@ export const {
   updateBreakpoint,
   setSelectedComponent,
   setChatStyles,
+  updateContent,
 } = chatSlice.actions;
 export const chatReducer = chatSlice.reducer;

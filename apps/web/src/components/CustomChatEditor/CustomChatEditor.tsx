@@ -127,17 +127,33 @@ const CustomChatEditor: React.FC = () => {
         onLeave={handleMouseLeave}
         isSelected={selectedComponent === "header"}
       >
-        <ChatSection
-          sectionName="headerContent"
-          styles={styles.headerContent[currentBreakpoint]}
-          hoveredSection={hoveredSection}
-          onHover={handleMouseEnter}
-          onLeave={handleMouseLeave}
-          stopPropagation
-          isSelected={selectedComponent === "headerContent"}
-        >
-          <Typography>{content.headerText}</Typography>
-        </ChatSection>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {content.profilePicture && (
+            <Box
+              component="img"
+              src={content.profilePicture.url}
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                objectFit: "cover",
+              }}
+            />
+          )}
+          <ChatSection
+            sectionName="headerContent"
+            styles={styles.headerContent[currentBreakpoint]}
+            hoveredSection={hoveredSection}
+            onHover={handleMouseEnter}
+            onLeave={handleMouseLeave}
+            stopPropagation
+            isSelected={selectedComponent === "headerContent"}
+          >
+            <Typography sx={{ fontFamily: "Montserrat" }}>
+              {content.headerText}
+            </Typography>
+          </ChatSection>
+        </Box>
       </ChatSection>
 
       <ChatSection
@@ -157,7 +173,9 @@ const CustomChatEditor: React.FC = () => {
           stopPropagation
           isSelected={selectedComponent === "botMessage"}
         >
-          <Typography>{content.botMessageText}</Typography>
+          <Typography sx={{ fontFamily: "Montserrat" }}>
+            {content.botMessageText}
+          </Typography>
         </ChatSection>
 
         <ChatSection
@@ -169,7 +187,9 @@ const CustomChatEditor: React.FC = () => {
           stopPropagation
           isSelected={selectedComponent === "senderMessage"}
         >
-          <Typography>{content.senderMessageText}</Typography>
+          <Typography sx={{ fontFamily: "Montserrat" }}>
+            {content.senderMessageText}
+          </Typography>
         </ChatSection>
       </ChatSection>
 
@@ -200,7 +220,15 @@ const CustomChatEditor: React.FC = () => {
             variant="outlined"
             size="small"
             disabled
-            sx={{ pointerEvents: "none" }}
+            sx={{
+              pointerEvents: "none",
+              "& .MuiOutlinedInput-root": {
+                fontFamily: "Montserrat",
+                "& input": {
+                  fontFamily: "Montserrat",
+                },
+              },
+            }}
           />
         </ChatSection>
 
