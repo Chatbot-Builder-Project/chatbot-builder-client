@@ -69,8 +69,8 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
     try {
       const imageUrl = await handleDownloadScreenshot();
       const body = _.cloneDeep({
-        name,
-        description,
+        name: "graph",
+        description: "graph description ",
         visual: {
           data: {
             imageUrl,
