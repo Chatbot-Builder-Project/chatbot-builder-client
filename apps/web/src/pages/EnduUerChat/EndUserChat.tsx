@@ -35,7 +35,6 @@ export const EndUserChat = () => {
     skip: !conversationId,
   });
   const styles = conversation?.visual?.data?.ui || defaultStyles;
-  console.log("asdasdasdas", styles);
 
   useEffect(() => {
     const initConversation = async () => {
@@ -112,30 +111,60 @@ export const EndUserChat = () => {
     }
   };
 
+  const renderMessageContent = (msg: ConversationMessage) => {
+    return (
+      <Stack spacing={1}>
+        {msg.textOutput && (
+          <Typography sx={{ whiteSpace: 'pre-line' }}>{msg.textOutput.text}</Typography>
+        )}
+        {msg.imageOutputs?.map((img, index) => (
+          <Box key={index} sx={{ maxWidth: '100%', mt: 1 }}>
+            <img src={img.url} alt="Message content" style={{ maxWidth: '100%' }} />
+          </Box>
+        ))}
+      </Stack>
+    );
+  };
+
+  const renderOptions = (optionMetas: Record<string, { description?: string; imageData?: { url: string } }>) => {
+    return (
+      <Stack spacing={1} mt={1}>
+        {Object.entries(optionMetas).map(([option, meta]) => (
+          <Button
+            key={option}
+            variant="outlined"
+            onClick={() => handleSendOption(option)}
+            sx={{ 
+              textTransform: 'none',
+              justifyContent: 'flex-start',
+              textAlign: 'left'
+            }}
+          >
+            <Stack spacing={1} width="100%">
+              <Typography>{option}</Typography>
+              {meta.description && (
+                <Typography variant="caption" color="text.secondary">
+                  {meta.description}
+                </Typography>
+              )}
+              {meta.imageData?.url && (
+                <Box sx={{ width: '100%', mt: 1 }}>
+                  <img src={meta.imageData.url} alt={option} style={{ maxWidth: '100%' }} />
+                </Box>
+              )}
+            </Stack>
+          </Button>
+        ))}
+      </Stack>
+    );
+  };
+
   const renderMessage = (msg: ConversationMessage) => {
     return (
-      <>
-        {msg.textOutput && <Typography>{msg.textOutput.text}</Typography>}
-        {msg.optionExpected && msg.expectedOptionMetas && (
-          <Stack spacing={1} mt={1}>
-            {Object.entries(msg.expectedOptionMetas).map(([option, meta]) => (
-              <Button
-                key={option}
-                variant="outlined"
-                onClick={() => handleSendOption(option)}
-                sx={{ textTransform: "none" }}
-              >
-                {option}
-                {meta.description && (
-                  <Typography variant="caption" display="block">
-                    {meta.description}
-                  </Typography>
-                )}
-              </Button>
-            ))}
-          </Stack>
-        )}
-      </>
+      <Stack spacing={2}>
+        {renderMessageContent(msg)}
+        {msg.optionExpected && msg.expectedOptionMetas && renderOptions(msg.expectedOptionMetas)}
+      </Stack>
     );
   };
 
@@ -182,27 +211,31 @@ export const EndUserChat = () => {
           ...styles.messageInputSection[currentBreakpoint],
         }}
       >
-        <Box sx={{ ...styles.messageInput[currentBreakpoint] }}>
-          <TextField
-            fullWidth
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={content.inputPlaceholder}
-            variant="outlined"
-            size="small"
-          />
-        </Box>
+        {messages[messages.length - 1]?.textExpected && (
+          <>
+            <Box sx={{ ...styles.messageInput[currentBreakpoint] }}>
+              <TextField
+                fullWidth
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder={content.inputPlaceholder}
+                variant="outlined"
+                size="small"
+              />
+            </Box>
 
-        <Box
-          onClick={handleSend}
-          sx={{
-            cursor: "pointer",
-            ...styles.sendButton[currentBreakpoint],
-          }}
-        >
-          <SendButton styles={styles.sendButton} />
-        </Box>
+            <Box
+              onClick={handleSend}
+              sx={{
+                cursor: "pointer",
+                ...styles.sendButton[currentBreakpoint],
+              }}
+            >
+              <SendButton styles={styles.sendButton} />
+            </Box>
+          </>
+        )}
       </Box>
     </Box>
   );
