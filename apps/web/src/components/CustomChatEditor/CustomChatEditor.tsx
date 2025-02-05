@@ -241,7 +241,7 @@ const CustomChatEditor: React.FC = () => {
           stopPropagation
           isSelected={selectedComponent === "sendButton"}
         >
-          <SendButton styles={styles.sendButton[currentBreakpoint] as any} />
+          <SendButton styles={styles.sendButton[currentBreakpoint]} />
         </ChatSection>
       </ChatSection>
     </Box>

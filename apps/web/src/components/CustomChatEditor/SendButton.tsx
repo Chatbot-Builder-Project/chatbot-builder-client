@@ -1,8 +1,9 @@
-import { IconButton, SxProps, Theme } from "@mui/material";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { IconButton } from "@mui/material";
 import * as TablerIcons from "@tabler/icons-react";
 
 interface SendButtonProps {
-  styles: SxProps<Theme> & { icon?: string };
+  styles: any;
 }
 
 const SendButton: React.FC<SendButtonProps> = ({ styles }) => {
@@ -10,7 +11,7 @@ const SendButton: React.FC<SendButtonProps> = ({ styles }) => {
   const { icon, ...buttonStyles } = styles as any;
   let IconComponent = TablerIcons.IconSend;
 
-  if (icon && typeof icon === 'string') {
+  if (icon && typeof icon === "string") {
     const selectedIcon = TablerIcons[icon as keyof typeof TablerIcons];
     if (selectedIcon) {
       IconComponent = selectedIcon as typeof TablerIcons.IconSend;
@@ -18,10 +19,7 @@ const SendButton: React.FC<SendButtonProps> = ({ styles }) => {
   }
 
   return (
-    <IconButton
-      sx={buttonStyles}
-      disabled
-    >
+    <IconButton sx={buttonStyles} disabled>
       <IconComponent size={20} />
     </IconButton>
   );

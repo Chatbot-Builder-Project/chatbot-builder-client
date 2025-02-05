@@ -115,11 +115,30 @@ export const EndUserChat = () => {
     return (
       <Stack spacing={1}>
         {msg.textOutput && (
-          <Typography sx={{ whiteSpace: 'pre-line' }}>{msg.textOutput.text}</Typography>
+          <Typography
+            sx={{
+              whiteSpace: 'pre-line',
+              color: 'inherit',
+              fontFamily: 'Montserrat',
+              fontSize: { xs: '0.875rem', sm: '1rem' },
+              fontWeight: 400,
+              lineHeight: 1.5,
+            }}
+          >
+            {msg.textOutput.text}
+          </Typography>
         )}
         {msg.imageOutputs?.map((img, index) => (
           <Box key={index} sx={{ maxWidth: '100%', mt: 1 }}>
-            <img src={img.url} alt="Message content" style={{ maxWidth: '100%' }} />
+            <img 
+              src={img.url} 
+              alt="Message content" 
+              style={{ 
+                maxWidth: '100%',
+                borderRadius: '4px',
+                display: 'block'
+              }} 
+            />
           </Box>
         ))}
       </Stack>
@@ -137,19 +156,42 @@ export const EndUserChat = () => {
             sx={{ 
               textTransform: 'none',
               justifyContent: 'flex-start',
-              textAlign: 'left'
+              textAlign: 'left',
+              padding: '12px',
+              borderColor: styles.botMessage[currentBreakpoint].backgroundColor,
+              color: styles.botMessage[currentBreakpoint].color,
+              backgroundColor: 'transparent',
+              '&:hover': {
+                borderColor: styles.sendButton[currentBreakpoint].backgroundColor,
+                backgroundColor: `${styles.sendButton[currentBreakpoint].backgroundColor}10`,
+              },
+              fontFamily: 'Montserrat',
             }}
           >
             <Stack spacing={1} width="100%">
-              <Typography>{option}</Typography>
+              <Typography sx={{ fontFamily: 'Montserrat' }}>{option}</Typography>
               {meta.description && (
-                <Typography variant="caption" color="text.secondary">
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: `${styles.botMessage[currentBreakpoint].color}80`,
+                    fontFamily: 'Montserrat'
+                  }}
+                >
                   {meta.description}
                 </Typography>
               )}
               {meta.imageData?.url && (
                 <Box sx={{ width: '100%', mt: 1 }}>
-                  <img src={meta.imageData.url} alt={option} style={{ maxWidth: '100%' }} />
+                  <img 
+                    src={meta.imageData.url} 
+                    alt={option} 
+                    style={{ 
+                      maxWidth: '100%',
+                      borderRadius: '4px',
+                      display: 'block'
+                    }} 
+                  />
                 </Box>
               )}
             </Stack>
@@ -175,11 +217,29 @@ export const EndUserChat = () => {
         height: "100vh",
         display: "flex",
         flexDirection: "column",
+        backgroundColor: styles.background[currentBreakpoint].backgroundColor,
       }}
     >
       <Box sx={{ ...styles.header[currentBreakpoint] }}>
+        {conversation?.visual?.data?.profilePicture && (
+          <Box
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              overflow: 'hidden',
+              marginRight: 2,
+            }}
+          >
+            <img
+              src={conversation.visual.data.profilePicture.url}
+              alt="Bot Profile"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </Box>
+        )}
         <Typography sx={{ ...styles.headerContent[currentBreakpoint] }}>
-          {content.headerText}
+          {conversation?.visual?.data?.headerText || content.headerText}
         </Typography>
       </Box>
 
@@ -188,6 +248,19 @@ export const EndUserChat = () => {
           height: "100%",
           overflowY: "auto",
           ...styles.background[currentBreakpoint],
+          "&::-webkit-scrollbar": {
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: `${styles.sendButton[currentBreakpoint].backgroundColor}40`,
+            borderRadius: "4px",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            background: styles.sendButton[currentBreakpoint].backgroundColor,
+          },
         }}
       >
         {messages.map((msg, index) => (
@@ -219,9 +292,14 @@ export const EndUserChat = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder={content.inputPlaceholder}
+                placeholder={conversation?.visual?.data?.inputPlaceholder || content.inputPlaceholder}
                 variant="outlined"
                 size="small"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    ...styles.messageInput[currentBreakpoint]["& .MuiOutlinedInput-root"],
+                  },
+                }}
               />
             </Box>
 

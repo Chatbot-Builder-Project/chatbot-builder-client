@@ -154,6 +154,53 @@ const RightSidebar = () => {
   };
 
   const renderStyleField = (path: string[], value: string | number) => {
+    // Handle object values (like padding, margin etc)
+    if (typeof value === "object" && value !== null) {
+      return (
+        <TextField
+          fullWidth
+          value={JSON.stringify(value)}
+          onChange={(e) => {
+            try {
+              const parsed = JSON.parse(e.target.value);
+              handleStyleChange(path, parsed);
+            } catch {
+              // Handle invalid JSON input
+              console.error("Invalid JSON input");
+            }
+          }}
+          size="small"
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: "#2b2b2b",
+              height: "28px",
+              fontSize: "0.75rem",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                backgroundColor: "#363636",
+              },
+              "& input": {
+                color: "white",
+                fontFamily: "Montserrat",
+                padding: "2px 8px",
+              },
+              "& fieldset": {
+                borderColor: "#ffffff20",
+                transition: "all 0.2s ease",
+              },
+              "&:hover fieldset": {
+                borderColor: "#ffffff40",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#2196f3",
+              },
+            },
+          }}
+        />
+      );
+    }
+
+    // Handle color values
     if (
       typeof value === "string" &&
       (value.startsWith("#") || value.startsWith("rgb"))
@@ -163,6 +210,34 @@ const RightSidebar = () => {
           value={value}
           onChange={(color) => handleColorChange(path, color)}
           format="hex"
+          sx={{
+            width: "100%",
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: "#ffffff",
+              height: "28px",
+              fontSize: "0.75rem",
+              transition: "all 0.2s ease",
+              "& input": {
+                color: "#000000",
+                fontFamily: "Montserrat",
+                padding: "2px 8px",
+              },
+              "& fieldset": {
+                borderColor: "#ffffff20",
+              },
+              "&:hover fieldset": {
+                borderColor: "#ffffff40",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#2196f3",
+              },
+            },
+            "& .MuiColorInput-button": {
+              backgroundColor: "#f5f5f5",
+              borderRadius: "4px",
+              marginRight: "4px",
+            },
+          }}
         />
       );
     }
@@ -224,7 +299,21 @@ const RightSidebar = () => {
       }}
       bgcolor={"#111111"}
     >
-      <Tabs value={tab} onChange={(_, newValue) => setTab(newValue)}>
+      <Tabs
+        value={tab}
+        onChange={(_, newValue) => setTab(newValue)}
+        sx={{
+          "& .MuiTab-root": {
+            color: "#ffffff80",
+            "&.Mui-selected": {
+              color: "#ffffff",
+            },
+          },
+          "& .MuiTabs-indicator": {
+            backgroundColor: "#ffffff",
+          },
+        }}
+      >
         <Tab label="Styles" />
         <Tab label="Content" />
       </Tabs>
