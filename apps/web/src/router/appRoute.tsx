@@ -11,6 +11,7 @@ import { AuthLayout } from "../components/Auth/Layout";
 import { AppLayout } from "../components/AppLayout";
 import { DashboardLayout } from "../pages/Dashboard/Layout.tsx";
 import { EndUserChat } from "../pages/EnduUerChat/EndUserChat.tsx";
+import DiscoverChatbots from "../pages/DiscoverChatbots/DiscoverChatbots.tsx";
 
 type AppRouteObject = RouteObject & {
   children?: AppRouteObject[];
@@ -23,6 +24,7 @@ const routes: AppRouteObject[] = [
     element: <AppLayout />,
     children: [
       { path: "/", element: <Home /> },
+      { path: "/Discover", element: <DiscoverChatbots /> },
       { path: "*", element: <NotFound /> },
     ],
   },

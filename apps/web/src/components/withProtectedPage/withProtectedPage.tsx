@@ -10,7 +10,7 @@ interface RouteInfo {
   isHomePage: boolean;
 }
 
-const UNPROTECTED_PATHS = ["/auth"] as const;
+const UNPROTECTED_PATHS = ["/auth", "/discover"] as const;
 
 const withProtectedPage = <P extends object>(
   WrappedComponent: ComponentType<P>
@@ -57,7 +57,10 @@ const withProtectedPage = <P extends object>(
 
       if (token) {
         handleAuthError();
-        if (routeInfo.isUnprotected) {
+        if (
+          routeInfo.isUnprotected &&
+          !location.pathname.startsWith("/discover")
+        ) {
           navigate("/");
         }
       } else {

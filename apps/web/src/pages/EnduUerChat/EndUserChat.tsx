@@ -36,7 +36,7 @@ export const EndUserChat = () => {
   const initConversation = async () => {
     try {
       const result = await createConversation({
-        chatbotId,
+        chatbotId: chatbotId || "",
         name: "test",
       }).unwrap();
       setConversationId(result.conversationId);
@@ -125,8 +125,14 @@ export const EndUserChat = () => {
               fontSize: { xs: "0.875rem", sm: "1rem" },
               fontWeight: 400,
               lineHeight: 1.5,
-              ...(msg.role === "assistant" && content?.botMessageText 
-                ? { "&::before": { content: `"${content.botMessageText}"`, display: "block", marginBottom: 1 } }
+              ...(msg.role === "assistant" && content?.botMessageText
+                ? {
+                    "&::before": {
+                      content: `"${content.botMessageText}"`,
+                      display: "block",
+                      marginBottom: 1,
+                    },
+                  }
                 : {}),
             }}
           >
@@ -263,8 +269,8 @@ export const EndUserChat = () => {
               />
             </Box>
           )}
-          <Typography 
-            sx={{ 
+          <Typography
+            sx={{
               ...styles.headerContent[currentBreakpoint],
               fontFamily: "Montserrat",
             }}
