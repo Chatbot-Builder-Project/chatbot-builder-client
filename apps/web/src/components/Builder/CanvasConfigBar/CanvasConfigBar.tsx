@@ -18,6 +18,8 @@ import {
   IconFileExport,
   IconFileImport,
   IconEye,
+  IconArrowLeft,
+  IconTool,
 } from "@tabler/icons-react";
 import {
   selectStartNodeId,
@@ -152,39 +154,58 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
     navigate(`/builder/chat/${id}`);
   };
 
+  const handleBackToDashboard = () => {
+    navigate("/dashboard");
+  };
+
+  const handleGoToBuilder = () => {
+    navigate(`/builder/flow/${id}`);
+  };
+
   return (
     <CanvasConfigContainerBar>
       <LogoContainer>
+        {mode === "chat" && (
+          <CenterButton onClick={handleBackToDashboard}>
+            <IconArrowLeft size={18} />
+          </CenterButton>
+        )}
         <AppLogo />
         {mode === "chat" && (
-          <ButtonGroup variant="outlined" size="small" sx={{ mr: 2 }}>
-            {(["xs", "sm", "md", "lg", "xl"] as ChatBreakpoint[]).map(
-              (breakpoint) => (
-                <Button
-                  key={breakpoint}
-                  onClick={() => handleBreakpointChange(breakpoint)}
-                  variant={
-                    currentBreakpoint === breakpoint ? "contained" : "outlined"
-                  }
-                  sx={{
-                    fontFamily: "inherit",
-                    backgroundColor:
-                      currentBreakpoint === breakpoint ? "#028ce5" : "#e0e0e0",
-                    color:
-                      currentBreakpoint === breakpoint ? "#e0e0e0" : "black",
-                    "&:hover": {
+          <>
+            <ButtonGroup variant="outlined" size="small" sx={{ mr: 2 }}>
+              {(["xs", "sm", "md", "lg", "xl"] as ChatBreakpoint[]).map(
+                (breakpoint) => (
+                  <Button
+                    key={breakpoint}
+                    onClick={() => handleBreakpointChange(breakpoint)}
+                    variant={
+                      currentBreakpoint === breakpoint
+                        ? "contained"
+                        : "outlined"
+                    }
+                    sx={{
+                      fontFamily: "inherit",
                       backgroundColor:
                         currentBreakpoint === breakpoint
                           ? "#028ce5"
                           : "#e0e0e0",
-                    },
-                  }}
-                >
-                  {breakpoint.toUpperCase()}
-                </Button>
-              )
-            )}
-          </ButtonGroup>
+                      color:
+                        currentBreakpoint === breakpoint ? "#e0e0e0" : "black",
+                      "&:hover": {
+                        backgroundColor:
+                          currentBreakpoint === breakpoint
+                            ? "#028ce5"
+                            : "#e0e0e0",
+                      },
+                    }}
+                  >
+                    {breakpoint.toUpperCase()}
+                  </Button>
+                )
+              )}
+            </ButtonGroup>
+          </>
         )}
       </LogoContainer>
 
@@ -201,6 +222,11 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
         {mode === "flow" && (
           <CenterButton onClick={handlePreview}>
             <IconEye size={18} />
+          </CenterButton>
+        )}
+        {mode === "chat" && (
+          <CenterButton onClick={handleGoToBuilder}>
+            <IconTool size={18} />
           </CenterButton>
         )}
         <SaveButton onClick={handleSave}>Save</SaveButton>

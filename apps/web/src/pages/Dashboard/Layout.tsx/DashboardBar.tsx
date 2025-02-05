@@ -13,6 +13,7 @@ import AppLogo from "../../../components/AppLogo";
 import { useNavigate } from "react-router-dom";
 import { useCreateWorkflowMutation } from "@chatbot-builder/store/API/builder/builder";
 import { CreateWorkflowModal } from "../../../components/CreateWorkflowModal/CreateWorkflowModal";
+import { defaultStyles } from "@chatbot-builder/store/slices/Builder/Chat/default";
 
 const DashboardBar = () => {
   const [isSearchActive, setIsSearchActive] = useState(false);
@@ -41,7 +42,7 @@ const DashboardBar = () => {
         },
         graph: {
           visual: {
-            data: {},
+            data: defaultStyles,
           },
           startNodeId: 1,
           nodes: [

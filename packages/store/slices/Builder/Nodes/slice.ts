@@ -350,6 +350,9 @@ const builderSlice = createSlice({
     updateWorkflowVisual: (state, action: PayloadAction<Partial<WorkflowVisual>>) => {
       state.workflowVisual = { ...state.workflowVisual, ...action.payload };
     },
+    setNextNodeId: (state, action: PayloadAction<number>) => {
+      state.nextNodeId = action.payload;
+    },
   },
 });
 
@@ -423,6 +426,7 @@ export const {
   initWorkflow,
   updateWorkflowMetadata,
   updateWorkflowVisual,
+  setNextNodeId,
 } = builderSlice.actions;
 
 export default builderSlice.reducer;

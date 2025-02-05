@@ -115,6 +115,7 @@ const CustomChatEditor: React.FC = () => {
     setHoveredSection((prev) => [...prev, section]);
 
   const handleMouseLeave = () => setHoveredSection((prev) => prev.slice(0, -1));
+  if (!styles) return null;
 
   return (
     <Box sx={{ ...ChatContainerSX, width, height }}>

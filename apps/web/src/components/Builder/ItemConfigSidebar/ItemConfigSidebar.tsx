@@ -34,9 +34,11 @@ import Editor from "@monaco-editor/react";
 import { InputPortsAutocomplete } from "./InputPortsAutocomplete";
 import { getInputPortsWithNodeInfo } from "./utils";
 import { ImageSelectorButton } from "../../ImageModalUploader/ImageModalUploader";
-let idCounter = 1;
+import { useNextNodeId } from "@chatbot-builder/store/hooks/useNextNodeId";
+
 const ItemConfigSidebar = () => {
   const dispatch = useDispatch();
+  const getNextId = useNextNodeId();
   const selectedId = useSelector(selectElementId);
   const selectedNode = useSelector((state: RootState) =>
     selectedId ? selectNodeById(state, selectedId) : null
@@ -49,7 +51,10 @@ const ItemConfigSidebar = () => {
   const renderPromptNode = () =>
     selectedNode?.type === NodeType.Prompt ? (
       <>
-        <SectionTitle>Text Template: (Placeholders include port id, placed in curly brackets)</SectionTitle>
+        <SectionTitle>
+          Text Template: (Placeholders include port id, placed in curly
+          brackets)
+        </SectionTitle>
         <TextArea
           value={selectedNode?.template || ""}
           onChange={(e) => {
@@ -92,11 +97,10 @@ const ItemConfigSidebar = () => {
             onClick={() => {
               const updated = cloneDeep(selectedNode);
               const newPort = {
-                info: { id: idCounter, name: `Input_${idCounter}` },
+                info: { id: getNextId(), name: `Input_${getNextId()}` },
                 nodeId: selectedNode.info.id,
                 dataType: "text",
               };
-              idCounter++;
               updated.inputPorts = [...(updated.inputPorts || []), newPort];
               dispatch(updateNode(updated));
             }}
@@ -236,7 +240,7 @@ const ItemConfigSidebar = () => {
         <Divider
           sx={{ width: "100%", bgcolor: "white", marginY: 3, marginX: "auto" }}
         />
-          <SectionTitle>Send Data To:</SectionTitle>
+        <SectionTitle>Send Data To:</SectionTitle>
         <InputPortsAutocomplete
           allDataInputPorts={allNodes
             .map((node) =>
@@ -282,7 +286,7 @@ const ItemConfigSidebar = () => {
             onClick={() => {
               const updated = cloneDeep(selectedNode);
               const newPort = {
-                info: { id: Date.now(), name: `Image_Input_${Date.now()}` },
+                info: { id: getNextId(), name: `Image_Input_${getNextId()}` },
                 nodeId: selectedNode.info.id,
                 dataType: "image",
               };
@@ -307,7 +311,7 @@ const ItemConfigSidebar = () => {
               const updated = cloneDeep(selectedNode);
               if (checked) {
                 updated.textOutputPort = {
-                  info: { id: Date.now(), name: `Text_Output_${Date.now()}` },
+                  info: { id: getNextId(), name: `Text_Output_${getNextId()}` },
                   nodeId: selectedNode.info.id,
                   dataType: "text",
                 };
@@ -329,7 +333,10 @@ const ItemConfigSidebar = () => {
               const updated = cloneDeep(selectedNode);
               if (checked) {
                 updated.optionOutputPort = {
-                  info: { id: Date.now(), name: `Option_Output_${Date.now()}` },
+                  info: {
+                    id: getNextId(),
+                    name: `Option_Output_${getNextId()}`,
+                  },
                   nodeId: selectedNode.info.id,
                   dataType: "option",
                 };
@@ -535,7 +542,9 @@ const ItemConfigSidebar = () => {
   const renderGenerationNode = () =>
     selectedNode?.type === NodeType.Generation ? (
       <>
-        <SectionTitle>Response Schema: (AI will strict the response to follow this schema)</SectionTitle>
+        <SectionTitle>
+          Response Schema: (AI will strict the response to follow this schema)
+        </SectionTitle>
         <Editor
           height="200px"
           defaultLanguage="json"
@@ -599,7 +608,9 @@ const ItemConfigSidebar = () => {
 
         {selectedNode?.enumId && (
           <>
-            <SectionTitle>What Flow Link should each Option route to ?</SectionTitle>
+            <SectionTitle>
+              What Flow Link should each Option route to ?
+            </SectionTitle>
             <ArrayContainer>
               {allEnums
                 .find((enum_) => enum_.info.id === selectedNode.enumId)
@@ -668,7 +679,9 @@ const ItemConfigSidebar = () => {
 
         {selectedNode?.enumId && (
           <>
-            <SectionTitle>What Flow Link should each Option route to ?</SectionTitle>
+            <SectionTitle>
+              What Flow Link should each Option route to ?
+            </SectionTitle>
             <ArrayContainer>
               {allEnums
                 .find((enum_) => enum_.info.id === selectedNode.enumId)
@@ -720,7 +733,9 @@ const ItemConfigSidebar = () => {
                     dispatch(updateNode(updated));
                   }}
                 >
-                  <option value="">Select flow link to fallback in case of error</option>
+                  <option value="">
+                    Select flow link to fallback in case of error
+                  </option>
                   {allFlowLinks
                     .filter(
                       (link) => link.sourceNodeId === selectedNode.info.id

@@ -30,12 +30,13 @@ const Canvas: React.FC<CanvasProps> = ({ children, dimensions }) => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch();
   const { data: workflow, isLoading } = useGetWorkflowQuery(id);
-
+  const location = window.location.pathname;
   useEffect(() => {
     if (workflow) {
       dispatch(initWorkflow(workflow.graph));
       if (workflow.graph.visual) {
         dispatch(updateWorkflowVisual(workflow?.graph?.visual?.data));
+        console.log("asdasdasd",workflow?.graph?.visual?.data);
         dispatch(setChatStyles(workflow?.graph?.visual?.data));
         dispatch(
           updateWorkflowMetadata({
@@ -45,7 +46,7 @@ const Canvas: React.FC<CanvasProps> = ({ children, dimensions }) => {
         );
       }
     }
-  }, [workflow, dispatch]);
+  }, [workflow, dispatch, location]);
 
   const calculateDropPosition = useCallback(
     (
