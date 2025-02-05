@@ -84,7 +84,14 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
           },
         },
         graph: {
-          visual: { data: mode === "chat" ? chatStyles : workflowVisual },
+          visual: {
+            data:
+              mode === "chat"
+                ? chatStyles
+                : _.isEmpty(workflowVisual)
+                ? defaultStyles
+                : workflowVisual,
+          },
           startNodeId: selectStartNodeId(state),
           nodes: selectAllNodes(state),
           dataLinks: selectAllDataLinks(state),
@@ -134,8 +141,6 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
 
   const handleExport = () => {
     const graphData = {
-      name,
-      description,
       visual: workflowVisual,
       startNodeId: selectStartNodeId(state),
       nodes: selectAllNodes(state),
