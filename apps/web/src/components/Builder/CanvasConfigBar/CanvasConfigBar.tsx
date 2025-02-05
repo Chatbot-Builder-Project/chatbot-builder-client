@@ -211,10 +211,10 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
 
       <ConfigContainer>
         <CenterButton onClick={handleExport}>
-          <IconUpload size={18} />
+          <IconDownload size={18} />
         </CenterButton>
         <CenterButton onClick={handleImport}>
-          <IconDownload size={18} />
+          <IconUpload size={18} />
         </CenterButton>
         <CenterButton onClick={resetPosition}>
           <IconFocus2 size={18} />
