@@ -42,6 +42,45 @@ export interface CreateConversationRequest {
   name: string;
 }
 
+export interface MessageOutput {
+  text: string;
+  type: 'Text';
+}
+
+export interface OptionMeta {
+  description: string;
+  imageData: string | null;
+}
+
+export interface ConversationMessage {
+  createdAt: string;
+  textOutput?: MessageOutput;
+  imageOutputs: any[];
+  textExpected: boolean;
+  optionExpected: boolean;
+  expectedOptionMetas: Record<string, OptionMeta> | null;
+}
+
 export interface CreateConversationResponse {
-  id: string;
+  conversationId: string;
+  initialMessage: ConversationMessage;
+}
+
+export interface TextInput {
+  text: string;
+  type: 'Text' | 'Image';
+}
+
+export interface OptionInput {
+  option: string;
+  type: 'Text';
+}
+
+export interface SendMessageRequest {
+  text?: TextInput;
+  option?: OptionInput;
+}
+
+export interface SendMessageResponse {
+  output: ConversationMessage;
 }

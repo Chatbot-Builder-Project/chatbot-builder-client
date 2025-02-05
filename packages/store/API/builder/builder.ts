@@ -5,7 +5,8 @@ import type {
   CreateChatbotRequest, 
   CreateChatbotResponse,
   CreateConversationRequest,
-  CreateConversationResponse
+  CreateConversationResponse,
+  SendMessageResponse
 } from "./types";
 
 export const builderApi = createApi({
@@ -70,16 +71,16 @@ export const builderApi = createApi({
         method: "GET",
       }),
     }),
-    // sendMessage: builder.mutation<Message, { conversationId: string; message: string }>({
-    //   query: ({ conversationId, message }) => ({
-    //     url: `/conversations/${conversationId}/messages`,
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: { message },
-    //   }),
-    // }),
+    sendMessage: builder.mutation<SendMessageResponse, { conversationId: string; body: SendMessageRequest }>({
+      query: ({ conversationId, body }) => ({
+        url: `/conversations/${conversationId}/messages`,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body,
+      }),
+    }),
   }),
 });
 
@@ -91,5 +92,5 @@ export const {
   useCreateChatbotMutation,
   useCreateConversationMutation,
   useGetConversationMessagesQuery,
-  // useSendMessageMutation,
+  useSendMessageMutation,
 } = builderApi;
