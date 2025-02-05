@@ -115,10 +115,9 @@ export const InputPortsAutocomplete = ({
       );
 
       if (!linkExists) {
-        const newId = getNextId();
         dispatch(
           addDataLink({
-            info: { id: newId, name: `DataLink_${newId}` },
+            info: { id: Date.now(), name: `DataLink_${Date.now()}` },
             sourcePortId: sourcePortId,
             targetPortId: item.inputPort.info.id,
             visual: { data: {} },

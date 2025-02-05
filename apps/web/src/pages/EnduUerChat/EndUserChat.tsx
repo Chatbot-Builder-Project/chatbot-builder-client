@@ -1,8 +1,14 @@
 import { Box, TextField, Typography } from "@mui/material";
 import { defaultStyles } from "@chatbot-builder/store/slices/Builder/Chat/default";
 import SendButton from "../../components/CustomChatEditor/SendButton";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
+import {
+  useCreateConversationMutation,
+  useGetConversationMessagesQuery,
+  useSendMessageMutation,
+} from "@chatbot-builder/store/API/builder/builder";
+import { useParams } from "react-router-dom";
 
 const mockChatState = {
   currentBreakpoint: "lg" as const,
@@ -16,13 +22,43 @@ const mockChatState = {
 };
 
 export const EndUserChat = () => {
+  const { chatbotId } = useParams();
   const [message, setMessage] = useState("");
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const currentBreakpoint = useBreakpoint();
   const { styles, content } = { ...mockChatState };
 
-  const handleSend = () => {
-    if (message.trim()) {
-      setMessage("");
+  const [createConversation] = useCreateConversationMutation();
+  const [sendMessage] = useSendMessageMutation();
+  const { data: messages = [] } = useGetConversationMessagesQuery(
+    conversationId ?? "",
+    { skip: !conversationId }
+  );
+
+  useEffect(() => {
+    const initConversation = async () => {
+      try {
+        const result = await createConversation({ chatbotId }).unwrap();
+        setConversationId(result.conversationId);
+      } catch (error) {
+        console.error("Failed to create conversation:", error);
+      }
+    };
+
+    initConversation();
+  }, []);
+
+  const handleSend = async () => {
+    if (message.trim() && conversationId) {
+      try {
+        await sendMessage({
+          conversationId,
+          message: message.trim(),
+        }).unwrap();
+        setMessage("");
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      }
     }
   };
 
@@ -51,16 +87,22 @@ export const EndUserChat = () => {
       <Box
         sx={{
           height: "100%",
+          overflowY: "auto",
           ...styles.background[currentBreakpoint],
         }}
       >
-        <Box sx={{ ...styles.botMessage[currentBreakpoint] }}>
-          <Typography>{content.botMessageText}</Typography>
-        </Box>
-
-        <Box sx={{ ...styles.senderMessage[currentBreakpoint] }}>
-          <Typography>{content.senderMessageText}</Typography>
-        </Box>
+        {messages.map((msg, index) => (
+          <Box
+            key={index}
+            sx={
+              msg.role === "assistant"
+                ? styles.botMessage[currentBreakpoint]
+                : styles.senderMessage[currentBreakpoint]
+            }
+          >
+            <Typography>{msg.content}</Typography>
+          </Box>
+        ))}
       </Box>
 
       <Box

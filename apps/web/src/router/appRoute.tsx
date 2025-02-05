@@ -48,7 +48,7 @@ const routes: AppRouteObject[] = [
     ],
   },
   {
-    path: "/chat/:chatbotId/:conversationId",
+    path: "/chat/:chatbotId",
     element: <EndUserChat />,
   },
 ];

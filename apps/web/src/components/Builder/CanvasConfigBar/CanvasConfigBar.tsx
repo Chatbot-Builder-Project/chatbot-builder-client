@@ -1,7 +1,10 @@
 import { useCanvas } from "../../../contexts/CanvasContext";
 import AppLogo from "../../AppLogo";
 import { useDispatch, useSelector } from "react-redux";
-import { useUpdateWorkflowMutation } from "@chatbot-builder/store/API/builder/builder";
+import {
+  useUpdateWorkflowMutation,
+  useCreateChatbotMutation,
+} from "@chatbot-builder/store/API/builder/builder";
 import { ButtonGroup, Button } from "@mui/material";
 import { updateBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat";
 import { ChatBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat/types";
@@ -46,6 +49,7 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
   const dispatch = useDispatch();
   const currentBreakpoint = useSelector(selectCurrentBreakpoint);
   const [updateWorkflow] = useUpdateWorkflowMutation();
+  const [createChatbot] = useCreateChatbotMutation();
   const state = useSelector((state: RootState) => state);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -88,8 +92,24 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
     }
   };
 
-  const handlePublish = () => {
-    // TODO: Implement publish functionality
+  const handlePublish = async () => {
+    try {
+      // First save the workflow
+      await handleSave();
+
+      // Then create the chatbot
+      const response = await createChatbot({
+        workflowId: id!,
+        isPublic: true,
+      });
+
+      if ("data" in response) {
+        // Navigate to the chat view
+        navigate(`/chat/${response.data.id}`);
+      }
+    } catch (error) {
+      console.error("Failed to publish chatbot:", error);
+    }
   };
 
   const handleBreakpointChange = (breakpoint: ChatBreakpoint) => {

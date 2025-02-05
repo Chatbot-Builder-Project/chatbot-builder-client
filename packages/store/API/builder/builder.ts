@@ -1,6 +1,12 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { fetchBaseQueryWithAuthHandling } from "../baseQuery";
-import type { WorkflowResponse } from "./types";
+import type { 
+  WorkflowResponse, 
+  CreateChatbotRequest, 
+  CreateChatbotResponse,
+  CreateConversationRequest,
+  CreateConversationResponse
+} from "./types";
 
 export const builderApi = createApi({
   reducerPath: "builderApi",
@@ -38,6 +44,42 @@ export const builderApi = createApi({
         method: "GET",
       }),
     }),
+    createChatbot: builder.mutation<CreateChatbotResponse, CreateChatbotRequest>({
+      query: (body) => ({
+        url: "/chatbots",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body,
+      }),
+    }),
+    createConversation: builder.mutation<CreateConversationResponse, CreateConversationRequest>({
+      query: (body) => ({
+        url: "/conversations",
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body,
+      }),
+    }),
+    getConversationMessages: builder.query<any, string>({
+      query: (conversationId) => ({
+        url: `/conversations/${conversationId}`,
+        method: "GET",
+      }),
+    }),
+    // sendMessage: builder.mutation<Message, { conversationId: string; message: string }>({
+    //   query: ({ conversationId, message }) => ({
+    //     url: `/conversations/${conversationId}/messages`,
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: { message },
+    //   }),
+    // }),
   }),
 });
 
@@ -46,4 +88,8 @@ export const {
   useUpdateWorkflowMutation,
   useDeleteWorkflowMutation,
   useGetWorkflowQuery,
+  useCreateChatbotMutation,
+  useCreateConversationMutation,
+  useGetConversationMessagesQuery,
+  // useSendMessageMutation,
 } = builderApi;

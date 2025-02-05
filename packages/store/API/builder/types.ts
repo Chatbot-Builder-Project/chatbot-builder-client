@@ -27,3 +27,21 @@ export interface WorkflowResponse {
   visual: Visual;
   stats: null;
 }
+
+export interface CreateChatbotRequest {
+  workflowId: string;
+  isPublic: boolean;
+}
+
+export interface CreateChatbotResponse {
+  id: string;
+}
+
+export interface CreateConversationRequest {
+  chatbotId: string;
+  name: string;
+}
+
+export interface CreateConversationResponse {
+  id: string;
+}
