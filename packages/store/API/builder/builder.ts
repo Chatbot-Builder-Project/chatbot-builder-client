@@ -65,7 +65,7 @@ export const builderApi = createApi({
         body,
       }),
     }),
-    getConversationMessages: builder.query<any, string>({
+    getConversation: builder.query<any, string>({
       query: (conversationId) => ({
         url: `/conversations/${conversationId}`,
         method: "GET",
@@ -91,6 +91,6 @@ export const {
   useGetWorkflowQuery,
   useCreateChatbotMutation,
   useCreateConversationMutation,
-  useGetConversationMessagesQuery,
+  useGetConversationQuery,
   useSendMessageMutation,
 } = builderApi;

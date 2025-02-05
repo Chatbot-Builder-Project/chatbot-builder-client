@@ -44,7 +44,7 @@ export interface CreateConversationRequest {
 
 export interface MessageOutput {
   text: string;
-  type: 'Text';
+  type: "Text";
 }
 
 export interface OptionMeta {
@@ -68,12 +68,12 @@ export interface CreateConversationResponse {
 
 export interface TextInput {
   text: string;
-  type: 'Text' | 'Image';
+  type: "Text" | "Image";
 }
 
 export interface OptionInput {
   option: string;
-  type: 'Text';
+  type: "Text";
 }
 
 export interface SendMessageRequest {
@@ -83,4 +83,19 @@ export interface SendMessageRequest {
 
 export interface SendMessageResponse {
   output: ConversationMessage;
+}
+
+export interface ConversationResponse {
+  id: string;
+  ownerId: string;
+  chatbotId: string;
+  createdAt: string;
+  updatedAt: string;
+  name: string;
+  visual: {
+    data: {
+      imageUrl: string;
+      ui: any;
+    };
+  };
 }

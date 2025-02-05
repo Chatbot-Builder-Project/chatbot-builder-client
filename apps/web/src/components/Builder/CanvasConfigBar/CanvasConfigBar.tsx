@@ -66,7 +66,9 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
       const body = _.cloneDeep({
         name,
         description,
-        visual: { data: { imageUrl } },
+        visual: {
+          data: { imageUrl, ui: mode === "chat" ? chatStyles : workflowVisual },
+        },
         graph: {
           visual: { data: mode === "chat" ? chatStyles : workflowVisual },
           startNodeId: selectStartNodeId(state),

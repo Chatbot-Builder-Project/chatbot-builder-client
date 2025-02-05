@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import {
   useCreateConversationMutation,
-  useGetConversationMessagesQuery,
+  useGetConversationQuery,
   useSendMessageMutation,
 } from "@chatbot-builder/store/API/builder/builder";
 import { useParams } from "react-router-dom";
@@ -28,14 +28,14 @@ export const EndUserChat = () => {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const currentBreakpoint = useBreakpoint();
-  const { styles, content } = { ...mockChatState };
-
+  const { content } = mockChatState;
   const [createConversation] = useCreateConversationMutation();
   const [sendMessage] = useSendMessageMutation();
-  const { data: conversationMessages = [] } = useGetConversationMessagesQuery(
-    conversationId ?? "",
-    { skip: !conversationId }
-  );
+  const { data: conversation } = useGetConversationQuery(conversationId ?? "", {
+    skip: !conversationId,
+  });
+  const styles = conversation?.visual?.data?.ui || defaultStyles;
+  console.log("asdasdasdas", styles);
 
   useEffect(() => {
     const initConversation = async () => {
