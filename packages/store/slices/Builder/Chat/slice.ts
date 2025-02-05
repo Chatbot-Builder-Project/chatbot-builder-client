@@ -61,6 +61,9 @@ const chatSlice = createSlice({
     setSelectedComponent: (state, action: PayloadAction<ChatComponent>) => {
       state.selectedComponent = action.payload;
     },
+    setChatStyles: (state, action: PayloadAction<ChatComponentStyles>) => {
+      state.styles = action.payload;
+    },
   },
 });
 
@@ -69,5 +72,6 @@ export const {
   resetChatStyles,
   updateBreakpoint,
   setSelectedComponent,
+  setChatStyles,
 } = chatSlice.actions;
 export const chatReducer = chatSlice.reducer;

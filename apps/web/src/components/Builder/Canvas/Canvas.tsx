@@ -1,10 +1,13 @@
 // import html2canvas from "html2canvas";
 import {
+  initWorkflow,
   setPendingFlowLinkSource,
   setSelected,
   updateNodeVisual,
+  updateWorkflowMetadata,
+  updateWorkflowVisual,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useDrop } from "react-dnd";
 import { useDispatch } from "react-redux";
 import { BaseNodeData } from "../../../types/nodes";
@@ -13,12 +16,36 @@ import { clamp } from "lodash";
 import { useCanvas } from "../../../contexts/CanvasContext";
 import { NodeVisual } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 import { CanvasProps } from "./types";
-import { setSelectedComponent } from "@chatbot-builder/store/slices/Builder/Chat";
+import {
+  setChatStyles,
+  setSelectedComponent,
+} from "@chatbot-builder/store/slices/Builder/Chat";
+import { useGetWorkflowQuery } from "@chatbot-builder/store/API/builder/builder";
+import { useParams } from "react-router-dom";
+import { CircularProgress } from "@mui/material";
 
 const Canvas: React.FC<CanvasProps> = ({ children, dimensions }) => {
-  const dispatch = useDispatch();
   const { canvasRef, handleMouseDown, handleMouseMove, handleMouseUp, scale } =
     useCanvas();
+  const { id } = useParams<{ id: string }>();
+  const dispatch = useDispatch();
+  const { data: workflow, isLoading } = useGetWorkflowQuery(id);
+
+  useEffect(() => {
+    if (workflow) {
+      dispatch(initWorkflow(workflow.graph));
+      if (workflow.graph.visual) {
+        dispatch(updateWorkflowVisual(workflow?.graph?.visual?.data));
+        dispatch(setChatStyles(workflow?.graph?.visual?.data));
+        dispatch(
+          updateWorkflowMetadata({
+            name: workflow.name || "",
+            description: workflow.description || "",
+          })
+        );
+      }
+    }
+  }, [workflow, dispatch]);
 
   const calculateDropPosition = useCallback(
     (
@@ -171,13 +198,23 @@ const Canvas: React.FC<CanvasProps> = ({ children, dimensions }) => {
         >
           +
         </div>
-        {children({ onPositionChange: handleNodePositionChange })}
+        {isLoading ? (
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <CircularProgress />
+          </div>
+        ) : (
+          children({ onPositionChange: handleNodePositionChange })
+        )}
       </div>
     </div>
   );
 };
 
 export default Canvas;
-function useUploadComponent(): { uploadAndGetImage: any; isLoading: any } {
-  throw new Error("Function not implemented.");
-}

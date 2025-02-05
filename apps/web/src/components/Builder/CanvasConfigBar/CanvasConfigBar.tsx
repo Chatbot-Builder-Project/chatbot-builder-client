@@ -50,6 +50,10 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
   const workflowVisual = useSelector(selectWorkflowVisual);
   const { name, description } = useSelector(selectWorkflowMetadata);
   const { handleDownloadScreenshot } = useCanvas();
+  const chatStyles = useSelector(
+    (state: RootState) => state.builder.chat.styles
+  );
+
   const handleSave = async () => {
     try {
       const imageUrl = await handleDownloadScreenshot();
@@ -58,7 +62,7 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
         description,
         visual: { data: { imageUrl } },
         graph: {
-          visual: workflowVisual,
+          visual: { data: mode === "chat" ? chatStyles : workflowVisual },
           startNodeId: selectStartNodeId(state),
           nodes: selectAllNodes(state),
           dataLinks: selectAllDataLinks(state),
@@ -66,7 +70,10 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
           enums: selectAllEnums(state),
         },
       });
-      traverseAndAddVisualData(body);
+
+      if (mode === "flow") {
+        traverseAndAddVisualData(body);
+      }
 
       if (id) {
         await updateWorkflow({
@@ -74,9 +81,7 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
           body,
         });
       }
-      // You can add a success notification here
     } catch (error) {
-      // You can add error handling here
       console.error("Failed to save workflow:", error);
     }
   };
