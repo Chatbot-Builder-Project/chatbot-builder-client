@@ -7,8 +7,7 @@ import type {
 } from "@reduxjs/toolkit/query";
 import { QueryError } from "./types";
 
-const baseUrl =
-  "http://localhost:8080/api/v1";
+const baseUrl = "http://localhost:8080/api/v1";
 
 export const fetchBaseQueryWithAuthHandling: BaseQueryFn<
   string | FetchArgs,
@@ -25,7 +24,6 @@ export const fetchBaseQueryWithAuthHandling: BaseQueryFn<
       if (token) {
         headers.set("authorization", `Bearer ${token}`);
       }
-      headers.set("Content-Type", "application/json");
       return headers;
     },
   });

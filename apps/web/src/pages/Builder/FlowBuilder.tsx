@@ -1,5 +1,9 @@
 import { useGetWorkflowQuery } from "@chatbot-builder/store/API/builder/builder";
-import { initWorkflow, updateWorkflowVisual } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
+import {
+  initWorkflow,
+  updateWorkflowMetadata,
+  updateWorkflowVisual,
+} from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -22,6 +26,12 @@ const FlowBuilder: React.FC = () => {
       dispatch(initWorkflow(workflow.graph));
       if (workflow.graph.visual) {
         dispatch(updateWorkflowVisual(workflow.graph.visual));
+        dispatch(
+          updateWorkflowMetadata({
+            name: workflow.name || "",
+            description: workflow.description || "",
+          })
+        );
       }
     }
   }, [workflow, dispatch]);

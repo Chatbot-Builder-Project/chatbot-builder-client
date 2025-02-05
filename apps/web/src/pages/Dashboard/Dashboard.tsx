@@ -24,13 +24,13 @@ const Dashboard = () => {
       // You can add error handling/notification here
     }
   };
-
+  console.log("adasdasd", data);
   return (
     <DashboardContainer>
       {data.page.items.map((workflow) => (
-        <Card 
-          key={workflow.id} 
-          workflow={workflow} 
+        <Card
+          key={workflow.id}
+          workflow={workflow}
           onClick={handleCardClick}
           onDelete={handleDeleteWorkflow}
         />

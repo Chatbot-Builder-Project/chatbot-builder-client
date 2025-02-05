@@ -17,6 +17,7 @@ import {
   IconFocus2,
   IconFileExport,
   IconFileImport,
+  IconEye,
 } from "@tabler/icons-react";
 import {
   selectStartNodeId,
@@ -32,7 +33,7 @@ import _ from "lodash";
 import { selectCurrentBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat/selectors";
 import { RootState } from "@chatbot-builder/store/store";
 import { traverseAndAddVisualData } from "./utils";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 interface CanvasConfigBarProps {
   mode: "flow" | "chat";
@@ -45,15 +46,17 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
   const [updateWorkflow] = useUpdateWorkflowMutation();
   const state = useSelector((state: RootState) => state);
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const workflowVisual = useSelector(selectWorkflowVisual);
   const { name, description } = useSelector(selectWorkflowMetadata);
-
+  const { handleDownloadScreenshot } = useCanvas();
   const handleSave = async () => {
     try {
+      const imageUrl = await handleDownloadScreenshot();
       const body = _.cloneDeep({
         name,
         description,
-        visual: { data: {} },
+        visual: { data: { imageUrl } },
         graph: {
           visual: workflowVisual,
           startNodeId: selectStartNodeId(state),
@@ -61,15 +64,11 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
           dataLinks: selectAllDataLinks(state),
           flowLinks: selectAllFlowLinks(state),
           enums: selectAllEnums(state),
-          name,
-          description,
         },
       });
       traverseAndAddVisualData(body);
 
       if (id) {
-        console.log("asdasdsdasasd");
-
         await updateWorkflow({
           id,
           body,
@@ -143,6 +142,11 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
     input.click();
   };
 
+  const handlePreview = async () => {
+    await handleSave();
+    navigate(`/builder/chat/${id}`);
+  };
+
   return (
     <CanvasConfigContainerBar>
       <LogoContainer>
@@ -180,8 +184,6 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
       </LogoContainer>
 
       <ConfigContainer>
-        <SaveButton onClick={handleSave}>Save</SaveButton>
-        <PublishButton onClick={handlePublish}>Publish</PublishButton>
         <CenterButton onClick={handleExport}>
           <IconFileExport size={18} />
         </CenterButton>
@@ -191,6 +193,13 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
         <CenterButton onClick={resetPosition}>
           <IconFocus2 size={18} />
         </CenterButton>
+        {mode === "flow" && (
+          <CenterButton onClick={handlePreview}>
+            <IconEye size={18} />
+          </CenterButton>
+        )}
+        <SaveButton onClick={handleSave}>Save</SaveButton>
+        <PublishButton onClick={handlePublish}>Publish</PublishButton>
       </ConfigContainer>
     </CanvasConfigContainerBar>
   );

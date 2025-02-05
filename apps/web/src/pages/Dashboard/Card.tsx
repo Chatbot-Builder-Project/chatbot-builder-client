@@ -15,6 +15,14 @@ const ImgContainer = styled.div`
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
   &:hover {
     transform: translateY(-5px);
   }
@@ -136,7 +144,11 @@ const Card: React.FC<CardProps> = ({ workflow, onClick, onDelete }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <ImgContainer>
-        <LogoSVG isHovered={isHovered} gradientId={gradientId} />
+        {workflow.visual?.data?.imageUrl ? (
+          <img src={workflow.visual.data.imageUrl} alt={workflow.name} />
+        ) : (
+          <LogoSVG isHovered={isHovered} gradientId={gradientId} />
+        )}
       </ImgContainer>
       <CardInfo>
         <CardName>{workflow.name}</CardName>

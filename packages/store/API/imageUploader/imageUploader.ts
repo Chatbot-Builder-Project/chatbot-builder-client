@@ -42,6 +42,9 @@ export const imageUploaderApi = createApi({
         url: "/images",
         method: "POST",
         body: imageData,
+        headers: {
+          Accept: "text/plain",
+        },
       }),
     }),
     getImage: builder.query<ImageDetails, string>({
