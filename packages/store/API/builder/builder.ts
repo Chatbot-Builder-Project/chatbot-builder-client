@@ -6,7 +6,8 @@ import type {
   CreateChatbotResponse,
   CreateConversationRequest,
   CreateConversationResponse,
-  SendMessageResponse
+  SendMessageResponse,
+  SendMessageRequest
 } from "./types";
 
 export const builderApi = createApi({

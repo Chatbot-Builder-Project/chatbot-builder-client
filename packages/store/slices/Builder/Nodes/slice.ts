@@ -309,8 +309,17 @@ const builderSlice = createSlice({
       state.workflowId = action.payload;
     },
     initWorkflow: (state, action: PayloadAction<WorkflowResponse["graph"]>) => {
-      const { nodes, enums, dataLinks, flowLinks, startNodeId, id, visual, name, description } =
-        action.payload;
+      const {
+        nodes,
+        enums,
+        dataLinks,
+        flowLinks,
+        startNodeId,
+        id,
+        visual,
+        name,
+        description,
+      } = action.payload;
 
       // Reset all adapters
       nodesAdapter.setAll(state.nodes, nodes);
@@ -324,7 +333,7 @@ const builderSlice = createSlice({
 
       // Set workflow visual
       if (visual) {
-        state.workflowVisual = visual;
+        state.workflowVisual = visual.data;
       }
 
       // Calculate next node ID
@@ -347,7 +356,10 @@ const builderSlice = createSlice({
       state.workflowName = action.payload.name;
       state.workflowDescription = action.payload.description;
     },
-    updateWorkflowVisual: (state, action: PayloadAction<Partial<WorkflowVisual>>) => {
+    updateWorkflowVisual: (
+      state,
+      action: PayloadAction<Partial<WorkflowVisual>>
+    ) => {
       state.workflowVisual = { ...state.workflowVisual, ...action.payload };
     },
     setNextNodeId: (state, action: PayloadAction<number>) => {

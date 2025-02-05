@@ -13,6 +13,7 @@ import {
   selectSelectedComponent,
 } from "@chatbot-builder/store/slices/Builder/Chat/selectors";
 import { RootState } from "@chatbot-builder/store/store";
+import { defaultStyles } from "@chatbot-builder/store/slices/Builder/Chat/default";
 
 const ChatContainerSX = {
   position: "absolute",
@@ -115,13 +116,14 @@ const CustomChatEditor: React.FC = () => {
     setHoveredSection((prev) => [...prev, section]);
 
   const handleMouseLeave = () => setHoveredSection((prev) => prev.slice(0, -1));
-  if (!styles) return null;
+  let finalStyles = styles;
+  if (!styles) finalStyles = defaultStyles;
 
   return (
     <Box sx={{ ...ChatContainerSX, width, height }}>
       <ChatSection
         sectionName="header"
-        styles={styles.header[currentBreakpoint]}
+        styles={finalStyles.header[currentBreakpoint]}
         hoveredSection={hoveredSection}
         onHover={handleMouseEnter}
         onLeave={handleMouseLeave}
@@ -142,7 +144,7 @@ const CustomChatEditor: React.FC = () => {
           )}
           <ChatSection
             sectionName="headerContent"
-            styles={styles.headerContent[currentBreakpoint]}
+            styles={finalStyles.headerContent[currentBreakpoint]}
             hoveredSection={hoveredSection}
             onHover={handleMouseEnter}
             onLeave={handleMouseLeave}
@@ -158,7 +160,10 @@ const CustomChatEditor: React.FC = () => {
 
       <ChatSection
         sectionName="background"
-        styles={{ ...styles.background[currentBreakpoint], height: "100%" }}
+        styles={{
+          ...finalStyles.background[currentBreakpoint],
+          height: "100%",
+        }}
         hoveredSection={hoveredSection}
         onHover={handleMouseEnter}
         onLeave={handleMouseLeave}
@@ -166,7 +171,7 @@ const CustomChatEditor: React.FC = () => {
       >
         <ChatSection
           sectionName="botMessage"
-          styles={styles.botMessage[currentBreakpoint]}
+          styles={finalStyles.botMessage[currentBreakpoint]}
           hoveredSection={hoveredSection}
           onHover={handleMouseEnter}
           onLeave={handleMouseLeave}
@@ -180,7 +185,7 @@ const CustomChatEditor: React.FC = () => {
 
         <ChatSection
           sectionName="senderMessage"
-          styles={styles.senderMessage[currentBreakpoint]}
+          styles={finalStyles.senderMessage[currentBreakpoint]}
           hoveredSection={hoveredSection}
           onHover={handleMouseEnter}
           onLeave={handleMouseLeave}
@@ -196,7 +201,7 @@ const CustomChatEditor: React.FC = () => {
       <ChatSection
         sectionName="messageInputSection"
         styles={{
-          ...styles.messageInputSection[currentBreakpoint],
+          ...finalStyles.messageInputSection[currentBreakpoint],
           display: "flex",
           alignItems: "center",
         }}
@@ -207,7 +212,7 @@ const CustomChatEditor: React.FC = () => {
       >
         <ChatSection
           sectionName="messageInput"
-          styles={styles.messageInput[currentBreakpoint]}
+          styles={finalStyles.messageInput[currentBreakpoint]}
           hoveredSection={hoveredSection}
           onHover={handleMouseEnter}
           onLeave={handleMouseLeave}
@@ -234,14 +239,14 @@ const CustomChatEditor: React.FC = () => {
 
         <ChatSection
           sectionName="sendButton"
-          styles={styles.sendButton[currentBreakpoint]}
+          styles={finalStyles.sendButton[currentBreakpoint]}
           hoveredSection={hoveredSection}
           onHover={handleMouseEnter}
           onLeave={handleMouseLeave}
           stopPropagation
           isSelected={selectedComponent === "sendButton"}
         >
-          <SendButton styles={styles.sendButton[currentBreakpoint]} />
+          <SendButton styles={finalStyles.sendButton[currentBreakpoint]} />
         </ChatSection>
       </ChatSection>
     </Box>

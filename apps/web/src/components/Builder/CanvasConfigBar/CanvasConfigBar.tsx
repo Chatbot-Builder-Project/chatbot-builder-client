@@ -35,10 +35,14 @@ import {
   initWorkflow,
 } from "@chatbot-builder/store/slices/Builder/Nodes/slice";
 import _ from "lodash";
-import { selectCurrentBreakpoint } from "@chatbot-builder/store/slices/Builder/Chat/selectors";
+import {
+  selectChatContent,
+  selectCurrentBreakpoint,
+} from "@chatbot-builder/store/slices/Builder/Chat/selectors";
 import { RootState } from "@chatbot-builder/store/store";
 import { traverseAndAddVisualData } from "./utils";
 import { useParams, useNavigate } from "react-router-dom";
+import { defaultStyles } from "@chatbot-builder/store/slices/Builder/Chat/default";
 
 interface CanvasConfigBarProps {
   mode: "flow" | "chat";
@@ -59,6 +63,7 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
   const chatStyles = useSelector(
     (state: RootState) => state.builder.chat.styles
   );
+  const content = useSelector(selectChatContent);
 
   const handleSave = async () => {
     try {
@@ -67,7 +72,16 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
         name,
         description,
         visual: {
-          data: { imageUrl, ui: mode === "chat" ? chatStyles : workflowVisual },
+          data: {
+            imageUrl,
+            ui:
+              mode === "chat"
+                ? chatStyles
+                : _.isEmpty(workflowVisual)
+                ? defaultStyles
+                : workflowVisual,
+            content,
+          },
         },
         graph: {
           visual: { data: mode === "chat" ? chatStyles : workflowVisual },
@@ -233,10 +247,10 @@ const CanvasConfigBar: React.FC<CanvasConfigBarProps> = ({ mode }) => {
 
       <ConfigContainer>
         <CenterButton onClick={handleExport}>
-          <IconDownload size={18} />
+          <IconUpload size={18} />
         </CenterButton>
         <CenterButton onClick={handleImport}>
-          <IconUpload size={18} />
+          <IconDownload size={18} />
         </CenterButton>
         <CenterButton onClick={resetPosition}>
           <IconFocus2 size={18} />

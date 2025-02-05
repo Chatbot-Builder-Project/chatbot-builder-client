@@ -20,7 +20,6 @@ import {
   ChatContent,
   isChatComponent,
 } from "@chatbot-builder/store/slices/Builder/Chat/types";
-import IconSelect from "../../CustomChatEditor/IconSelect";
 import {
   selectSelectedComponent,
   selectCurrentBreakpoint,
@@ -85,12 +84,31 @@ const RightSidebar = () => {
 
   const handleColorChange = (path: string[], color: string) => {
     if (!selectedComponent || !isChatComponent(selectedComponent)) return;
+
+    // Convert any color format to hex
+    let finalColor = color;
+    try {
+      // Handle rgba colors
+      if (color.startsWith('rgba')) {
+        const [r, g, b] = color.match(/\d+/g)?.map(Number) || [];
+        finalColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      }
+      // Handle rgb colors
+      else if (color.startsWith('rgb')) {
+        const [r, g, b] = color.match(/\d+/g)?.map(Number) || [];
+        finalColor = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      }
+    } catch (error) {
+      console.error('Color conversion error:', error);
+      finalColor = color;
+    }
+
     dispatch(
       updateComponentStyle({
         component: selectedComponent,
         styleUpdate: {
           path,
-          value: color,
+          value: finalColor,
         },
       })
     );
@@ -153,101 +171,76 @@ const RightSidebar = () => {
     );
   };
 
-  const renderStyleField = (path: string[], value: string | number) => {
-    // Handle object values (like padding, margin etc)
-    if (typeof value === "object" && value !== null) {
-      return (
-        <TextField
-          fullWidth
-          value={JSON.stringify(value)}
-          onChange={(e) => {
-            try {
-              const parsed = JSON.parse(e.target.value);
-              handleStyleChange(path, parsed);
-            } catch {
-              // Handle invalid JSON input
-              console.error("Invalid JSON input");
-            }
-          }}
-          size="small"
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              backgroundColor: "#2b2b2b",
-              height: "28px",
-              fontSize: "0.75rem",
-              transition: "all 0.2s ease",
-              "&:hover": {
-                backgroundColor: "#363636",
-              },
-              "& input": {
-                color: "white",
-                fontFamily: "Montserrat",
-                padding: "2px 8px",
-              },
-              "& fieldset": {
-                borderColor: "#ffffff20",
-                transition: "all 0.2s ease",
-              },
-              "&:hover fieldset": {
-                borderColor: "#ffffff40",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#2196f3",
-              },
-            },
-          }}
-        />
-      );
-    }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const shouldShowSimpleField = (path: string[], value: any) => {
+    const lastPath = path[path.length - 1];
+    const simpleFields = [
+      "width",
+      "height",
+      "maxWidth",
+      "minWidth",
+      "maxHeight",
+      "minHeight",
+      "borderRadius",
+      "fontSize",
+      "fontWeight",
+      "padding",
+      "margin",
+      "borderWidth",
+      "backgroundColor",
+      "color",
+      "borderColor",
+      "gap",
+    ];
 
-    // Handle color values
-    if (
+    return simpleFields.includes(lastPath) || typeof value !== "object";
+  };
+
+  const shouldShowColorPicker = (path: string[], value: string | number) => {
+    const lastPath = path[path.length - 1].toLowerCase();
+    return (
       typeof value === "string" &&
-      (value.startsWith("#") || value.startsWith("rgb"))
-    ) {
-      return (
-        <MuiColorInput
-          value={value}
-          onChange={(color) => handleColorChange(path, color)}
-          format="hex"
-          sx={{
-            width: "100%",
-            "& .MuiOutlinedInput-root": {
-              backgroundColor: "#ffffff",
-              height: "28px",
-              fontSize: "0.75rem",
-              transition: "all 0.2s ease",
-              "& input": {
-                color: "#000000",
-                fontFamily: "Montserrat",
-                padding: "2px 8px",
-              },
-              "& fieldset": {
-                borderColor: "#ffffff20",
-              },
-              "&:hover fieldset": {
-                borderColor: "#ffffff40",
-              },
-              "&.Mui-focused fieldset": {
-                borderColor: "#2196f3",
-              },
-            },
-            "& .MuiColorInput-button": {
-              backgroundColor: "#f5f5f5",
-              borderRadius: "4px",
-              marginRight: "4px",
-            },
-          }}
-        />
-      );
-    }
+      (value.startsWith("#") ||
+        value.startsWith("rgb") ||
+        lastPath.includes("color") ||
+        lastPath.includes("background"))
+    );
+  };
 
-    if (path[path.length - 1] === "icon") {
+  const renderStyleField = (path: string[], value: string | number) => {
+    if (!shouldShowSimpleField(path, value)) return null;
+
+    if (shouldShowColorPicker(path, value)) {
+      const currentColor = typeof value === 'string' ? value : '#000000';
+      
       return (
-        <IconSelect
-          value={value as string}
-          onChange={(newValue) => handleStyleChange(path, newValue)}
-        />
+        <Box sx={{ width: "100%" }}>
+          <MuiColorInput
+            value={currentColor}
+            onChange={(color) => handleColorChange(path, color)}
+            format="hex8"
+            sx={{
+              width: "100%",
+              "& .MuiInputBase-root": {
+                backgroundColor: "#2b2b2b !important",
+                height: "32px",
+              },
+              "& .MuiInputBase-input": {
+                color: "#ffffff !important",
+                fontSize: "0.75rem",
+                padding: "4px 8px",
+                fontFamily: "Montserrat",
+              },
+              "& .MuiColorInput-button": {
+                width: "24px",
+                height: "24px",
+                padding: 0,
+                marginRight: "8px",
+                border: "2px solid #ffffff40",
+              },
+            }}
+          />
+        </Box>
       );
     }
 
@@ -259,21 +252,16 @@ const RightSidebar = () => {
         size="small"
         sx={{
           "& .MuiOutlinedInput-root": {
-            backgroundColor: "#2b2b2b",
-            height: "28px",
+            backgroundColor: "#2b2b2b !important",
+            height: "32px",
             fontSize: "0.75rem",
-            transition: "all 0.2s ease",
-            "&:hover": {
-              backgroundColor: "#363636",
-            },
+            fontFamily: "Montserrat",
             "& input": {
-              color: "white",
-              fontFamily: "Montserrat",
+              color: "#ffffff !important",
               padding: "2px 8px",
             },
             "& fieldset": {
               borderColor: "#ffffff20",
-              transition: "all 0.2s ease",
             },
             "&:hover fieldset": {
               borderColor: "#ffffff40",
@@ -287,17 +275,34 @@ const RightSidebar = () => {
     );
   };
 
+  const filterStyles = (styles: Array<[string[], string | number]>) => {
+    const seen = new Set<string>();
+    return styles.filter(([path]) => {
+      const pathStr = path.join(".");
+      if (seen.has(pathStr)) return false;
+      seen.add(pathStr);
+      
+      const lastPath = path[path.length - 1];
+      return (
+        !lastPath.startsWith("&") &&
+        !lastPath.includes("hover") &&
+        !lastPath.includes("focus")
+      );
+    });
+  };
+
   return (
     <Box
       p={1.5}
-      style={{
+      sx={{
         position: "absolute",
         right: 0,
         top: 60,
         height: "calc(100vh - 60px)",
         width: "240px",
+        backgroundColor: "#111111",
+        overflowY: "auto",
       }}
-      bgcolor={"#111111"}
     >
       <Tabs
         value={tab}
@@ -333,7 +338,7 @@ const RightSidebar = () => {
             {selectedComponent} Styles
           </Typography>
           {componentStyle &&
-            flattenStyles(componentStyle).map(([path, value]) => (
+            filterStyles(flattenStyles(componentStyle)).map(([path, value]) => (
               <Box key={path.join(".")} sx={{ mb: 0.75 }}>
                 <Typography
                   variant="caption"

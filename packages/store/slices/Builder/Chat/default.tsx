@@ -218,7 +218,7 @@ export const defaultStyles: ChatComponentStyles = {
       flex: 1,
       "& .MuiOutlinedInput-root": {
         borderRadius: "8px",
-        backgroundColor: theme.colors.secondaryBackground,
+        backgroundColor: `${theme.colors.secondaryBackground} !important`,
         color: theme.colors.lightText,
         transition: "all 0.2s ease-in-out",
         "& fieldset": {
@@ -247,7 +247,7 @@ export const defaultStyles: ChatComponentStyles = {
       flex: 1,
       "& .MuiOutlinedInput-root": {
         borderRadius: "8px",
-        backgroundColor: theme.colors.secondaryBackground,
+        backgroundColor: `${theme.colors.secondaryBackground} !important`,
         color: theme.colors.lightText,
         transition: "all 0.2s ease-in-out",
         "& fieldset": {
@@ -276,7 +276,7 @@ export const defaultStyles: ChatComponentStyles = {
       flex: 1,
       "& .MuiOutlinedInput-root": {
         borderRadius: "8px",
-        backgroundColor: theme.colors.secondaryBackground,
+        backgroundColor: `${theme.colors.secondaryBackground} !important`,
         color: theme.colors.lightText,
         transition: "all 0.2s ease-in-out",
         "& fieldset": {
@@ -305,7 +305,7 @@ export const defaultStyles: ChatComponentStyles = {
       flex: 1,
       "& .MuiOutlinedInput-root": {
         borderRadius: "8px",
-        backgroundColor: theme.colors.secondaryBackground,
+        backgroundColor: `${theme.colors.secondaryBackground} !important`,
         color: theme.colors.lightText,
         transition: "all 0.2s ease-in-out",
         "& fieldset": {
@@ -334,7 +334,7 @@ export const defaultStyles: ChatComponentStyles = {
       flex: 1,
       "& .MuiOutlinedInput-root": {
         borderRadius: "8px",
-        backgroundColor: theme.colors.secondaryBackground,
+        backgroundColor: `${theme.colors.secondaryBackground} !important`,
         color: theme.colors.lightText,
         transition: "all 0.2s ease-in-out",
         "& fieldset": {
