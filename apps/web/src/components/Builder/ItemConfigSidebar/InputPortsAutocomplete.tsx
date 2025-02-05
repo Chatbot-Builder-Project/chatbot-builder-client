@@ -10,6 +10,7 @@ import {
 } from "@chatbot-builder/store/slices/Builder/Nodes/types";
 import { Autocomplete, TextField } from "@mui/material";
 import { styled as muiStyled } from "@mui/material/styles";
+import { useNextNodeId } from "@chatbot-builder/store/hooks/useNextNodeId";
 
 const StyledAutocomplete = muiStyled(Autocomplete)`
   & .MuiOutlinedInput-root {
@@ -78,6 +79,7 @@ export const InputPortsAutocomplete = ({
   label = "Select Input Ports",
 }: InputPortsAutocompleteProps) => {
   const dispatch = useDispatch();
+  const getNextId = useNextNodeId();
 
   const filteredOptions = allDataInputPorts.filter(
     (item) => item.nodeInfo.id !== selectedNodeId
@@ -113,9 +115,10 @@ export const InputPortsAutocomplete = ({
       );
 
       if (!linkExists) {
+        const newId = getNextId();
         dispatch(
           addDataLink({
-            info: { id: Date.now(), name: `DataLink_${Date.now()}` },
+            info: { id: newId, name: `DataLink_${newId}` },
             sourcePortId: sourcePortId,
             targetPortId: item.inputPort.info.id,
             visual: { data: {} },
